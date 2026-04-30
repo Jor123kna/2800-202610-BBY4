@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcrypt");
 
 const users = require("./users");
+
+const saltRounds = 12;
 
 router.get("/", (req, res) => {
   res.send(`
@@ -17,7 +20,8 @@ router.get("/", (req, res) => {
   `);
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
+
   const { username, password } = req.body;
 
   const existingUser = users.find(user => user.username === username);
@@ -26,7 +30,13 @@ router.post("/", (req, res) => {
     return res.send("Username already exists. <a href='/signup'>Try again</a>");
   }
 
-  users.push({ username, password });
+  // hash password
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+  users.push({
+    username,
+    password: hashedPassword
+  });
 
   res.redirect("/login");
 });

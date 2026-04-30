@@ -35,6 +35,34 @@ app.get('/test-db', (req, res) => {
     }
 });
 
+const Location = require('./models/locations');
+
+app.post('/add-location', async (req, res) => {
+
+    try {
+
+        const location = new Location({
+            name: req.body.name,
+            address: req.body.address,
+            lat: req.body.lat,
+            lng: req.body.lng,
+            type: req.body.type,
+            status: req.body.status
+        });
+
+        await location.save();
+
+        res.json({ message: "Location added to database!" });
+
+    } catch (error) {
+
+        console.error(error);
+        res.json({ message: "Error adding location" });
+
+    }
+
+});
+
 // 404 handler
 app.use((req, res) => {
     res.status(404).send('Page not found - 404');

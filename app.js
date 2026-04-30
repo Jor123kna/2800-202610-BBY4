@@ -17,10 +17,12 @@ app.use(express.static('public'));
 
 // session
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'routereliefsecret',
     resave: false,
     saveUninitialized: false
 }));
+
+// routes
 
 app.get('/', (req, res) => {
     res.send('Main Page');

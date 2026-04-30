@@ -1,48 +1,28 @@
-const express = require("express");
-const session = require("express-session");
-
-const loginRoutes = require("./login");
-const signupRoutes = require("./signup");
+require('dotenv').config();
+const express = require('express');
+const session = require('express-session');
 
 const app = express();
-const PORT = 3000;
 
-app.use(express.urlencoded({ extended: true }));
+// middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-app.use(
-  session({
-    secret: "mySecretKey",
+// session
+app.use(session({
+    secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: false,
-  })
-);
+    saveUninitialized: false
+}));
 
-app.use(express.static("public"));
+app.get('/', (req, res) => {
+    res.send('Main Page');
+})
 
-app.use("/login", loginRoutes);
-app.use("/signup", signupRoutes);
-
-app.get("/", (req, res) => {
-  res.send(`
-    <h1>Home Page</h1>
-
-    ${
-      req.session.user
-        ? `<p>Logged in as ${req.session.user}</p>
-           <a href="/logout">Logout</a>`
-        : `<a href="/login">Login</a><br>
-           <a href="/signup">Sign Up</a>`
-    }
-  `);
+// 404 handler
+app.use((req, res) => {
+    res.status(404).send('Page not found - 404');
 });
 
-app.get("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/");
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+module.exports = app;

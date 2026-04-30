@@ -1,28 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Test DB Connection</title>
+    <title>Add Location Test</title>
 </head>
 <body>
-  <h1>MongoDB Test</h1>
 
-  <button onclick="testDB()">Test DB Connection</button>
+<h2>Add Location</h2>
 
-  <p id="result"></p>
+<form id="locationForm">
 
-  <script>
-    async function testDB() {
-      const response = await fetch("/test-db");
-      const data = await response.json();
+<label>Name</label><br>
+<input type="text" name="name" required><br><br>
 
-      document.getElementById("result").innerText = data.message;
-    }
-  </script>
+<label>Address</label><br>
+<input type="text" name="address" required><br><br>
+
+<label>Latitude</label><br>
+<input type="number" step="any" name="lat" required><br><br>
+
+<label>Longitude</label><br>
+<input type="number" step="any" name="lng" required><br><br>
+
+<label>Type</label><br>
+<select name="type" required>
+<option value="food bank">Food Bank</option>
+<option value="shelter">Shelter</option>
+<option value="community fridge">Community Fridge</option>
+<option value="community kitchen">Community Kitchen</option>
+<option value="community centre">Community Centre</option>
+<option value="other">Other</option>
+</select><br><br>
+
+<label>Status</label><br>
+<select name="status">
+<option value="open">Open</option>
+<option value="limited">Limited</option>
+<option value="closed">Closed</option>
+</select><br><br>
+
+<button type="submit">Submit</button>
+
+</form>
+
+<p id="result"></p>
+
+<script>
+
+document.getElementById("locationForm").addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+
+    const data = Object.fromEntries(formData.entries());
+
+    const response = await fetch("/add-location", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    document.getElementById("result").innerText = result.message;
+
+});
+
+</script>
+
 </body>
 </html>
-
-/**
-  *http://localhost:3000/dbtestwindow.html
-  */
-
-  

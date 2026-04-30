@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test DB Connection</title>
+</head>
+<body>
+  <h1>MongoDB Test</h1>
+
+  <button onclick="testDB()">Test DB Connection</button>
+
+  <p id="result"></p>
+
+  <script>
+    async function testDB() {
+      const response = await fetch("/test-db");
+      const data = await response.json();
+
+      document.getElementById("result").innerText = data.message;
+    }
+  </script>
+</body>
+</html>
+
+/**
+  *http://localhost:3000/dbtestwindow.html
+  */
+
+  

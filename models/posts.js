@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const postSchema = new mongoose.Schema({
     author: {
         type: mongoose.Schema.Types.ObjectId, // User object
-        ref: 'users', // Foreign key to user collection
+        ref: 'User', // Foreign key to user collection
         required: true
     },
     content: {

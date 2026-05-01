@@ -1,26 +1,42 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+import Layout from './components/Layout';
+
+// Pages
+import Home from './pages/Home';
 import SignIn from './pages/SignIn';
-import Signup from './pages/SignUp';
+import SignUp from './pages/SignUp';
+import Community from './pages/Community';
+import Post from './pages/Post';
+import Map from './pages/Map';
+import Info from './pages/Info';
+import Profile from './pages/Profile';
 
 function App() {
-  const [showSignIn, setShowSignIn] = useState(true);
-
   return (
-    <div>
-      {/* Temporary Navigation */}
-      <div style={{ padding: '20px', backgroundColor: '#f0f0f0' }}>
-        <button onClick={() => setShowSignIn(true)} style={{ marginRight: '10px', cursor: 'pointer' }}>
-          Sign In
-        </button>
-        <button onClick={() => setShowSignIn(false)} style={{ cursor: 'pointer' }}>
-          Sign Up
-        </button>
-      </div>
-      <hr style={{ margin: 0 }} />
+    <BrowserRouter>
+      <Routes>
+        {/* Pre-auth routes */}
+        <Route element={<Layout hideBottomNav={true} />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+        </Route>
 
-      {/* Render selected page*/}
-      {showSignIn ? <SignIn /> : <Signup />}
-    </div>
+        {/* Main app routes */}
+        <Route element={<Layout />}>
+          <Route path="/community" element={<Community />} />
+          <Route path="/post" element={<Post />} />
+          <Route path="/map" element={<Map />} />
+          <Route path="/info" element={<Info />} />
+          <Route path="/profile" element={<Profile />} />
+        </Route>
+
+        {/* Redirect unknown URLs to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

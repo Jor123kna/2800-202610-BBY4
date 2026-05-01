@@ -1,0 +1,186 @@
+:root {
+
+  /* Primary */
+  --green-50:  #ECFDF5;
+  --green-100: #D1FAE5;
+  --green-200: #A7F3D0;
+  --green-500: #10B981;
+  --green-600: #059669;
+  --green-700: #047857;
+  --green-800: #065F46;
+  --green-900: #064E3B;
+
+  /* Accent */
+  --sand-50:  #FEF7ED;
+  --sand-100: #FFEDD5;
+  --sand-200: #FED7AA;
+  --sand-500: #F97316;
+  --sand-600: #EA580C;
+  --sand-700: #C2410C;
+  --sand-900: #7C2D12;
+
+  /* Emergency Red */
+  --red-50:  #FEF2F2;
+  --red-100: #FEE2E2;
+  --red-200: #FECACA;
+  --red-500: #EF4444;
+  --red-600: #DC2626;
+  --red-700: #B91C1C;
+  --red-900: #7F1D1D;
+
+  /* Info Blue */
+  --blue-50:  #EFF6FF;
+  --blue-600: #2563EB;
+  --blue-700: #1D4ED8;
+  --blue-900: #1E3A8A;
+
+  /* Neutrals */
+  --stone-0:   #FFFFFF;
+  --stone-50:  #FAFAF9;
+  --stone-100: #F5F5F4;
+  --stone-200: #E7E5E4;
+  --stone-300: #D6D3D1;
+  --stone-400: #A8A29E;
+  --stone-500: #78716C;
+  --stone-700: #44403C;
+  --stone-900: #1C1917;
+  --stone-1000: #000000;
+
+
+
+  /* Brand */
+  --color-brand:        var(--green-700);   /* primary buttons, header */
+  --color-brand-hover:  var(--green-800);
+  --color-brand-bg:     var(--green-50);
+  --color-brand-border: var(--green-200);
+  --color-brand-text:   var(--green-900);   /* text on green-50 bg */
+
+  /* Accent */
+  --color-accent:        var(--sand-500);
+  --color-accent-hover:  var(--sand-600);
+  --color-accent-bg:     var(--sand-50);
+  --color-accent-border: var(--sand-200);
+  --color-accent-text:   var(--sand-900);
+
+  /* Emergency */
+  --color-emergency:        var(--red-700);
+  --color-emergency-hover:  var(--red-900);
+  --color-emergency-bg:     var(--red-50);
+  --color-emergency-border: var(--red-200);
+  --color-emergency-text:   var(--red-900);
+
+  /* Info */
+  --color-info:        var(--blue-600);
+  --color-info-hover:  var(--blue-700);
+  --color-info-bg:     var(--blue-50);
+  --color-info-text:   var(--blue-900);
+
+  /* Surface backgrounds */
+  --color-surface-base:    var(--stone-0);
+  --color-surface-raised:  var(--stone-50); 
+  --color-surface-sunken:  var(--stone-100); 
+
+  /* Text */
+  --color-text-primary:    var(--stone-900);
+  --color-text-secondary:  var(--stone-500);
+  --color-text-disabled:   var(--stone-400);
+  --color-text-inverse:    var(--stone-0);
+
+  /* Borders */
+  --color-border-subtle:   var(--stone-200);
+  --color-border-strong:   var(--stone-300); 
+  --color-border-focus:    var(--green-700); 
+
+
+  
+  /* Shelter / Resource status */
+  --color-status-open:     var(--green-700);
+  --color-status-open-bg:  var(--green-50);
+  --color-status-limited:     var(--sand-700);
+  --color-status-limited-bg:  var(--sand-50);
+  --color-status-closed:     var(--red-700);
+  --color-status-closed-bg:  var(--red-50);
+
+  /* User roles - In Need vs Helper */
+  --color-role-helper:        var(--green-700);
+  --color-role-helper-bg:     var(--green-50);
+  --color-role-in-need:       var(--sand-700);
+  --color-role-in-need-bg:    var(--sand-50);
+
+
+  /*  SPACING SCALE  */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+
+  /* BORDER RADIUS */
+  --radius-sm:   6px;
+  --radius-md:   10px;  
+  --radius-lg:   14px; 
+  --radius-xl:   20px;   
+  --radius-full: 9999px;
+
+
+  /* TYPOGRAPHY */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+
+  --text-xs:    12px;
+  --text-sm:    14px;
+  --text-base:  16px;
+  --text-lg:    18px;
+  --text-xl:    22px;
+  --text-2xl:   28px;
+  --text-3xl:   34px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium:  500;
+  --font-weight-bold:    600;
+
+  --line-height-tight:   1.3;
+  --line-height-normal:  1.5;
+  --line-height-relaxed: 1.7;
+
+
+  /* ELEVATION */
+  --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.05);
+  --shadow-md: 0 2px 8px rgba(28, 25, 23, 0.08);
+  --shadow-lg: 0 8px 24px rgba(28, 25, 23, 0.12);
+
+
+  /* ACCESSIBILITY */
+  --tap-target-min: 44px;
+
+
+  /* LAYOUT */
+  --max-width-mobile:  428px;
+  --max-width-content: 720px;
+}
+
+
+
+@media (prefers-contrast: more) {
+  :root {
+    --color-text-primary:   var(--stone-1000);
+    --color-text-secondary: var(--stone-700);
+    --color-border-subtle:  var(--stone-400);
+    --color-border-strong:  var(--stone-700);
+    --color-brand:          var(--green-900);
+    --color-emergency:      var(--red-900);
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

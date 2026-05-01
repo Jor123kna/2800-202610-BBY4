@@ -27,6 +27,15 @@ app.get('/', (req, res) => {
     res.send('Main Page');
 });
 
+// test routes for POSTMAN
+app.use('/users', require('./routes/userRoutes'));
+app.use('/locations', require('./routes/locationRoutes'));
+
+// Schema
+const Location = require('./models/locations');
+const User = require('./models/users');
+const Post = require('./models/posts');
+
 // test database connection
 app.get('/test-db', (req, res) => {
     if (mongoose.connection.readyState === 1) {
@@ -36,7 +45,7 @@ app.get('/test-db', (req, res) => {
     }
 });
 
-const Location = require('./models/locations');
+
 
 app.post('/add-location', async (req, res) => {
 
@@ -70,9 +79,3 @@ app.use((req, res) => {
 });
 
 module.exports = app;
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});

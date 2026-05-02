@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
+const path = require('path');
 
 const app = express();
 
@@ -24,7 +25,7 @@ app.use(session({
 
 // routes
 app.get('/', (req, res) => {
-    res.send('Main Page');
+    res.sendFile(path.join(__dirname, 'frontend', 'public', 'index.html'));
 });
 
 // test routes for POSTMAN
@@ -50,7 +51,6 @@ app.get('/test-db', (req, res) => {
 app.post('/add-location', async (req, res) => {
 
     try {
-
         const location = new Location({
             name: req.body.name,
             address: req.body.address,

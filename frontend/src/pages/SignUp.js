@@ -16,11 +16,32 @@ function SignUp() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Sign up submitted:', formData);
-    // TODO: connect to backend signup API
-    navigate('/community');
+
+    try {
+      const response = await fetch('http://localhost:5000/users/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || 'Sign up failed');
+        return;
+      }
+
+      console.log('Sign up successful:', data);
+      navigate('/community');
+    } catch (error) {
+      console.error('Sign up error:', error);
+      alert('Something went wrong. Please try again.');
+    }
   };
 
   return (

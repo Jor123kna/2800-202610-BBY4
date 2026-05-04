@@ -1,17 +1,19 @@
 require('dotenv').config();
+
 const express = require('express');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const path = require('path');
+const cors = require('cors');
 
 const app = express();
 
-// connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('MongoDB connected'))
-    .catch((err) => console.log('MongoDB connection error:', err));
-
 // middleware
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -20,7 +22,11 @@ app.use(express.static('public'));
 app.use(session({
     secret: process.env.SESSION_SECRET || 'routereliefsecret',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        secure: false,
+        sameSite: 'lax'
+    }
 }));
 
 // routes
@@ -34,8 +40,6 @@ app.use('/locations', require('./routes/locationRoutes'));
 
 // Schema
 const Location = require('./models/locations');
-const User = require('./models/users');
-const Post = require('./models/posts');
 
 // test database connection
 app.get('/test-db', (req, res) => {
@@ -46,10 +50,7 @@ app.get('/test-db', (req, res) => {
     }
 });
 
-
-
 app.post('/add-location', async (req, res) => {
-
     try {
         const location = new Location({
             name: req.body.name,
@@ -65,12 +66,9 @@ app.post('/add-location', async (req, res) => {
         res.json({ message: "Location added to database!" });
 
     } catch (error) {
-
         console.error(error);
         res.json({ message: "Error adding location" });
-
     }
-
 });
 
 // 404 handler

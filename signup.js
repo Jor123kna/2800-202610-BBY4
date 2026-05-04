@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
+const Joi = require("joi");
 
 const users = require("./users");
 
@@ -21,24 +22,41 @@ router.get("/", (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+  try {
+    const schema = Joi.object({
+      username: Joi.string().alphanum().min(3).max(30).required(),
+      password: Joi.string().min(6).required()
+    });
 
-  const { username, password } = req.body;
+    const { username, password } = req.body;
 
-  const existingUser = users.find(user => user.username === username);
+    const { error } = schema.validate({ username, password });
 
-  if (existingUser) {
-    return res.send("Username already exists. <a href='/signup'>Try again</a>");
+    if (error) {
+      return res.send(`Invalid input: ${error.details[0].message}`);
+    }
+
+    const existingUser = users.find(user => user.username === username);
+
+    if (existingUser) {
+      return res.send("Username already exists. <a href='/signup'>Try again</a>");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const newUser = new users({
+      username,
+      password: hashedPassword
+    });
+
+    await newUser.save();
+
+   res.redirect("/login");
+   
+  } catch (err) {
+    console.error(err);
+    res.send("An error occurred. Please try again.");
   }
-
-  // hash password
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-  users.push({
-    username,
-    password: hashedPassword
-  });
-
-  res.redirect("/login");
 });
 
 module.exports = router;

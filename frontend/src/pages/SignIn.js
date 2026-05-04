@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-
 function SignIn() {
   const navigate = useNavigate();
 
@@ -10,15 +9,40 @@ function SignIn() {
     password: '',
   });
 
+  const [errorMessage, setErrorMessage] = useState('');
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrorMessage('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Sign in submitted:', formData);
-    // TODO: connect to backend signin API
-    navigate('/community');
+
+    try {
+      const response = await fetch('http://localhost:5000/users/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data.message || 'Unable to log in.');
+        return;
+      }
+
+      console.log('Sign in successful:', data);
+      navigate('/community');
+
+    } catch (error) {
+      console.error('Sign in error:', error);
+      setErrorMessage('Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -56,6 +80,18 @@ function SignIn() {
             required
           />
         </div>
+
+        {errorMessage && (
+          <p
+            style={{
+              color: 'red',
+              fontSize: 'var(--text-sm)',
+              marginBottom: 'var(--space-4)',
+            }}
+          >
+            {errorMessage}
+          </p>
+        )}
 
         <div style={{ textAlign: 'right', marginBottom: 'var(--space-4)' }}>
           <Link

@@ -7,7 +7,7 @@ const User = require('./models/users');
 const Location = require('./models/locations');
 const Post = require('./models/posts');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // Connect to Atlas using Mongoose
 mongoose.connect(process.env.MONGODB_URI)

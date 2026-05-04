@@ -17,15 +17,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Pre-auth routes */}
-        <Route element={<Layout hideBottomNav={true} />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-        </Route>
-
         {/* Main app routes */}
         <Route element={<Layout />}>
+         <Route path="/" element={<Home />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/community" element={<Community />} />
           <Route path="/post" element={<Post />} />
           <Route path="/map" element={<Map />} />

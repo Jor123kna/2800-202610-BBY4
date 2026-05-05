@@ -8,7 +8,7 @@ const User = require('../models/users');
 // POST /users/signup
 router.post('/signup', validateSignup, async (req, res) => {
     try {
-        const { firstName, lastName, email, phone, password } = req.body;
+        const { firstName, lastName, email, phone, password, role } = req.body;
 
         const existingUser = await User.findOne({ email });
 
@@ -26,7 +26,7 @@ router.post('/signup', validateSignup, async (req, res) => {
             email,
             phone,
             password: hashedPassword,
-            role: 'in-need'
+            role: role || 'in-need'
         });
 
         req.session.user = {

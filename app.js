@@ -34,9 +34,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend', 'public', 'index.html'));
 });
 
-// test routes for POSTMAN
 app.use('/users', require('./routes/userRoutes'));
 app.use('/locations', require('./routes/locationRoutes'));
+app.use('/posts', require('./routes/postRoutes'))
 
 // Schema
 const Location = require('./models/locations');

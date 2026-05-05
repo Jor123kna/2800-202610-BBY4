@@ -1,19 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Post() {
   const navigate = useNavigate();
+  
+  const [userData, setUserData] = useState(null);
 
   const [formData, setFormData] = useState({
     title: '',
     role: '', 
     content: '',
+    neighbourhood: '',
   });
 
-  // Validation errors
   const [errors, setErrors] = useState({});
 
-  // Character limits
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/users/profile', {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setUserData(data.user);
+        } else {
+          setUserData(null);
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+        setUserData(null);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+  
   const TITLE_MAX = 100;
   const CONTENT_MAX = 500;
   const CONTENT_MIN = 10;
@@ -35,7 +63,6 @@ function Post() {
     }
   };
 
-  // Validate form before submission
   const validateForm = () => {
     const newErrors = {};
 
@@ -60,7 +87,7 @@ function Post() {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formErrors = validateForm();
@@ -69,15 +96,65 @@ function Post() {
       return;
     }
 
-    console.log('New post:', formData);
-    alert('Post created! (Backend connection coming soon)');
-    navigate('/community');
-  };
+    setLoading(true);
+    setSubmitError('');
 
+    try {
+      const response = await fetch('http://localhost:5000/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setSubmitError(data.message || 'Failed to create post');
+        setLoading(false);
+        return;
+      }
+
+      navigate('/community');
+    } catch (err) {
+      setSubmitError('Something went wrong. Please try again.');
+      setLoading(false);
+    }
+  };
+  
   const handleCancel = () => {
     navigate('/community');
   };
+  
+  if (!userData && userData !== null) {
+    return (
+      <div className="page-padding">
+        <p style={{ color: 'var(--color-text-secondary)' }}>Loading...</p>
+      </div>
+    );
+  }
 
+  if (!userData) {
+    return (
+      <div className="page-padding">
+        <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
+          <h1 style={{ marginBottom: 'var(--space-2)' }}>Create a post</h1>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
+            You must be logged in to create a post
+          </p>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <button
+            onClick={() => navigate('/signin')}
+            className="btn btn-primary"
+          >
+            Sign in
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="page-padding">
       {/* Page header */}
@@ -89,6 +166,20 @@ function Post() {
       </div>
 
       <form onSubmit={handleSubmit}>
+        {/* Posting as (user info from session) */}
+        <div className="input-group">
+          <label className="input-label">Posting as</label>
+          <input
+            type="text"
+            className="input"
+            value={`${userData.firstName} ${userData.lastName} (${userData.role})`}
+            disabled
+            style={{
+              backgroundColor: 'var(--color-surface-sunken)',
+              color: 'var(--color-text-secondary)',
+            }}
+          />
+        </div>
         {/* Title */}
         <div className="input-group">
           <label htmlFor="title" className="input-label">
@@ -162,14 +253,38 @@ function Post() {
             </span>
           </div>
         </div>
+        
+        {/* Neighbourhood (optional) */}
+        <div className="input-group">
+          <label htmlFor="neighbourhood" className="input-label">
+            Neighbourhood (optional)
+          </label>
+          <input
+            type="text"
+            id="neighbourhood"
+            name="neighbourhood"
+            value={formData.neighbourhood}
+            onChange={handleChange}
+            className="input"
+            placeholder="e.g. Mount Pleasant"
+          />
+        </div>
+
+        {/* Submit error message */}
+        {submitError && (
+          <div className="alert alert-emergency" style={{ marginBottom: 'var(--space-4)' }}>
+            {submitError}
+          </div>
+        )}
 
         {/* Submit button */}
         <button
           type="submit"
           className="btn btn-primary btn-block"
+          disabled={loading}
           style={{ marginTop: 'var(--space-4)' }}
         >
-          Post to community
+          {loading ? 'Posting...' : 'Post to community'}
         </button>
 
         {/* Cancel link */}

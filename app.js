@@ -10,7 +10,7 @@ const app = express();
 
 // middleware
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:5000',
     credentials: true
 }));
 
@@ -34,9 +34,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend', 'public', 'index.html'));
 });
 
-// test routes for POSTMAN
 app.use('/users', require('./routes/userRoutes'));
 app.use('/locations', require('./routes/locationRoutes'));
+app.use('/posts', require('./routes/postRoutes'))
 
 // Schema
 const Location = require('./models/locations');

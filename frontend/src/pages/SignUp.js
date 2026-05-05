@@ -10,10 +10,15 @@ function SignUp() {
     email: '',
     phone: '',
     password: '',
+    role: 'in-need',
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleRoleSelect = (role) => {
+    setFormData({ ...formData, role });
   };
 
   const handleSubmit = async (e) => {
@@ -117,6 +122,33 @@ function SignUp() {
             className="input"
             required
           />
+        </div>
+
+        <div className="input-group">
+          <label className="input-label">How would you like to participate?</label>
+          <div className="role-toggle">
+            <button
+              type="button"
+              className={`role-toggle-option ${formData.role === 'in-need' ? 'selected in-need' : ''}`}
+              onClick={() => handleRoleSelect('in-need')}
+              aria-pressed={formData.role === 'in-need'}
+            >
+              <span className="role-toggle-icon" aria-hidden="true">🆘</span>
+              <span className="role-toggle-title">I need help</span>
+              <span className="role-toggle-desc">Receive support from the community</span>
+            </button>
+
+            <button
+              type="button"
+              className={`role-toggle-option ${formData.role === 'helper' ? 'selected helper' : ''}`}
+              onClick={() => handleRoleSelect('helper')}
+              aria-pressed={formData.role === 'helper'}
+            >
+              <span className="role-toggle-icon" aria-hidden="true">🤝</span>
+              <span className="role-toggle-title">I want to help</span>
+              <span className="role-toggle-desc">Offer support to those in need</span>
+            </button>
+          </div>
         </div>
 
         <button

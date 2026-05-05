@@ -18,6 +18,11 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+     role: {
+    type: String,
+    enum: ['helper', 'in-need'],
+    required: true
+   },
     createdAt: {
         type: Date,
         default: Date.now

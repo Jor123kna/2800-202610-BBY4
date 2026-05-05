@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema({
         enum: ['helper', 'in-need', 'admin'],
         default: 'in-need'
     },
+    firstTimeMode: {
+        type: Boolean,
+        default: true
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -11,7 +11,8 @@ router.post('/', isLoggedIn, async (req, res) => {
             author: req.session.user.id,        // from session
             title: req.body.title,              // from form
             content: req.body.content,          // from form
-            neighbourhood: req.body.neighbourhood // from form
+            neighbourhood: req.body.neighbourhood, // from form
+            role: req.body.role                // from form
             // createdAt is automatic
         });
 
@@ -63,6 +64,25 @@ router.delete('/:id', isLoggedIn, async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});
+
+router.get('/mine', isLoggedIn, async (req, res) => {
+  try {
+    const posts = await Post.find({ author: req.session.user.id })
+      .populate('author', 'firstName lastName role')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: 'User posts retrieved',
+      posts
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: 'Error getting user posts',
+      error: err.message
+    });
+  }
 });
 
 module.exports = router;

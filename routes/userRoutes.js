@@ -26,7 +26,8 @@ router.post('/signup', validateSignup, async (req, res) => {
             email,
             phone,
             password: hashedPassword,
-            role: role || 'in-need'
+            role: role || 'in-need',
+            firstTimeMode: true
         });
 
         req.session.user = {
@@ -35,7 +36,8 @@ router.post('/signup', validateSignup, async (req, res) => {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            role: user.role
+            role: user.role,
+            firstTimeMode: user.firstTimeMode
         };
 
         req.session.save(() => {
@@ -122,6 +124,63 @@ router.get('/logout', (req, res) => {
             message: 'Logged out successfully'
         });
     });
+});
+
+// PUT /users/update
+router.put('/update', async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.status(401).json({
+                message: 'Not logged in'
+            });
+        }
+
+        const updates = {};
+
+        if (req.body.firstTimeMode !== undefined) {
+            updates.firstTimeMode = req.body.firstTimeMode;
+        }
+
+        if (req.body.role !== undefined) {
+            if (!['helper', 'in-need'].includes(req.body.role)) {
+                return res.status(400).json({
+                    message: 'Invalid role'
+                });
+            }
+
+            updates.role = req.body.role;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.session.user.id,
+            updates,
+            { returnDocument: 'after' }
+        );
+
+        req.session.user = {
+            id: updatedUser._id,
+            name: `${updatedUser.firstName} ${updatedUser.lastName}`,
+            firstName: updatedUser.firstName,
+            lastName: updatedUser.lastName,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            firstTimeMode: updatedUser.firstTimeMode
+        };
+
+        req.session.save(() => {
+            res.json({
+                message: 'User updated successfully',
+                user: req.session.user
+            });
+        });
+
+    } catch (err) {
+        console.error('Update user error:', err);
+        res.status(500).json({
+            message: 'Error updating user',
+            error: err.message
+        });
+    }
 });
 
 module.exports = router;

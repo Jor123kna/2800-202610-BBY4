@@ -7,3 +7,7 @@ function validateSession(req, res, next) {
 
     next();
 }
+
+module.exports = {
+    isLoggedIn: validateSession
+};

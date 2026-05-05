@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/posts');
-const { isLoggedIn } = require('../middleware/reuireLogin');
+const { isLoggedIn } = require('../middleware/requireLogin');
 
 // POST /posts - create a new post
 // author comes from session (not from form)

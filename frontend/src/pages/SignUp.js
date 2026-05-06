@@ -42,7 +42,15 @@ function SignUp() {
       }
 
       console.log('Sign up successful:', data);
-      navigate('/community');
+
+      const successMessage = {
+        text: 'Account created successfully! Welcome to RouteRelief.',
+        expiresAt: Date.now() + 60 * 60 * 1000 // 1 hour
+      };
+
+      localStorage.setItem('communityMessage', JSON.stringify(successMessage));
+
+      navigate('/community', { state: { startTour: true } });
     } catch (error) {
       console.error('Sign up error:', error);
       alert('Something went wrong. Please try again.');

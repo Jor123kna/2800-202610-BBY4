@@ -55,29 +55,49 @@ function Profile() {
     fetchProfile();
   }, []);
 
-  const handleSignOut = () => {
-    localStorage.removeItem('routeReliefUser');
+  const handleSignOut = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/users/logout', {
+        method: 'GET',
+        credentials: 'include'
+      });
 
-    setUserData({
-      name: 'Not logged in',
-      email: '',
-      role: ''
-    });
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || 'Unable to sign out.');
+        return;
+      }
+
+      localStorage.removeItem('routeReliefUser');
+
+      setUserData({
+        name: 'Not logged in',
+        email: '',
+        role: ''
+      });
+
+      navigate('/signin');
+
+    } catch (error) {
+      console.error('Sign out error:', error);
+      alert('Something went wrong signing out.');
+    }
   };
 
   const handleDeleteAccount = async () => {
-    const savedUser = localStorage.getItem('routeReliefUser');
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete your account? This cannot be undone.'
+    );
 
-    if (!savedUser) {
-      alert('No user is currently logged in.');
+    if (!confirmDelete) {
       return;
     }
 
-    const user = JSON.parse(savedUser);
-
     try {
-      const response = await fetch(`http://localhost:5000/users/delete/${user.id}`, {
-        method: 'DELETE'
+      const response = await fetch('http://localhost:5000/users/delete', {
+        method: 'DELETE',
+        credentials: 'include'
       });
 
       const data = await response.json();
@@ -86,8 +106,6 @@ function Profile() {
         alert(data.message || 'Unable to delete account.');
         return;
       }
-
-      localStorage.removeItem('routeReliefUser');
 
       setUserData({
         name: 'Not logged in',
@@ -290,7 +308,7 @@ function Profile() {
         {/* Posts section */}
         <div className="profile-section">
           <div className="profile-section-header">
-            <div className="profile-section-label">YOUR POSTS</div>
+            <div className="profile-section-label">YOUR {userPosts.length === 1 ? 'POST' : 'POSTS'}</div>
             <div className="profile-section-count">
               {userPosts.length} {userPosts.length === 1 ? 'post' : 'posts'}
             </div>
@@ -326,7 +344,7 @@ function Profile() {
                   className="btn-secondary-block"
                   onClick={handleLoadMorePosts}
                 >
-                  Load 3 more
+                  Load {userPosts.length === 1 ? 'another post' : 'more posts'}
                 </button>
               )}
             </div>

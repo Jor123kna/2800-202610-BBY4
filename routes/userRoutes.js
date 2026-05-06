@@ -119,11 +119,57 @@ router.get('/profile', (req, res) => {
 
 // GET /users/logout
 router.get('/logout', (req, res) => {
-    req.session.destroy(() => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({
+                message: 'Error logging out'
+            });
+        }
+
+        res.clearCookie('connect.sid', {
+            path: '/'
+        });
+
         res.json({
             message: 'Logged out successfully'
         });
     });
+});
+
+// DELETE /users/delete
+router.delete('/delete', async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.status(401).json({
+                message: 'Not logged in'
+            });
+        }
+
+        await User.findByIdAndDelete(req.session.user.id);
+
+        req.session.destroy((err) => {
+            if (err) {
+                return res.status(500).json({
+                    message: 'Account deleted, but logout failed'
+                });
+            }
+
+            res.clearCookie('connect.sid', {
+                path: '/'
+            });
+
+            res.json({
+                message: 'Account deleted successfully'
+            });
+        });
+
+    } catch (err) {
+        console.error('Delete account error:', err);
+        res.status(500).json({
+            message: 'Error deleting account',
+            error: err.message
+        });
+    }
 });
 
 // PUT /users/update

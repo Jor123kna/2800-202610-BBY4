@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PostCard from '../components/PostCard';
+import PageHint from '../components/PageHint';
+
 
 function Community() {
     const navigate = useNavigate();
@@ -8,6 +10,33 @@ function Community() {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [userData, setUserData] = useState(null);
+    const [showHint, setShowHint] = useState(true);
+
+    // fetch user data 
+      useEffect(() => {
+        const fetchProfile = async () => {
+          try {
+            const response = await fetch('http://localhost:5000/users/profile', {
+              method: 'GET',
+              credentials: 'include',
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+              setUserData(data.user);
+            } else {
+              setUserData(null);
+            }
+          } catch (error) {
+            console.error('Failed to fetch profile:', error);
+            setUserData(null);
+          }
+        };
+    
+        fetchProfile();
+      }, []);
 
     // fetch real posts from backend
     useEffect(() => {
@@ -67,6 +96,14 @@ function Community() {
 
     return (
         <div className="page-padding">
+            {/* Page Hint */}
+            {showHint && userData?.firstTimeMode && (
+                <PageHint
+                    message="Tap + to create a post. Filter by In Need or To Help!"
+                    onClose={() => setShowHint(false)}
+                />
+            )}
+
             {/* Page header */}
             <div style={{ marginBottom: 'var(--space-4)' }}>
                 <h1 style={{ marginBottom: 'var(--space-2)' }}>Community</h1>

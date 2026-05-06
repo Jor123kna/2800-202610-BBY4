@@ -1,5 +1,5 @@
-/* ---------- RESET ---------- */
-
+/* 1. FOUNDATIONS */
+/* Reset */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -21,9 +21,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-
-/* ---------- ACCESSIBILITY ---------- */
-
+/* Accessibility */
 :focus-visible {
   outline: 3px solid var(--color-border-focus);
   outline-offset: 2px;
@@ -42,9 +40,7 @@ body {
   border: 0;
 }
 
-
-/* ---------- TYPOGRAPHY ---------- */
-
+/* Typography */
 h1, h2, h3, h4 {
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-tight);
@@ -57,8 +53,8 @@ h3 { font-size: var(--text-xl); }
 h4 { font-size: var(--text-lg); }
 
 
-/* ---------- LAYOUT CONTAINERS ---------- */
 
+/* 2. LAYOUT */
 .app-container {
   width: 100%;
   min-height: 100vh;
@@ -67,18 +63,21 @@ h4 { font-size: var(--text-lg); }
   padding-bottom: 72px;
 }
 
+/* Default page padding */
 .page-padding {
   padding: var(--space-5) var(--space-4);
   max-width: 720px;
   margin: 0 auto;
 }
 
+/* Narrow padding (auth pages: SignIn, SignUp, Home) */
 .page-padding-narrow {
   padding: var(--space-5) var(--space-4);
   max-width: 440px;
   margin: 0 auto;
 }
 
+/* Wide padding (Map page) */
 .page-padding-wide {
   padding: var(--space-5) var(--space-4);
   max-width: 1200px;
@@ -86,8 +85,9 @@ h4 { font-size: var(--text-lg); }
 }
 
 
-/* ---------- TOP HEADER ---------- */
 
+/* 3. SHARED COMPONENTS */
+/* Top header */
 .top-header {
   background: var(--color-brand);
   color: var(--color-text-inverse);
@@ -108,9 +108,7 @@ h4 { font-size: var(--text-lg); }
   gap: var(--space-2);
 }
 
-
-/* ---------- BOTTOM NAVIGATION ---------- */
-
+/* Bottom navigation */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -131,34 +129,55 @@ h4 { font-size: var(--text-lg); }
   padding: var(--space-2) var(--space-1);
   min-height: 60px;
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.65);
   text-decoration: none;
-  transition: color 0.15s ease, background-color 0.15s ease;
+  font-weight: var(--font-weight-medium);
+  transition: all 0.15s ease;
+  position: relative;
 }
 
 .bottom-nav-item:hover {
   background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Orange accent bar on top of active tab */
+.bottom-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: none;
+  width: auto;
+  height: 3px;
+  background: var(--color-accent);
+  border-radius: 0;
 }
 
 .bottom-nav-item.active {
   color: var(--color-text-inverse);
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.22);
+  font-weight: var(--font-weight-semibold);
 }
 
 .bottom-nav-item-icon {
   width: 22px;
   height: 22px;
   filter: brightness(0) invert(1);
-  opacity: 0.85;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
 }
 
 .bottom-nav-item.active .bottom-nav-item-icon {
   opacity: 1;
+  transform: scale(1.1);
 }
 
 
-/* ---------- BUTTONS ---------- */
 
+/* 4. FORM ELEMENTS */
+/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -180,10 +199,12 @@ h4 { font-size: var(--text-lg); }
   transform: scale(0.98);
 }
 
+/* Full-width modifier */
 .btn-block {
   width: 100%;
 }
 
+/* Primary action */
 .btn-primary {
   background: var(--color-brand);
   color: var(--color-text-inverse);
@@ -192,6 +213,7 @@ h4 { font-size: var(--text-lg); }
   background: var(--color-brand-hover);
 }
 
+/* Secondary action */
 .btn-secondary {
   background: var(--color-surface-base);
   color: var(--color-brand);
@@ -201,6 +223,7 @@ h4 { font-size: var(--text-lg); }
   background: var(--color-brand-bg);
 }
 
+/* Tertiary action */
 .btn-tertiary {
   background: transparent;
   color: var(--color-text-primary);
@@ -209,6 +232,7 @@ h4 { font-size: var(--text-lg); }
   background: var(--color-surface-raised);
 }
 
+/* Accent action */
 .btn-accent {
   background: var(--color-accent);
   color: var(--color-text-inverse);
@@ -217,6 +241,7 @@ h4 { font-size: var(--text-lg); }
   background: var(--color-accent-hover);
 }
 
+/* Emergency action */
 .btn-emergency {
   background: var(--color-emergency);
   color: var(--color-text-inverse);
@@ -225,9 +250,7 @@ h4 { font-size: var(--text-lg); }
   background: var(--color-emergency-hover);
 }
 
-
-/* ---------- INPUTS ---------- */
-
+/* Inputs */
 .input {
   width: 100%;
   min-height: var(--tap-target-min);
@@ -262,9 +285,75 @@ h4 { font-size: var(--text-lg); }
   margin-bottom: var(--space-4);
 }
 
+/* Role toggle */
+.role-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
 
-/* ---------- CARDS ---------- */
+.role-toggle-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  min-height: 120px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-base);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
 
+.role-toggle-option:hover {
+  border-color: var(--color-text-secondary);
+  background: var(--color-surface-raised);
+}
+
+/* Selected state - In Need */
+.role-toggle-option.selected.in-need {
+  border-color: var(--color-role-in-need);
+  background: var(--color-role-in-need-bg);
+  color: var(--color-role-in-need);
+}
+
+/* Selected state - Helper */
+.role-toggle-option.selected.helper {
+  border-color: var(--color-role-helper);
+  background: var(--color-role-helper-bg);
+  color: var(--color-role-helper);
+}
+
+.role-toggle-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.role-toggle-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.role-toggle-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.role-toggle-option.selected .role-toggle-desc {
+  color: inherit;
+  opacity: 0.85;
+}
+
+
+
+/* 5. CARDS & ALERTS */
+/* Cards */
 .card {
   background: var(--color-surface-base);
   border: 1px solid var(--color-border-subtle);
@@ -279,9 +368,7 @@ h4 { font-size: var(--text-lg); }
   box-shadow: var(--shadow-md);
 }
 
-
-/* ---------- STATUS BADGES ---------- */
-
+/* Status badges */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -313,9 +400,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--color-status-closed);
 }
 
-
-/* ---------- ROLE TAGS ---------- */
-
+/* Role tags */
 .role-tag {
   display: inline-flex;
   align-items: center;
@@ -336,9 +421,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--color-role-in-need);
 }
 
-
-/* ---------- ALERT BANNERS ---------- */
-
+/* Alert banners */
 .alert {
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
@@ -368,8 +451,9 @@ h4 { font-size: var(--text-lg); }
 }
 
 
-/* ---------- TEXT UTILITIES ---------- */
 
+/* 6. UTILITIES */
+/* Text utilities */
 .text-secondary { color: var(--color-text-secondary); }
 .text-brand     { color: var(--color-brand); }
 .text-accent    { color: var(--color-accent-text); }
@@ -383,81 +467,84 @@ h4 { font-size: var(--text-lg); }
 .font-bold   { font-weight: var(--font-weight-bold); }
 
 
-.role-toggle {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
+/* Floating action button */
+.fab {
+  position: fixed;
+  bottom: 84px;
+  right: var(--space-5);
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: var(--color-brand);
+  color: var(--color-text-inverse);
+  border: none;
+  font-size: 28px;
+  font-weight: var(--font-weight-regular);
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: background-color 0.15s ease, transform 0.05s ease;
 }
 
-.role-toggle-option {
+.fab:hover {
+  background: var(--color-brand-hover);
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+/* Keep FAB aligned with content max-width on larger screens */
+@media (min-width: 768px) {
+  .fab {
+    right: calc(50% - 720px / 2 + var(--space-5));
+  }
+}
+
+
+/* Empty state */
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  min-height: 120px;
-  border: 2px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-base);
-  color: var(--color-text-primary);
-  font-family: inherit;
-  cursor: pointer;
   text-align: center;
-  transition: all 0.15s ease;
-}
-
-.role-toggle-option:hover {
-  border-color: var(--color-text-secondary);
-  background: var(--color-surface-raised);
-}
-
-/* Selected state */
-.role-toggle-option.selected.in-need {
-  border-color: var(--color-role-in-need);
-  background: var(--color-role-in-need-bg);
-  color: var(--color-role-in-need);
-}
-
-/* Selected state */
-.role-toggle-option.selected.helper {
-  border-color: var(--color-role-helper);
-  background: var(--color-role-helper-bg);
-  color: var(--color-role-helper);
-}
-
-.role-toggle-icon {
-  font-size: 28px;
-  line-height: 1;
-}
-
-.role-toggle-title {
-  font-size: var(--text-base);
-  font-weight: var(--font-weight-medium);
-}
-
-.role-toggle-desc {
-  font-size: var(--text-xs);
+  padding: var(--space-12) var(--space-4);
   color: var(--color-text-secondary);
-  line-height: 1.4;
 }
 
-.role-toggle-option.selected .role-toggle-desc {
-  color: inherit;
-  opacity: 0.85;
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-4);
+  opacity: 0.6;
 }
 
-/* ---------- POST LIST ---------- */
+.empty-state-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
 
+.empty-state-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+
+/* 7. PAGE-SPECIFIC STYLES */
+/* 7a. COMMUNITY PAGE */
+/* Post list */
 .post-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-
-/* ---------- POST CARD ---------- */
-
+/* Post card */
 .post-card {
   background: var(--color-surface-base);
   border: 1px solid var(--color-border-subtle);
@@ -506,120 +593,7 @@ h4 { font-size: var(--text-lg); }
   color: var(--color-text-primary);
 }
 
-
-/* ---------- FLOATING ACTION BUTTON (FAB) ---------- */
-
-.fab {
-  position: fixed;
-  bottom: 84px;
-  right: var(--space-5);
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-full);
-  background: var(--color-brand);
-  color: var(--color-text-inverse);
-  border: none;
-  font-size: 28px;
-  font-weight: var(--font-weight-regular);
-  cursor: pointer;
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 5;
-  transition: background-color 0.15s ease, transform 0.05s ease;
-}
-
-.fab:hover {
-  background: var(--color-brand-hover);
-}
-
-.fab:active {
-  transform: scale(0.95);
-}
-
-
-@media (min-width: 768px) {
-  .fab {
-    right: calc(50% - 720px / 2 + var(--space-5));
-  }
-}
-
-
-/* ---------- EMPTY STATE ---------- */
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: var(--space-12) var(--space-4);
-  color: var(--color-text-secondary);
-}
-
-.empty-state-icon {
-  font-size: 48px;
-  margin-bottom: var(--space-4);
-  opacity: 0.6;
-}
-
-.empty-state-title {
-  font-size: var(--text-lg);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-2);
-}
-
-.empty-state-desc {
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-}
-
-/* ---------- TEXTAREA ---------- */
-
-.textarea {
-  resize: vertical;
-  min-height: 120px;
-  font-family: inherit;
-  line-height: var(--line-height-normal);
-}
-
-.textarea-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: var(--space-1);
-  gap: var(--space-2);
-}
-
-.char-counter {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-}
-
-
-/* ---------- INPUT ERROR STATE ---------- */
-
-.input-error {
-  border-color: var(--color-emergency);
-}
-
-.input-error:focus {
-  border-color: var(--color-emergency);
-}
-
-.input-error-message {
-  display: block;
-  font-size: var(--text-xs);
-  color: var(--color-emergency);
-  margin-top: var(--space-1);
-}
-
-
-/* ---------- FILTER TABS ---------- */
-
+/* Filter tabs */
 .filter-tabs {
   display: flex;
   gap: var(--space-2);
@@ -658,6 +632,7 @@ h4 { font-size: var(--text-lg); }
   box-shadow: var(--shadow-sm);
 }
 
+/* Count badge */
 .filter-tab-count {
   display: inline-flex;
   align-items: center;
@@ -675,4 +650,342 @@ h4 { font-size: var(--text-lg); }
 .filter-tab.active .filter-tab-count {
   background: var(--color-brand-bg);
   color: var(--color-brand);
+}
+
+
+/* 7b. POST CREATION PAGE */
+/* Textarea */
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+  line-height: var(--line-height-normal);
+}
+
+/* Footer below textarea showing error message + char counter */
+.textarea-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-1);
+  gap: var(--space-2);
+}
+
+.char-counter {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+/* Input error state */
+.input-error {
+  border-color: var(--color-emergency);
+}
+
+.input-error:focus {
+  border-color: var(--color-emergency);
+}
+
+.input-error-message {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-emergency);
+  margin-top: var(--space-1);
+}
+
+
+/* 7c. PROFILE PAGE */
+/* Header */
+.profile-header {
+  background: linear-gradient(135deg, var(--color-brand) 0%, #065f46 100%);
+  color: var(--color-text-inverse);
+  padding: var(--space-8) var(--space-4) var(--space-6);
+  text-align: center;
+}
+
+/* Circle avatar with user's initials */
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.2);
+  border: 3px solid rgba(255, 255, 255, 0.4);
+  color: var(--color-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 auto var(--space-3);
+}
+
+.profile-name {
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 2px;
+}
+
+.profile-email {
+  font-size: var(--text-sm);
+  opacity: 0.85;
+  margin-bottom: var(--space-3);
+}
+
+/* Role badge */
+.profile-role-badge {
+  display: flex;
+  justify-content: center;
+}
+
+.profile-role-badge-pill {
+  background: rgba(255, 255, 255, 0.95);
+  font-size: var(--text-xs);
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-semibold);
+}
+
+.profile-role-badge-pill.in-need {
+  color: var(--color-accent-emphasis, #C2410C);
+}
+
+.profile-role-badge-pill.helper {
+  color: var(--color-brand);
+}
+
+/* Profile content */
+.profile-content {
+  padding-top: var(--space-6);
+}
+
+.profile-section {
+  margin-bottom: var(--space-6);
+}
+
+/* Uppercase section label */
+.profile-section-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-3);
+}
+
+/* Section header with label on left + count on right */
+.profile-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.profile-section-count {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+/* Spacing between user's posts in profile view */
+.profile-post-item {
+  margin-bottom: var(--space-3);
+}
+
+/* Bottom action area */
+.profile-actions {
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+/* Link-style buttons */
+/* Underlined green link */
+.btn-link {
+  background: transparent;
+  border: none;
+  color: var(--color-brand);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: var(--space-2) 0;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+.btn-link:hover {
+  opacity: 0.7;
+}
+
+/* Small red link */
+.btn-link-danger {
+  background: transparent;
+  border: none;
+  color: var(--color-emergency);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  font-family: inherit;
+}
+
+.btn-link-danger:hover {
+  opacity: 0.7;
+}
+
+/* Centered red link, full width */
+.btn-link-danger-center {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--color-emergency);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: var(--space-3);
+  text-align: center;
+  font-family: inherit;
+  margin-top: var(--space-2);
+}
+
+.btn-link-danger-center:hover {
+  opacity: 0.7;
+}
+
+/* Outlined gray block button */
+.btn-secondary-block {
+  display: block;
+  width: 100%;
+  background: var(--color-surface-sunken);
+  border: 1.5px solid var(--color-border-subtle);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: var(--space-3);
+  transition: all 0.15s ease;
+}
+
+.btn-secondary-block:hover {
+  background: var(--color-border-subtle);
+}
+
+/* 7d. INFO PAGE (DISASTER GUIDES) */
+
+/* Disaster list */
+.disaster-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+
+/* Disaster card */
+.disaster-card {
+  width: 100%;
+  background: var(--color-surface-base);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+}
+
+.disaster-card:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.disaster-card:active {
+  transform: scale(0.99);
+}
+
+.disaster-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+/* Round icon circle */
+.disaster-card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.disaster-card-icon.flood {
+  background: #DBEAFE;
+}
+
+.disaster-card-icon.earthquake {
+  background: #FEF3C7;
+}
+
+.disaster-card-icon.wildfire {
+  background: #FEE2E2;
+}
+
+/* Text info */
+.disaster-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.disaster-card-name {
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+
+.disaster-card-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+
+/* Right arrow indicator */
+.disaster-card-arrow {
+  color: var(--color-text-secondary);
+  font-size: var(--text-xl);
+  flex-shrink: 0;
+}
+
+
+/* Stage tags row */
+.disaster-card-tags {
+  display: flex;
+  gap: var(--space-2);
+  padding-left: 64px;
+}
+
+.disaster-tag {
+  font-size: var(--text-xs);
+  padding: 3px var(--space-2);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-medium);
+}
+
+.disaster-tag.flood {
+  background: #DBEAFE;
+  color: #1E3A8A;
+}
+
+.disaster-tag.earthquake {
+  background: #FEF3C7;
+  color: #78350F;
+}
+
+.disaster-tag.wildfire {
+  background: #FEE2E2;
+  color: #7F1D1D;
 }

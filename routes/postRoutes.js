@@ -31,7 +31,6 @@ router.get('/', async (req, res) => {
     try {
         const posts = await Post.find()
             .populate('author', 'firstName lastName role')
-            .sort({ createdAt: -1 }); // newest first
 
         res.status(200).json({
             message: 'Posts retrieved',

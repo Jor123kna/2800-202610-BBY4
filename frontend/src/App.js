@@ -11,18 +11,8 @@ import Community from './pages/Community';
 import Post from './pages/Post';
 import Map from './pages/Map';
 import Info from './pages/Info';
+import DisasterDetail from './pages/DisasterDetail';
 import Profile from './pages/Profile';
-
-function DisasterDetailPlaceholder() {
-  return (
-    <div className="page-padding">
-      <h1>Disaster Detail</h1>
-      <p style={{ color: 'var(--color-text-secondary)', marginTop: 'var(--space-2)' }}>
-        Coming soon — this page will show detailed safety steps for each disaster.
-      </p>
-    </div>
-  );
-}
 
 function App() {
   return (
@@ -37,8 +27,7 @@ function App() {
           <Route path="/post" element={<Post />} />
           <Route path="/map" element={<Map />} />
           <Route path="/info" element={<Info />} />
-          {/* Placeholder route for disaster detail */}
-          <Route path="/info/:disasterId" element={<DisasterDetailPlaceholder />} />
+          <Route path="/info/:disasterId" element={<DisasterDetail />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
 

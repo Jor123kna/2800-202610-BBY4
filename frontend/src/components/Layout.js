@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import TopHeader from './TopHeader';
 import BottomNav from './BottomNav';
+import AppTour from './AppTour';
 
 function Layout({ showBack = false, hideBottomNav = false }) {
   return (
@@ -13,6 +14,7 @@ function Layout({ showBack = false, hideBottomNav = false }) {
       </main>
 
       {!hideBottomNav && <BottomNav />}
+      {!hideBottomNav && <AppTour />}
     </div>
   );
 }

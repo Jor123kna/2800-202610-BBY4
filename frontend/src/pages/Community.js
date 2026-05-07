@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+// import { useLocation } from 'react-router-dom';
 import PostCard from '../components/PostCard';
 import PageHint from '../components/PageHint';
 
@@ -12,33 +13,50 @@ function Community() {
     const [error, setError] = useState('');
     const [userData, setUserData] = useState(null);
     const [showHint, setShowHint] = useState(true);
-    const [activeSort, setActiveSort] = useState('newest');
+    const [message, setMessage] = React.useState('');
+    // const location = useLocation();
+    // const message = location.state?.message;
+
+    useEffect(() => {
+        const savedMessage = localStorage.getItem('communityMessage');
+
+        if (!savedMessage) return;
+
+        const parsedMessage = JSON.parse(savedMessage);
+
+        if (Date.now() > parsedMessage.expiresAt) {
+            localStorage.removeItem('communityMessage');
+            return;
+        }
+
+        setMessage(parsedMessage.text);
+    }, []);
 
 
     // fetch user data 
-      useEffect(() => {
+    useEffect(() => {
         const fetchProfile = async () => {
-          try {
-            const response = await fetch('http://localhost:5000/users/profile', {
-              method: 'GET',
-              credentials: 'include',
-            });
-    
-            const data = await response.json();
-    
-            if (response.ok) {
-              setUserData(data.user);
-            } else {
-              setUserData(null);
+            try {
+                const response = await fetch('http://localhost:5000/users/profile', {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    setUserData(data.user);
+                } else {
+                    setUserData(null);
+                }
+            } catch (error) {
+                console.error('Failed to fetch profile:', error);
+                setUserData(null);
             }
-          } catch (error) {
-            console.error('Failed to fetch profile:', error);
-            setUserData(null);
-          }
         };
-    
+
         fetchProfile();
-      }, []);
+    }, []);
 
     // fetch real posts from backend
     useEffect(() => {
@@ -110,6 +128,18 @@ function Community() {
 
     return (
         <div className="page-padding">
+            {message && (
+                <div
+                    className="card"
+                    style={{
+                        marginBottom: 'var(--space-4)',
+                        backgroundColor: 'var(--color-surface)',
+                        border: '1px solid var(--color-brand)'
+                    }}
+                >
+                    <p>{message}</p>
+                </div>
+            )}
             {/* Page Hint */}
             {showHint && userData?.firstTimeMode && (
                 <PageHint

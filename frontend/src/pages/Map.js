@@ -1,24 +1,35 @@
-import React from 'react';
+// import React from 'react';
+import React, { useState } from 'react';
+// using useSate a hook that lets thi page store checkbox on of value 
+
+import MapComponent from '../components/MapComponent';
 
 function Map() {
+    const [showFood, setShowFood] = useState(false);
   return (
-    <div className="page-padding">
+    <div className="page-padding-wide">
       <h1>Map</h1>
       <p style={{ color: 'var(--color-text-secondary)', marginTop: 'var(--space-2)' }}>
         Evacuation routes and community centres
       </p>
+           <div style={{ marginTop: 'var(--space-4)' }}>
+        <label>
+          <input
+            type="checkbox"
+            checked={showFood}
+            onChange={(e) => setShowFood(e.target.checked)}
+          />
+          {' '}Show food centres
+        </label>
+      </div>
       <div
         className="card"
         style={{
           marginTop: 'var(--space-4)',
-          minHeight: '300px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'var(--color-surface-sunken)',
+          padding: 'var(--space-3)',
         }}
       >
-        <p style={{ color: 'var(--color-text-secondary)' }}>Map will go here</p>
+        <MapComponent showFood={showFood} />
       </div>
     </div>
   );

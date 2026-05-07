@@ -1,18 +1,18 @@
 import React from 'react';
-import { NavLink , useNavigate} from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 function BottomNav() {
   const navigate = useNavigate();
 
   const tabs = [
-    { to: '/community', label: 'Community', icon: '💬' },
-    { to: '/post',      label: 'Post',      icon: '✏️' },
-    { to: '/map',       label: 'Map',       icon: '📍' },
-    { to: '/info',      label: 'Info',      icon: '📖' },
-    { to: '/profile',   label: 'Profile',   icon: '👤' },
+    { to: '/community', label: 'Community', icon: '💬', tourClass: `nav-community` },
+    { to: '/post', label: 'Post', icon: '✏️', tourClass: `nav-post` },
+    { to: '/map', label: 'Map', icon: '📍', tourClass: `nav-map` },
+    { to: '/info', label: 'Info', icon: '📖', tourClass: `nav-info` },
+    { to: '/profile', label: 'Profile', icon: '👤', tourClass: `nav-profile` },
   ];
 
- const checkProfileLogin = async (e) => {
+  const checkProfileLogin = async (e) => {
     if (e.currentTarget.getAttribute('href') === '/profile') {
       e.preventDefault();
 
@@ -43,7 +43,7 @@ function BottomNav() {
           to={tab.to}
           onClick={tab.to === '/profile' ? checkProfileLogin : undefined}
           className={({ isActive }) =>
-            isActive ? 'bottom-nav-item active' : 'bottom-nav-item'
+            `${isActive ? 'bottom-nav-item active' : 'bottom-nav-item'} ${tab.tourClass}`
           }
         >
           <span className="bottom-nav-item-icon" aria-hidden="true">

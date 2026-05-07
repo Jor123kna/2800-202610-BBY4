@@ -36,7 +36,8 @@ app.get('/', (req, res) => {
 
 app.use('/users', require('./routes/userRoutes'));
 app.use('/locations', require('./routes/locationRoutes'));
-app.use('/posts', require('./routes/postRoutes'))
+app.use('/posts', require('./routes/postRoutes'));
+app.use('/walkthrough', require('./routes/walkthroughRoutes'));
 
 // Schema
 const Location = require('./models/locations');

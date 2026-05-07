@@ -13,6 +13,7 @@ function Community() {
     const [error, setError] = useState('');
     const [userData, setUserData] = useState(null);
     const [showHint, setShowHint] = useState(true);
+    const [activeSort, setActiveSort] = useState('newest');
     const [message, setMessage] = React.useState('');
     // const location = useLocation();
     // const message = location.state?.message;

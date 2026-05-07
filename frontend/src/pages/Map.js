@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 // import React from 'react';
-import React, { useState } from 'react';
 // using useSate a hook that lets thi page store checkbox on of value 
 
 import MapComponent from '../components/MapComponent';

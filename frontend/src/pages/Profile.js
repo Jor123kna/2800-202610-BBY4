@@ -77,8 +77,6 @@ function Profile() {
         role: ''
       });
 
-      navigate('/signin');
-
     } catch (error) {
       console.error('Sign out error:', error);
       alert('Something went wrong signing out.');

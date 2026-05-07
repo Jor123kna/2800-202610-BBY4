@@ -147,7 +147,13 @@ function Map() {
         })}
 
         {/* "Mock map" label */}
-        <div className="map-area-label">Map preview</div>
+        <div
+          className="map-area"
+          aria-label="Map showing nearby relief locations"
+          style={{ height: '500px', padding: 0, overflow: 'hidden' }}
+        >
+          <MapComponent showFood={activeFilter === 'food'} />
+        </div>
       </div>
 
       {/* Result count */}

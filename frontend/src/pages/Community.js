@@ -13,6 +13,7 @@ function Community() {
     const [error, setError] = useState('');
     const [userData, setUserData] = useState(null);
     const [showHint, setShowHint] = useState(true);
+    const [activeSort, setActiveSort] = useState('newest');
     const [message, setMessage] = React.useState('');
     // const location = useLocation();
     // const message = location.state?.message;
@@ -85,9 +86,21 @@ function Community() {
         fetchPosts();
     }, []);
 
+    // filter function
     const filteredPosts = posts.filter((post) => {
         if (activeFilter === 'all') return true;
         return post.role === activeFilter;
+    });
+
+    // sorting function
+    const sortedPosts = filteredPosts.sort((a, b) => {
+        if (activeSort === 'newest') {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+        }
+        if (activeSort === 'oldest') {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        }
+        return 0; 
     });
 
     // loading state
@@ -144,6 +157,23 @@ function Community() {
                 </p>
             </div>
 
+            {/* Sort tabs */}
+            <div style={{ 
+                display: 'flex', 
+                gap: 'var(--space-2)', 
+                marginBottom: 'var(--space-4)' 
+            }}>
+                <select
+                    value={activeSort}
+                    onChange={(e) => setActiveSort(e.target.value)}
+                    className="input"
+                    style={{ width: 'auto' }}
+                >
+                    <option value="newest">🕒 Newest First</option>
+                    <option value="oldest">🕒 Oldest First</option>
+                </select>
+            </div>
+
             {/* Filter tabs */}
             <div className="filter-tabs">
                 <button
@@ -189,7 +219,7 @@ function Community() {
                 </div>
             ) : (
                 <div className="post-list">
-                    {filteredPosts.map((post) => (
+                    {sortedPosts.map((post) => (
                         <PostCard key={post._id} post={post} />
                     ))}
                 </div>

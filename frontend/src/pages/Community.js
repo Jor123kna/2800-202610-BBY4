@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../config';
 // import { useLocation } from 'react-router-dom';
 import PostCard from '../components/PostCard';
 import PageHint from '../components/PageHint';
@@ -38,7 +39,7 @@ function Community() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await fetch('http://localhost:5000/users/profile', {
+                const response = await fetch(`${API_URL}/users/profile`, {
                     method: 'GET',
                     credentials: 'include',
                 });
@@ -63,7 +64,7 @@ function Community() {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await fetch('http://localhost:5000/posts', {
+                const response = await fetch(`${API_URL}/posts`, {
                     credentials: 'include'
                 });
 

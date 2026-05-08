@@ -8,9 +8,18 @@ const cors = require('cors');
 
 const app = express();
 
-// middleware
+const allowedOrigins = [
+    'http://localhost:3000',
+    process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: (origin, callback) => {
+        // Allow requests with no origin (e.g. Postman, server-to-server)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        callback(new Error('Not allowed by CORS'));
+    },
     credentials: true
 }));
 
@@ -29,11 +38,7 @@ app.use(session({
     }
 }));
 
-// routes
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'frontend', 'public', 'index.html'));
-});
-
+// API routes
 app.use('/users', require('./routes/userRoutes'));
 app.use('/locations', require('./routes/locationRoutes'));
 app.use('/posts', require('./routes/postRoutes'));

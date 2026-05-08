@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../config';
 // import React from 'react';
 // using useSate a hook that lets thi page store checkbox on of value 
 
@@ -15,7 +16,7 @@ function Map() {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const response = await fetch('http://localhost:5000/locations');
+        const response = await fetch(`${API_URL}/locations`);
         const data = await response.json();
         setLocations(data.locations || []);
       } catch (error) {

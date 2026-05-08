@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PostCard from '../components/PostCard';
+import { API_URL } from '../config';
 
 function Profile() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ function Profile() {
   React.useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch('http://localhost:5000/users/profile', {
+        const response = await fetch(`${API_URL}/users/profile`, {
           method: 'GET',
           credentials: 'include'
         });
@@ -21,7 +22,7 @@ function Profile() {
         if (response.ok) {
           setUserData(data.user);
 
-          const postsResponse = await fetch('http://localhost:5000/posts/mine', {
+          const postsResponse = await fetch(`${API_URL}/posts/mine`, {
             method: 'GET',
             credentials: 'include'
           });
@@ -57,7 +58,7 @@ function Profile() {
 
   const handleSignOut = async () => {
     try {
-      const response = await fetch('http://localhost:5000/users/logout', {
+      const response = await fetch(`${API_URL}/users/logout`, {
         method: 'GET',
         credentials: 'include'
       });
@@ -93,7 +94,7 @@ function Profile() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/users/delete', {
+      const response = await fetch(`${API_URL}/users/delete`, {
         method: 'DELETE',
         credentials: 'include'
       });
@@ -129,7 +130,7 @@ function Profile() {
     const newMode = userData.firstTimeMode === true ? false : true;
 
     try {
-      const response = await fetch('http://localhost:5000/users/update', {
+      const response = await fetch(`${API_URL}/users/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -157,7 +158,7 @@ function Profile() {
 
   const handleRoleChange = async (role) => {
     try {
-      const response = await fetch('http://localhost:5000/users/update', {
+      const response = await fetch(`${API_URL}/users/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -186,7 +187,7 @@ function Profile() {
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/posts/${postId}`, {
+      const response = await fetch(`${API_URL}/posts/${postId}`, {
         method: 'DELETE',
         credentials: 'include'
       });

@@ -83,7 +83,8 @@ router.post('/signin', validateSignin, async (req, res) => {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            role: user.role
+            role: user.role,
+            firstTimeMode: user.firstTimeMode
         };
 
         req.session.save(() => {

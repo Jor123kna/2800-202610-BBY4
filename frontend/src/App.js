@@ -9,6 +9,7 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import Community from './pages/Community';
 import Post from './pages/Post';
+import PostDetail from './pages/PostDetail';
 import Map from './pages/Map';
 import Info from './pages/Info';
 import DisasterDetail from './pages/DisasterDetail';
@@ -27,6 +28,7 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/community" element={<Community />} />
             <Route path="/post" element={<Post />} />
+            <Route path="/post/:id" element={<PostDetail />} />
             <Route path="/map" element={<Map />} />
             <Route path="/info" element={<Info />} />
             <Route path="/info/:disasterId" element={<DisasterDetail />} />

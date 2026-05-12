@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function PostCard({ post }) {
+    const navigate = useNavigate();
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -15,8 +17,26 @@ function PostCard({ post }) {
         return date.toLocaleDateString();
     };
 
+    const handleClick = () => {
+        navigate(`/post/${post._id}`);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleClick();
+        }
+    };
+
     return (
-        <article className="post-card">
+        <article
+            className="post-card post-card-clickable"
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
+            role="button"
+            tabIndex={0}
+            aria-label={`View post: ${post.title}`}
+        >
             {/* Role badge at top */}
             <div className="post-card-header">
                 <span className={`role-tag role-tag-${post.role}`}>

@@ -1,47 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../config';
+import PageHint from '../components/PageHint';
+import { useAuth } from '../context/AuthContext';
+
 
 function Post() {
   const navigate = useNavigate();
-  
-  const [userData, setUserData] = useState(null);
-
+  const { userData } = useAuth();
+  const [showHint, setShowHint] = useState(true);
   const [formData, setFormData] = useState({
     title: '',
-    role: '', 
+    role: '',
     content: '',
     neighbourhood: '',
   });
-
   const [errors, setErrors] = useState({});
-
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
-  
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/users/profile', {
-          method: 'GET',
-          credentials: 'include',
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          setUserData(data.user);
-        } else {
-          setUserData(null);
-        }
-      } catch (error) {
-        console.error('Failed to fetch profile:', error);
-        setUserData(null);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-  
   const TITLE_MAX = 100;
   const CONTENT_MAX = 500;
   const CONTENT_MIN = 10;
@@ -100,7 +76,7 @@ function Post() {
     setSubmitError('');
 
     try {
-      const response = await fetch('http://localhost:5000/posts', {
+      const response = await fetch(`${API_URL}/posts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -121,11 +97,11 @@ function Post() {
       setLoading(false);
     }
   };
-  
+
   const handleCancel = () => {
     navigate('/community');
   };
-  
+
   if (!userData && userData !== null) {
     return (
       <div className="page-padding">
@@ -154,9 +130,18 @@ function Post() {
       </div>
     );
   }
-  
+
   return (
     <div className="page-padding">
+
+      {/* Page Hint */}
+      {showHint && userData?.firstTimeMode && (
+        <PageHint
+          message="Tap + to create a post. Filter by In Need or To Help!"
+          onClose={() => setShowHint(false)}
+        />
+      )}
+
       {/* Page header */}
       <div style={{ marginBottom: 'var(--space-6)' }}>
         <h1 style={{ marginBottom: 'var(--space-2)' }}>Create a post</h1>
@@ -253,7 +238,7 @@ function Post() {
             </span>
           </div>
         </div>
-        
+
         {/* Neighbourhood (optional) */}
         <div className="input-group">
           <label htmlFor="neighbourhood" className="input-label">

@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { API_URL } from '../config';
 
 function BottomNav() {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ function BottomNav() {
       e.preventDefault();
 
       try {
-        const response = await fetch('http://localhost:5000/users/profile', {
+        const response = await fetch(`${API_URL}/users/profile`, {
           method: 'GET',
           credentials: 'include'
         });

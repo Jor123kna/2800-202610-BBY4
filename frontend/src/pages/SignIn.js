@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_URL } from '../config';
 
 function SignIn() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ function SignIn() {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:5000/users/signin', {
+      const response = await fetch(`${API_URL}/users/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

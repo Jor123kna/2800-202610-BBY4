@@ -1,6 +1,7 @@
 import React from 'react';
 import { Joyride, STATUS } from 'react-joyride';
 import { useLocation } from 'react-router-dom';
+import { API_URL } from '../config';
 
 function AppTour() {
   const location = useLocation();
@@ -44,7 +45,7 @@ function AppTour() {
     setRunTour(false);
 
     try {
-      await fetch('http://localhost:5000/walkthrough/complete', {
+      await fetch(`${API_URL}/walkthrough/complete`, {
         method: 'PUT',
         credentials: 'include'
       });

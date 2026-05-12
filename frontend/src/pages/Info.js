@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import PageHint from '../components/PageHint';
+
 
 function Info() {
   const navigate = useNavigate();
+  const { userData } = useAuth();
+  const [showHint, setShowHint] = useState(true);
 
   // Disaster guide data
   const disasters = [
@@ -36,6 +41,15 @@ function Info() {
 
   return (
     <div className="page-padding">
+
+      {/* Page Hint */}
+      {showHint && userData?.firstTimeMode && (
+        <PageHint
+          message="Tap + to create a post. Filter by In Need or To Help!"
+          onClose={() => setShowHint(false)}
+        />
+      )}
+
       {/* Page header */}
       <div style={{ marginBottom: 'var(--space-6)' }}>
         <h1 style={{ marginBottom: 'var(--space-2)' }}>Disaster Guides</h1>

@@ -8,10 +8,21 @@ const cors = require("cors");
 
 const app = express();
 
-// middleware
+app.set("trust proxy", 1);
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. Postman, server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   }),
 );
@@ -20,24 +31,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-// session
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "routereliefsecret",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false,
-      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
   }),
 );
 
-// routes
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "frontend", "public", "index.html"));
-});
-
+// API routes
 app.use("/users", require("./routes/userRoutes"));
 app.use("/locations", require("./routes/locationRoutes"));
 app.use("/posts", require("./routes/postRoutes"));
@@ -52,26 +59,6 @@ app.get("/test-db", (req, res) => {
     res.json({ message: "Connected to MongoDB!" });
   } else {
     res.json({ message: "Not connected to MongoDB." });
-  }
-});
-
-app.post("/add-location", async (req, res) => {
-  try {
-    const location = new Location({
-      name: req.body.name,
-      address: req.body.address,
-      lat: req.body.lat,
-      lng: req.body.lng,
-      type: req.body.type,
-      status: req.body.status,
-    });
-
-    await location.save();
-
-    res.json({ message: "Location added to database!" });
-  } catch (error) {
-    console.error(error);
-    res.json({ message: "Error adding location" });
   }
 });
 

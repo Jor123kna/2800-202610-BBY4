@@ -60,9 +60,6 @@ router.get("/:id", async (req, res) => {
 // PUT /locations/:id - update a location by ID
 router.put("/:id", async (req, res) => {
   try {
-    console.log("PUT body:", req.body); // see what's coming in
-    console.log("PUT id:", req.params.id); // confirm the id
-
     const updated = await Location.findByIdAndUpdate(
       req.params.id,
       {
@@ -80,15 +77,12 @@ router.put("/:id", async (req, res) => {
       { new: true, runValidators: true },
     );
 
-    console.log("updated result:", updated); // null means id not found or validator failed
-
     if (!updated) {
       return res.status(404).json({ error: "Location not found" });
     }
 
     res.json(updated);
   } catch (err) {
-    console.log("PUT error:", err.message); // actual error
     res.status(500).json({ error: err.message });
   }
 });

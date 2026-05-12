@@ -1,10 +1,10 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const express = require('express');
-const session = require('express-session');
-const mongoose = require('mongoose');
-const path = require('path');
-const cors = require('cors');
+const express = require("express");
+const session = require("express-session");
+const mongoose = require("mongoose");
+const path = require("path");
+const cors = require("cors");
 
 const app = express();
 
@@ -27,7 +27,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 app.use(session({
     secret: process.env.SESSION_SECRET || 'routereliefsecret',
@@ -47,7 +47,7 @@ app.use('/posts', require('./routes/postRoutes'));
 app.use('/walkthrough', require('./routes/walkthroughRoutes'));
 
 // Schema
-const Location = require('./models/locations');
+const Location = require("./models/locations");
 
 // test database connection
 app.get('/test-db', (req, res) => {
@@ -61,7 +61,7 @@ app.get('/test-db', (req, res) => {
 
 // 404 handler
 app.use((req, res) => {
-    res.status(404).send('Page not found - 404');
+  res.status(404).send("Page not found - 404");
 });
 
 module.exports = app;

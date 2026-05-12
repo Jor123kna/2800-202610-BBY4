@@ -84,4 +84,26 @@ router.get('/mine', isLoggedIn, async (req, res) => {
   }
 });
 
+router.get('/:id', async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id)
+            .populate('author', 'firstName lastName role');
+ 
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+ 
+        res.status(200).json({
+            message: 'Post retrieved',
+            post
+        });
+ 
+    } catch (err) {
+        res.status(500).json({
+            message: 'Error getting post',
+            error: err.message
+        });
+    }
+});
+
 module.exports = router;

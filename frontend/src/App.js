@@ -13,27 +13,30 @@ import Map from './pages/Map';
 import Info from './pages/Info';
 import DisasterDetail from './pages/DisasterDetail';
 import Profile from './pages/Profile';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Main app routes */}
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/post" element={<Post />} />
-          <Route path="/map" element={<Map />} />
-          <Route path="/info" element={<Info />} />
-          <Route path="/info/:disasterId" element={<DisasterDetail />} />
-          <Route path="/profile" element={<Profile />} />
-        </Route>
+      <AuthProvider>
+        <Routes>
+          {/* Main app routes */}
+          <Route element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/post" element={<Post />} />
+            <Route path="/map" element={<Map />} />
+            <Route path="/info" element={<Info />} />
+            <Route path="/info/:disasterId" element={<DisasterDetail />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
 
-        {/* Redirect unknown URLs to home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Redirect unknown URLs to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

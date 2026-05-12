@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
-// import { useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import PostCard from '../components/PostCard';
 import PageHint from '../components/PageHint';
 
@@ -12,12 +12,10 @@ function Community() {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [userData, setUserData] = useState(null);
     const [showHint, setShowHint] = useState(true);
     const [activeSort, setActiveSort] = useState('newest');
     const [message, setMessage] = React.useState('');
-    // const location = useLocation();
-    // const message = location.state?.message;
+    const { userData} = useAuth();
 
     useEffect(() => {
         const savedMessage = localStorage.getItem('communityMessage');
@@ -32,32 +30,6 @@ function Community() {
         }
 
         setMessage(parsedMessage.text);
-    }, []);
-
-
-    // fetch user data 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const response = await fetch(`${API_URL}/users/profile`, {
-                    method: 'GET',
-                    credentials: 'include',
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    setUserData(data.user);
-                } else {
-                    setUserData(null);
-                }
-            } catch (error) {
-                console.error('Failed to fetch profile:', error);
-                setUserData(null);
-            }
-        };
-
-        fetchProfile();
     }, []);
 
     // fetch real posts from backend

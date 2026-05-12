@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { API_URL } from '../config';
-// import React from 'react';
+import { useAuth } from '../context/AuthContext';
 // using useSate a hook that lets thi page store checkbox on of value 
 
 import MapComponent from '../components/MapComponent';
+import PageHint from '../components/PageHint';
+
 
 /* The map area is currently a mock visual. */
 function Map() {
@@ -12,6 +14,10 @@ function Map() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showHint, setShowHint] = useState(true);
+  const { userData} = useAuth();
+
+ 
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -77,6 +83,15 @@ function Map() {
 
   return (
     <div className="page-padding-wide map-page">
+
+      {/* Page Hint */}
+      {showHint && userData?.firstTimeMode && (
+        <PageHint
+          message="Tap + to create a post. Filter by In Need or To Help!"
+          onClose={() => setShowHint(false)}
+        />
+      )}
+
       {/* Search bar */}
       <div className="map-search-bar">
         <span className="map-search-icon" aria-hidden="true">🔍</span>

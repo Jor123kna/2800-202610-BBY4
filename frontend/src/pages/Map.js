@@ -1,25 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 // import React from 'react';
-// using useSate a hook that lets thi page store checkbox on of value 
+// using useSate a hook that lets thi page store checkbox on of value
 
-import MapComponent from '../components/MapComponent';
+import MapComponent from "../components/MapComponent";
 
 /* The map area is currently a mock visual. */
 function Map() {
   const [locations, setLocations] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const response = await fetch('http://localhost:5000/locations');
+        const response = await fetch("http://localhost:5000/locations");
         const data = await response.json();
         setLocations(data.locations || []);
       } catch (error) {
-        console.error('Could not load locations:', error);
+        console.error("Could not load locations:", error);
       } finally {
         setLoading(false);
       }
@@ -28,13 +30,32 @@ function Map() {
   }, []);
 
   const filterMatchesLocation = (filter, locationType) => {
-    if (filter === 'all') return true;
-    if (filter === 'shelter') return locationType === 'shelter';
-    if (filter === 'food') {
-      return ['food bank', 'community fridge', 'community kitchen'].includes(locationType);
+    if (filter === "all") return true;
+
+    if (filter === "shelter") {
+      return ["emergency shelter", "warming centre", "cooling centre"].includes(
+        locationType,
+      );
     }
-    if (filter === 'community') return locationType === 'community centre';
-    if (filter === 'other') return locationType === 'other';
+    if (filter === "food") {
+      return ["food bank", "community fridge", "community kitchen"].includes(
+        locationType,
+      );
+    }
+    if (filter === "community") {
+      return ["community centre", "community kitchen"].includes(locationType);
+    }
+    if (filter === "hub") {
+      return ["disaster support hub", "information centre"].includes(
+        locationType,
+      );
+    }
+    if (filter === "support") {
+      return ["medical support", "pet support"].includes(locationType);
+    }
+    if (filter === "other") {
+      return locationType === "other";
+    }
     return false;
   };
 
@@ -48,37 +69,63 @@ function Map() {
 
   const getTypeIcon = (type) => {
     switch (type) {
-      case 'shelter': return '🏠';
-      case 'food bank': return '🍞';
-      case 'community fridge': return '🥬';
-      case 'community kitchen': return '🍳';
-      case 'community centre': return '🏘️';
-      default: return '📍';
+      case "emergency shelter":
+        return "🏠";
+      case "warming centre":
+        return "🔥";
+      case "cooling centre":
+        return "❄️";
+      case "food bank":
+        return "🍞";
+      case "community fridge":
+        return "🥬";
+      case "community kitchen":
+        return "🍳";
+      case "community centre":
+        return "🏘️";
+      case "disaster support hub":
+        return "🆘";
+      case "information centre":
+        return "ℹ️";
+      case "medical support":
+        return "🏥";
+      case "pet support":
+        return "🐾";
+      default:
+        return "📍";
     }
   };
 
   const getStatusClass = (status) => {
     switch (status) {
-      case 'open': return 'badge-open';
-      case 'limited': return 'badge-limited';
-      case 'closed': return 'badge-closed';
-      default: return 'badge-open';
+      case "open":
+        return "badge-open";
+      case "limited":
+        return "badge-limited";
+      case "closed":
+        return "badge-closed";
+      default:
+        return "badge-open";
     }
   };
 
   const filters = [
-    { value: 'all', label: 'All' },
-    { value: 'shelter', label: '🏠 Shelter' },
-    { value: 'food', label: '🍞 Food' },
-    { value: 'community', label: '🏘️ Community' },
-    { value: 'other', label: '📍 Other' },
+    { value: "all", label: "All" },
+    { value: "shelter", label: "🏠 Shelter" },
+    { value: "food", label: "🍞 Food" },
+    { value: "community", label: "🏘️ Community" },
+    { value: "hub", label: "🆘 Hubs" },
+    { value: "support", label: "🏥 Support" },
+    { value: "other", label: "📍 Other" },
   ];
 
   return (
     <div className="page-padding-wide map-page">
       {/* Search bar */}
       <div className="map-search-bar">
-        <span className="map-search-icon" aria-hidden="true">🔍</span>
+        <span className="map-search-icon" aria-hidden="true">
+          🔍
+        </span>
         <input
           type="text"
           className="map-search-input"
@@ -91,7 +138,7 @@ function Map() {
           <button
             type="button"
             className="map-search-clear"
-            onClick={() => setSearchQuery('')}
+            onClick={() => setSearchQuery("")}
             aria-label="Clear search"
           >
             ✕
@@ -100,14 +147,18 @@ function Map() {
       </div>
 
       {/* Filter chips */}
-      <div className="map-filter-chips" role="tablist" aria-label="Location category filter">
+      <div
+        className="map-filter-chips"
+        role="tablist"
+        aria-label="Location category filter"
+      >
         {filters.map((filter) => (
           <button
             key={filter.value}
             type="button"
             role="tab"
             aria-selected={activeFilter === filter.value}
-            className={`map-filter-chip ${activeFilter === filter.value ? 'active' : ''}`}
+            className={`map-filter-chip ${activeFilter === filter.value ? "active" : ""}`}
             onClick={() => setActiveFilter(filter.value)}
           >
             {filter.label}
@@ -116,27 +167,30 @@ function Map() {
       </div>
 
       {/* Mock map area */}
-      <div className="map-area" aria-label="Map showing nearby relief locations">
+      <div
+        className="map-area"
+        aria-label="Map showing nearby relief locations"
+      >
         {/* Mock streets */}
-        <div className="map-street horizontal" style={{ top: '30%' }}></div>
-        <div className="map-street horizontal" style={{ top: '60%' }}></div>
-        <div className="map-street vertical" style={{ left: '25%' }}></div>
-        <div className="map-street vertical" style={{ left: '70%' }}></div>
+        <div className="map-street horizontal" style={{ top: "30%" }}></div>
+        <div className="map-street horizontal" style={{ top: "60%" }}></div>
+        <div className="map-street vertical" style={{ left: "25%" }}></div>
+        <div className="map-street vertical" style={{ left: "70%" }}></div>
 
         {/* Map markers */}
         {filteredLocations.slice(0, 5).map((loc, index) => {
           const positions = [
-            { top: '25%', left: '20%' },
-            { top: '50%', left: '60%' },
-            { top: '40%', left: '40%' },
-            { top: '65%', left: '30%' },
-            { top: '35%', left: '75%' },
+            { top: "25%", left: "20%" },
+            { top: "50%", left: "60%" },
+            { top: "40%", left: "40%" },
+            { top: "65%", left: "30%" },
+            { top: "35%", left: "75%" },
           ];
           return (
             <button
               key={loc._id}
               type="button"
-              className={`map-marker ${selectedId === loc._id ? 'selected' : ''}`}
+              className={`map-marker ${selectedId === loc._id ? "selected" : ""}`}
               style={positions[index]}
               onClick={() => setSelectedId(loc._id)}
               aria-label={`Select ${loc.name}`}
@@ -150,25 +204,31 @@ function Map() {
         <div
           className="map-area"
           aria-label="Map showing nearby relief locations"
-          style={{ height: '500px', padding: 0, overflow: 'hidden' }}
+          style={{ height: "500px", padding: 0, overflow: "hidden" }}
         >
-          <MapComponent showFood={activeFilter === 'food'} />
+          <MapComponent showFood={activeFilter === "food"} />
         </div>
       </div>
 
       {/* Result count */}
       <div className="map-results-header">
         <span className="map-results-count">
-          {loading ? 'Loading...' : `${filteredLocations.length} location${filteredLocations.length !== 1 ? 's' : ''}`}
+          {loading
+            ? "Loading..."
+            : `${filteredLocations.length} location${filteredLocations.length !== 1 ? "s" : ""}`}
         </span>
       </div>
 
       {/* Location list */}
       {!loading && filteredLocations.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon" aria-hidden="true">🔍</div>
+          <div className="empty-state-icon" aria-hidden="true">
+            🔍
+          </div>
           <div className="empty-state-title">No locations found</div>
-          <div className="empty-state-desc">Try a different search or filter</div>
+          <div className="empty-state-desc">
+            Try a different search or filter
+          </div>
         </div>
       ) : (
         <div className="map-location-list">
@@ -176,8 +236,8 @@ function Map() {
             <button
               key={loc._id}
               type="button"
-              className={`map-location-card ${selectedId === loc._id ? 'selected' : ''}`}
-              onClick={() => setSelectedId(loc._id)}
+              className={`map-location-card ${selectedId === loc._id ? "selected" : ""}`}
+              onClick={() => navigate(`/locations/${loc._id}`)}
               aria-label={`View details for ${loc.name}`}
             >
               <div className="map-location-icon" aria-hidden="true">

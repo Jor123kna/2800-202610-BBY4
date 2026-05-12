@@ -13,6 +13,7 @@ import Map from './pages/Map';
 import Info from './pages/Info';
 import DisasterDetail from './pages/DisasterDetail';
 import Profile from './pages/Profile';
+import LocationDetail from './pages/LocationDetail';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/info" element={<Info />} />
           <Route path="/info/:disasterId" element={<DisasterDetail />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/locations/:id" element={<LocationDetail />} />
         </Route>
 
         {/* Redirect unknown URLs to home */}

@@ -1,30 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { API_URL } from '../config';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect } from "react";
+import { API_URL } from "../config";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-// using useSate a hook that lets thi page store checkbox on of value 
 
-import MapComponent from '../components/MapComponent';
-import PageHint from '../components/PageHint';
+import MapComponent from "../components/MapComponent";
+import PageHint from "../components/PageHint";
 
-
-/* The map area is currently a mock visual. */
 function Map() {
   const [locations, setLocations] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [showHint, setShowHint] = useState(true);
-  const { userData} = useAuth();
+  const { userData } = useAuth();
 
- 
+  // pull userType from your AuthContext — adjust key if yours is different
+  const userType = userData?.role; // 'in-need' | 'helper' | undefined
 
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const response = await fetch(`${API_URL}/locations`);
+        const response = await fetch(`${API_URL}/locations`, {
+          credentials: "include", // send session cookie so backend can filter by role
+        });
         const data = await response.json();
         setLocations(data.locations || []);
       } catch (error) {
@@ -36,32 +36,40 @@ function Map() {
     fetchLocations();
   }, []);
 
-  const filterMatchesLocation = (filter, locationType) => {
-    if (filter === "all") return true;
+  const filterMatchesLocation = (filter, loc) => {
+    // role-based filters
+    if (filter === "available") {
+      // in-need: show only places with open space
+      return loc.status !== "closed" && loc.capacity !== 0;
+    }
+    if (filter === "needs-help") {
+      // helper: show only places that need supplies/volunteers
+      return loc.needsSupplies === true;
+    }
 
+    // category filters — same for all roles
+    if (filter === "all") return true;
     if (filter === "shelter") {
       return ["emergency shelter", "warming centre", "cooling centre"].includes(
-        locationType,
+        loc.type,
       );
     }
     if (filter === "food") {
       return ["food bank", "community fridge", "community kitchen"].includes(
-        locationType,
+        loc.type,
       );
     }
     if (filter === "community") {
-      return ["community centre", "community kitchen"].includes(locationType);
+      return ["community centre", "community kitchen"].includes(loc.type);
     }
     if (filter === "hub") {
-      return ["disaster support hub", "information centre"].includes(
-        locationType,
-      );
+      return ["disaster support hub", "information centre"].includes(loc.type);
     }
     if (filter === "support") {
-      return ["medical support", "pet support"].includes(locationType);
+      return ["medical support", "pet support"].includes(loc.type);
     }
     if (filter === "other") {
-      return locationType === "other";
+      return loc.type === "other";
     }
     return false;
   };
@@ -70,7 +78,7 @@ function Map() {
     const matchesSearch =
       loc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       loc.address.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterMatchesLocation(activeFilter, loc.type);
+    const matchesFilter = filterMatchesLocation(activeFilter, loc); // pass whole loc now
     return matchesSearch && matchesFilter;
   });
 
@@ -116,19 +124,37 @@ function Map() {
     }
   };
 
-  const filters = [
-    { value: "all", label: "All" },
-    { value: "shelter", label: "🏠 Shelter" },
-    { value: "food", label: "🍞 Food" },
-    { value: "community", label: "🏘️ Community" },
-    { value: "hub", label: "🆘 Hubs" },
-    { value: "support", label: "🏥 Support" },
-    { value: "other", label: "📍 Other" },
-  ];
+  // role-aware filters — role chip appears first
+  const getFilters = () => {
+    const categoryFilters = [
+      { value: "all", label: "All" },
+      { value: "shelter", label: "🏠 Shelter" },
+      { value: "food", label: "🍞 Food" },
+      { value: "community", label: "🏘️ Community" },
+      { value: "hub", label: "🆘 Hubs" },
+      { value: "support", label: "🏥 Support" },
+      { value: "other", label: "📍 Other" },
+    ];
+
+    if (userType === "in-need") {
+      return [
+        { value: "available", label: "✅ Has Space" },
+        ...categoryFilters,
+      ];
+    }
+    if (userType === "helper") {
+      return [
+        { value: "needs-help", label: "🙏 Needs Help" },
+        ...categoryFilters,
+      ];
+    }
+    return categoryFilters;
+  };
+
+  const filters = getFilters();
 
   return (
     <div className="page-padding-wide map-page">
-
       {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (
         <PageHint
@@ -182,18 +208,16 @@ function Map() {
         ))}
       </div>
 
-      {/* Mock map area */}
+      {/* Map area */}
       <div
         className="map-area"
         aria-label="Map showing nearby relief locations"
       >
-        {/* Mock streets */}
         <div className="map-street horizontal" style={{ top: "30%" }}></div>
         <div className="map-street horizontal" style={{ top: "60%" }}></div>
         <div className="map-street vertical" style={{ left: "25%" }}></div>
         <div className="map-street vertical" style={{ left: "70%" }}></div>
 
-        {/* Map markers */}
         {filteredLocations.slice(0, 5).map((loc, index) => {
           const positions = [
             { top: "25%", left: "20%" },
@@ -208,7 +232,7 @@ function Map() {
               type="button"
               className={`map-marker ${selectedId === loc._id ? "selected" : ""}`}
               style={positions[index]}
-              onClick={() => setSelectedId(loc._id)}
+              onClick={() => navigate(`/locations/${loc._id}`)}
               aria-label={`Select ${loc.name}`}
             >
               📍
@@ -216,7 +240,6 @@ function Map() {
           );
         })}
 
-        {/* "Mock map" label */}
         <div
           className="map-area"
           aria-label="Map showing nearby relief locations"
@@ -262,10 +285,31 @@ function Map() {
               <div className="map-location-info">
                 <div className="map-location-name">{loc.name}</div>
                 <div className="map-location-address">{loc.address}</div>
+                {/* in-need: show available spots */}
+                {userType === "in-need" && loc.capacity !== null && (
+                  <div className="map-location-capacity">
+                    {loc.capacity === 0
+                      ? "⚠️ Full"
+                      : `${loc.capacity} spots available`}
+                  </div>
+                )}
               </div>
-              <span className={`badge ${getStatusClass(loc.status)}`}>
-                {loc.status}
-              </span>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  alignItems: "flex-end",
+                }}
+              >
+                <span className={`badge ${getStatusClass(loc.status)}`}>
+                  {loc.status}
+                </span>
+                {/* helper: show needs supplies badge */}
+                {userType === "helper" && loc.needsSupplies && (
+                  <span className="badge badge-limited">🙏 Needs supplies</span>
+                )}
+              </div>
             </button>
           ))}
         </div>

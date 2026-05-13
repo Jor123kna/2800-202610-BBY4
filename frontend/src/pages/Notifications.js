@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PageHint, {hints} from '../components/PageHint';
 import { useAuth } from '../context/AuthContext';
 
 const MOCK_MY_POSTS_NOTIFS = [
@@ -58,6 +59,8 @@ function Notifications() {
     const navigate = useNavigate();
     const { userData, authLoading } = useAuth();
 
+    const [showHint, setShowHint] = useState(true);
+
     const [activeTab, setActiveTab] = useState('my-posts');
 
     const formatDate = (dateString) => {
@@ -111,6 +114,13 @@ function Notifications() {
 
     return (
         <div className="notifications-page">
+            {/* Page Hint */}
+            {showHint && userData?.firstTimeMode && (
+                <PageHint
+                    message={hints['notifications']}
+                    onClose={() => setShowHint(false)}
+                />
+            )}
             <h1 className="notifications-title">Notifications</h1>
 
             {/* Tabs */}

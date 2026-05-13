@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 import MapComponent from "../components/MapComponent";
-import PageHint from "../components/PageHint";
+import PageHint, {hints} from "../components/PageHint";
 
 function Map() {
   const [locations, setLocations] = useState([]);
@@ -158,7 +158,7 @@ function Map() {
       {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (
         <PageHint
-          message="Tap + to create a post. Filter by In Need or To Help!"
+          message={hints['Map']}
           onClose={() => setShowHint(false)}
         />
       )}

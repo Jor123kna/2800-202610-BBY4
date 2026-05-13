@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import PageHint from '../components/PageHint';
+import PageHint, {hints} from '../components/PageHint';
 
 
 function Info() {
@@ -45,7 +45,7 @@ function Info() {
       {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (
         <PageHint
-          message="Tap + to create a post. Filter by In Need or To Help!"
+          message={hints['Info']}
           onClose={() => setShowHint(false)}
         />
       )}

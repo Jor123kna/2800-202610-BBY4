@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import PageHint, {hints} from '../components/PageHint';
+import { useAuth } from '../context/AuthContext';
 
 function DisasterDetail() {
   const { disasterId } = useParams();
   const navigate = useNavigate();
+  const { userData } = useAuth();
+  const [showHint, setShowHint] = useState(true);
+
   const [activeTab, setActiveTab] = useState('overview');
-  
+
   const disasterData = {
     flood: {
       icon: '🌊',
@@ -176,6 +181,13 @@ function DisasterDetail() {
       >
         ‹ Back to guides
       </button>
+      {/* Page Hint */}
+      {showHint && userData?.firstTimeMode && (
+        <PageHint
+          message={hints['DisasterDetails']}
+          onClose={() => setShowHint(false)}
+        />
+      )}
 
       {/* Disaster header */}
       <div className="disaster-detail-header">

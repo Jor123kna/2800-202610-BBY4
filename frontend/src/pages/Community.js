@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
 import { useAuth } from '../context/AuthContext';
 import PostCard from '../components/PostCard';
-import PageHint from '../components/PageHint';
+import PageHint, {hints} from '../components/PageHint';
 
 
 function Community() {
@@ -117,7 +117,7 @@ function Community() {
             {/* Page Hint */}
             {showHint && userData?.firstTimeMode && (
                 <PageHint
-                    message="Tap + to create a post. Filter by In Need or To Help!"
+                    message={hints['Community']}
                     onClose={() => setShowHint(false)}
                 />
             )}

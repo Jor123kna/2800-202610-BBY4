@@ -1,66 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
 import { useAuth } from '../context/AuthContext';
-
-const MOCK_REPLIES = [
-    {
-        _id: 'r1',
-        author: { firstName: 'Mike', lastName: 'Johnson' },
-        content: 'I think I saw someone matching that description near Robson Square about an hour ago. Walking east.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-        isAuthor: false
-    },
-    {
-        _id: 'r2',
-        author: { firstName: 'Jorja', lastName: 'Knaus' },
-        content: 'Thank you so much! I will head there right now. Please keep an eye out 🙏',
-        createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-        isAuthor: true
-    },
-    {
-        _id: 'r3',
-        author: { firstName: 'Anna', lastName: 'Lee' },
-        content: 'I am in the area too. Will help look. What was she wearing?',
-        createdAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
-        isAuthor: false
-    },
-    {
-        _id: 'r4',
-        author: { firstName: 'David', lastName: 'Park' },
-        content: 'Just checked Granville St — no sign of her there. Heading west now.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
-        isAuthor: false
-    },
-    {
-        _id: 'r5',
-        author: { firstName: 'Sarah', lastName: 'Kim' },
-        content: 'I work at the coffee shop on Davie. I will keep an eye on the street.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 18).toISOString(),
-        isAuthor: false
-    },
-    {
-        _id: 'r6',
-        author: { firstName: 'Ahmad', lastName: 'Khalil' },
-        content: 'Have you contacted the police yet? They can help coordinate the search faster.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-        isAuthor: false
-    },
-    {
-        _id: 'r7',
-        author: { firstName: 'Jorja', lastName: 'Knaus' },
-        content: 'Yes, called them already. They are sending an officer over now.',
-        createdAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-        isAuthor: true
-    },
-    {
-        _id: 'r8',
-        author: { firstName: 'Emily', lastName: 'Chen' },
-        content: 'Praying for you. Please update us when you find her 💚',
-        createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-        isAuthor: false
-    }
-];
 
 const REPLIES_PER_PAGE = 5;
 
@@ -69,32 +10,44 @@ function PostDetail() {
     const navigate = useNavigate();
     const { userData } = useAuth();
 
+    const replyListEndRef = useRef(null);
+
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     const [replies, setReplies] = useState([]);
+    const [repliesLoading, setRepliesLoading] = useState(true);
     const [visibleCount, setVisibleCount] = useState(REPLIES_PER_PAGE);
 
+    // Reply input state
     const [replyText, setReplyText] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
+    // Track which reply is currently being deleted
+    const [deletingId, setDeletingId] = useState(null);
+
+    // Fetch single post + replies in parallel
     useEffect(() => {
-        const fetchPost = async () => {
+        const fetchPostAndReplies = async () => {
             try {
-                const response = await fetch(`${API_URL}/posts/${id}`, {
-                    credentials: 'include'
-                });
+                const [postRes, repliesRes] = await Promise.all([
+                    fetch(`${API_URL}/posts/${id}`, { credentials: 'include' }),
+                    fetch(`${API_URL}/replies/post/${id}`, { credentials: 'include' })
+                ]);
 
-                const data = await response.json();
+                const postData = await postRes.json();
 
-                if (response.ok) {
-                    setPost(data.post);
-                    // load mock replies for now
-                    // replace with fetch when backend ready
-                    setReplies(MOCK_REPLIES);
+                if (postRes.ok) {
+                    setPost(postData.post);
                 } else {
                     setError('Post not found');
+                    return;
+                }
+
+                if (repliesRes.ok) {
+                    const repliesData = await repliesRes.json();
+                    setReplies(repliesData.replies || []);
                 }
 
             } catch (err) {
@@ -102,10 +55,11 @@ function PostDetail() {
                 setError('Something went wrong loading this post');
             } finally {
                 setLoading(false);
+                setRepliesLoading(false);
             }
         };
 
-        fetchPost();
+        fetchPostAndReplies();
     }, [id]);
 
     const formatDate = (dateString) => {
@@ -133,6 +87,7 @@ function PostDetail() {
         setVisibleCount((prev) => prev + REPLIES_PER_PAGE);
     };
 
+    // Submit reply to backend
     const handleSubmitReply = async (e) => {
         e.preventDefault();
 
@@ -141,24 +96,74 @@ function PostDetail() {
 
         setSubmitting(true);
 
-        // replace with POST request to backend
-        const newReply = {
-            _id: `temp-${Date.now()}`,
-            author: {
-                firstName: userData?.firstName || 'You',
-                lastName: userData?.lastName || ''
-            },
-            content: trimmed,
-            createdAt: new Date().toISOString(),
-            isAuthor: userData?._id === post.author?._id
-        };
+        try {
+            const response = await fetch(`${API_URL}/replies`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    postId: id,
+                    content: trimmed
+                })
+            });
 
-        setReplies((prev) => [...prev, newReply]);
+            const data = await response.json();
 
-        setVisibleCount((prev) => Math.max(prev, replies.length + 1));
+            if (response.ok) {
+                const newReplyCount = replies.length + 1;
+                setReplies((prev) => [...prev, data.reply]);
+                setVisibleCount((prev) => Math.max(prev, newReplyCount));
 
-        setReplyText('');
-        setSubmitting(false);
+                setReplyText('');
+
+                setTimeout(() => {
+                    replyListEndRef.current?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'end'
+                    });
+                }, 100);
+            } else {
+                console.error('Failed to send reply:', data.message);
+                alert(data.message || 'Failed to send reply');
+            }
+
+        } catch (err) {
+            console.error('Error sending reply:', err);
+            alert('Could not send reply. Please try again.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // Delete a reply
+    const handleDeleteReply = async (replyId) => {
+        // Confirm before deleting
+        if (!window.confirm('Delete this reply? This cannot be undone.')) {
+            return;
+        }
+
+        setDeletingId(replyId);
+
+        try {
+            const response = await fetch(`${API_URL}/replies/${replyId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setReplies((prev) => prev.filter((r) => r._id !== replyId));
+            } else {
+                alert(data.message || 'Failed to delete reply');
+            }
+
+        } catch (err) {
+            console.error('Error deleting reply:', err);
+            alert('Could not delete reply. Please try again.');
+        } finally {
+            setDeletingId(null);
+        }
     };
 
     const handleKeyDown = (e) => {
@@ -168,6 +173,7 @@ function PostDetail() {
         }
     };
 
+    // Loading state
     if (loading) {
         return (
             <div className="post-detail-page">
@@ -178,6 +184,7 @@ function PostDetail() {
         );
     }
 
+    // Error state
     if (error || !post) {
         return (
             <div className="post-detail-page">
@@ -204,11 +211,12 @@ function PostDetail() {
     const hasMore = visibleCount < replies.length;
     const remainingCount = replies.length - visibleCount;
 
+    const currentUserId = userData?.id;
+    const postAuthorId = post.author?._id;
+
     return (
         <>
-            {/* add bottom padding */}
             <div className="post-detail-page post-detail-page-with-input">
-                {/* Back button */}
                 <button
                     onClick={() => navigate('/community')}
                     className="btn-back"
@@ -255,37 +263,63 @@ function PostDetail() {
                         💬 Replies ({replies.length})
                     </h3>
 
-                    {replies.length === 0 ? (
+                    {repliesLoading ? (
+                        <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
+                            Loading replies...
+                        </p>
+                    ) : replies.length === 0 ? (
                         <div className="reply-empty">
                             <p>No replies yet · Be the first to respond</p>
                         </div>
                     ) : (
                         <>
                             <div className="reply-list">
-                                {visibleReplies.map((reply) => (
-                                    <div
-                                        key={reply._id}
-                                        className={`reply-card ${reply.isAuthor ? 'reply-card-author' : ''}`}
-                                    >
-                                        <div className="reply-avatar" aria-hidden="true">
-                                            {getInitials(reply.author?.firstName, reply.author?.lastName)}
-                                        </div>
-                                        <div className="reply-body">
-                                            <div className="reply-header">
-                                                <span className="reply-author-name">
-                                                    {reply.author?.firstName} {reply.author?.lastName}
-                                                </span>
-                                                {reply.isAuthor && (
-                                                    <span className="reply-author-badge">Author</span>
-                                                )}
-                                                <span className="reply-time">
-                                                    {formatDate(reply.createdAt)}
-                                                </span>
+                                {visibleReplies.map((reply) => {
+                                    const isPostAuthor = reply.author?._id === postAuthorId;
+                                    const isMyReply = reply.author?._id === currentUserId;
+                                    const isDeleting = deletingId === reply._id;
+
+                                    return (
+                                        <div
+                                            key={reply._id}
+                                            className={`reply-card ${isPostAuthor ? 'reply-card-author' : ''}`}
+                                        >
+                                            <div className="reply-avatar" aria-hidden="true">
+                                                {getInitials(reply.author?.firstName, reply.author?.lastName)}
                                             </div>
-                                            <p className="reply-content">{reply.content}</p>
+                                            <div className="reply-body">
+                                                <div className="reply-header">
+                                                    <span className="reply-author-name">
+                                                        {reply.author?.firstName} {reply.author?.lastName}
+                                                    </span>
+                                                    {isPostAuthor && (
+                                                        <span className="reply-author-badge">Author</span>
+                                                    )}
+                                                    <span className="reply-time">
+                                                        {formatDate(reply.createdAt)}
+                                                    </span>
+                                                </div>
+                                                <p className="reply-content">{reply.content}</p>
+
+                                                {/* Delete button */}
+                                                {isMyReply && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDeleteReply(reply._id)}
+                                                        disabled={isDeleting}
+                                                        className="btn-reply-delete"
+                                                        aria-label="Delete this reply"
+                                                    >
+                                                        {isDeleting ? 'Deleting...' : 'Delete'}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
+
+                                {/* invisible anchor for auto-scroll after sending a reply */}
+                                <div ref={replyListEndRef} aria-hidden="true" />
                             </div>
 
                             {hasMore && (
@@ -302,7 +336,7 @@ function PostDetail() {
                 </div>
             </div>
 
-            {/* reply input bar */}
+            {/* Fixed reply input bar */}
             {userData ? (
                 <form className="reply-input-bar" onSubmit={handleSubmitReply}>
                     <textarea
@@ -313,6 +347,7 @@ function PostDetail() {
                         onKeyDown={handleKeyDown}
                         rows={1}
                         maxLength={500}
+                        disabled={submitting}
                         aria-label="Reply text"
                     />
                     <button
@@ -321,7 +356,7 @@ function PostDetail() {
                         disabled={!replyText.trim() || submitting}
                         aria-label="Send reply"
                     >
-                        Send
+                        {submitting ? '...' : 'Send'}
                     </button>
                 </form>
             ) : (

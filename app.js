@@ -45,10 +45,11 @@ app.use(
 );
 
 // API routes
-app.use("/users", require("./routes/userRoutes"));
-app.use("/locations", require("./routes/locationRoutes"));
-app.use("/posts", require("./routes/postRoutes"));
-app.use("/walkthrough", require("./routes/walkthroughRoutes"));
+app.use('/users', require('./routes/userRoutes'));
+app.use('/locations', require('./routes/locationRoutes'));
+app.use('/posts', require('./routes/postRoutes'));
+app.use('/replies', require('./routes/replyRoutes'));
+app.use('/walkthrough', require('./routes/walkthroughRoutes'));
 
 // Schema
 const Location = require("./models/locations");

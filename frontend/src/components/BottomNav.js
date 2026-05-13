@@ -7,7 +7,7 @@ function BottomNav() {
 
   const tabs = [
     { to: '/community', label: 'Community', icon: '💬', tourClass: `nav-community` },
-    { to: '/post', label: 'Post', icon: '✏️', tourClass: `nav-post` },
+    { to: '/notifications', label: 'Notifications', icon: '🔔', tourClass: `nav-notifications` },
     { to: '/map', label: 'Map', icon: '📍', tourClass: `nav-map` },
     { to: '/info', label: 'Info', icon: '📖', tourClass: `nav-info` },
     { to: '/profile', label: 'Profile', icon: '👤', tourClass: `nav-profile` },

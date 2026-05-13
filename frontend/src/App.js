@@ -30,6 +30,7 @@ function App() {
             <Route path="/community" element={<Community />} />
             <Route path="/post" element={<Post />} />
             <Route path="/post/:id" element={<PostDetail />} />
+            <Route path="/notifications" element={<Notifications />} />
             <Route path="/map" element={<Map />} />
             <Route path="/info" element={<Info />} />
             <Route path="/info/:disasterId" element={<DisasterDetail />} />

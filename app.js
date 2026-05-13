@@ -44,6 +44,7 @@ app.use(session({
 app.use('/users', require('./routes/userRoutes'));
 app.use('/locations', require('./routes/locationRoutes'));
 app.use('/posts', require('./routes/postRoutes'));
+app.use('/replies', require('./routes/replyRoutes'));
 app.use('/walkthrough', require('./routes/walkthroughRoutes'));
 
 // Schema

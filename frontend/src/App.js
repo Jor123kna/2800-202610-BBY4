@@ -34,7 +34,7 @@ function App() {
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/map" element={<Map />} />
             <Route path="/info" element={<Info />} />
-            <Route path="/info/:disasterId" element={<DisasterDetail />} />
+            <Route path="/disaster/:disasterId" element={<DisasterDetail />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/locations/:id" element={<LocationDetail />} />
           </Route>

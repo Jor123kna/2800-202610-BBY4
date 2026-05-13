@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { API_URL } from '../config';
-import PageHint from '../components/PageHint';
-import { useAuth } from '../context/AuthContext';
-
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
+import PageHint from "../components/PageHint";
+import { useAuth } from "../context/AuthContext";
 
 function Post() {
   const navigate = useNavigate();
@@ -32,7 +31,7 @@ function Post() {
     setFormData({ ...formData, [name]: value });
 
     if (errors[name]) {
-      setErrors({ ...errors, [name]: '' });
+      setErrors({ ...errors, [name]: "" });
     }
   };
 
@@ -40,7 +39,7 @@ function Post() {
     setFormData({ ...formData, role });
 
     if (errors.role) {
-      setErrors({ ...errors, role: '' });
+      setErrors({ ...errors, role: "" });
     }
   };
 
@@ -48,17 +47,17 @@ function Post() {
     const newErrors = {};
 
     if (!formData.title.trim()) {
-      newErrors.title = 'Please enter a title';
+      newErrors.title = "Please enter a title";
     } else if (formData.title.length > TITLE_MAX) {
       newErrors.title = `Title must be ${TITLE_MAX} characters or less`;
     }
 
     if (!formData.role) {
-      newErrors.role = 'Please select a post type';
+      newErrors.role = "Please select a post type";
     }
 
     if (!formData.content.trim()) {
-      newErrors.content = 'Please add some details';
+      newErrors.content = "Please add some details";
     } else if (formData.content.length < CONTENT_MIN) {
       newErrors.content = `Details must be at least ${CONTENT_MIN} characters`;
     } else if (formData.content.length > CONTENT_MAX) {
@@ -78,7 +77,7 @@ function Post() {
     }
 
     setLoading(true);
-    setSubmitError('');
+    setSubmitError("");
 
 
     try {
@@ -101,19 +100,19 @@ function Post() {
 
       navigate(isEditing ? '/profile' : '/community');
     } catch (err) {
-      setSubmitError('Something went wrong. Please try again.');
+      setSubmitError("Something went wrong. Please try again.");
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    navigate('/community');
+    navigate("/community");
   };
 
   if (!userData && userData !== null) {
     return (
       <div className="page-padding">
-        <p style={{ color: 'var(--color-text-secondary)' }}>Loading...</p>
+        <p style={{ color: "var(--color-text-secondary)" }}>Loading...</p>
       </div>
     );
   }
@@ -121,15 +120,20 @@ function Post() {
   if (!userData) {
     return (
       <div className="page-padding">
-        <div style={{ textAlign: 'center', marginBottom: 'var(--space-6)' }}>
-          <h1 style={{ marginBottom: 'var(--space-2)' }}>Create a post</h1>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
+        <div style={{ textAlign: "center", marginBottom: "var(--space-6)" }}>
+          <h1 style={{ marginBottom: "var(--space-2)" }}>Create a post</h1>
+          <p
+            style={{
+              color: "var(--color-text-secondary)",
+              fontSize: "var(--text-sm)",
+            }}
+          >
             You must be logged in to create a post
           </p>
         </div>
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: "center" }}>
           <button
-            onClick={() => navigate('/signin')}
+            onClick={() => navigate("/signin")}
             className="btn btn-primary"
           >
             Sign in
@@ -141,7 +145,6 @@ function Post() {
 
   return (
     <div className="page-padding">
-
       {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (
         <PageHint
@@ -168,8 +171,8 @@ function Post() {
             value={`${userData.firstName} ${userData.lastName} (${userData.role})`}
             disabled
             style={{
-              backgroundColor: 'var(--color-surface-sunken)',
-              color: 'var(--color-text-secondary)',
+              backgroundColor: "var(--color-surface-sunken)",
+              color: "var(--color-text-secondary)",
             }}
           />
         </div>
@@ -184,11 +187,13 @@ function Post() {
             name="title"
             value={formData.title}
             onChange={handleChange}
-            className={`input ${errors.title ? 'input-error' : ''}`}
+            className={`input ${errors.title ? "input-error" : ""}`}
             placeholder="What's happening?"
             maxLength={TITLE_MAX}
           />
-          {errors.title && <span className="input-error-message">{errors.title}</span>}
+          {errors.title && (
+            <span className="input-error-message">{errors.title}</span>
+          )}
         </div>
 
         {/* Role Toggle (reused style from Sign Up) */}
@@ -197,27 +202,33 @@ function Post() {
           <div className="role-toggle">
             <button
               type="button"
-              className={`role-toggle-option ${formData.role === 'in-need' ? 'selected in-need' : ''}`}
-              onClick={() => handleRoleSelect('in-need')}
-              aria-pressed={formData.role === 'in-need'}
+              className={`role-toggle-option ${formData.role === "in-need" ? "selected in-need" : ""}`}
+              onClick={() => handleRoleSelect("in-need")}
+              aria-pressed={formData.role === "in-need"}
             >
-              <span className="role-toggle-icon" aria-hidden="true">🆘</span>
+              <span className="role-toggle-icon" aria-hidden="true">
+                🆘
+              </span>
               <span className="role-toggle-title">In Need</span>
               <span className="role-toggle-desc">Asking for help</span>
             </button>
 
             <button
               type="button"
-              className={`role-toggle-option ${formData.role === 'helper' ? 'selected helper' : ''}`}
-              onClick={() => handleRoleSelect('helper')}
-              aria-pressed={formData.role === 'helper'}
+              className={`role-toggle-option ${formData.role === "helper" ? "selected helper" : ""}`}
+              onClick={() => handleRoleSelect("helper")}
+              aria-pressed={formData.role === "helper"}
             >
-              <span className="role-toggle-icon" aria-hidden="true">🤝</span>
+              <span className="role-toggle-icon" aria-hidden="true">
+                🤝
+              </span>
               <span className="role-toggle-title">To Help</span>
               <span className="role-toggle-desc">Offering support</span>
             </button>
           </div>
-          {errors.role && <span className="input-error-message">{errors.role}</span>}
+          {errors.role && (
+            <span className="input-error-message">{errors.role}</span>
+          )}
         </div>
 
         {/* Content textarea */}
@@ -230,7 +241,7 @@ function Post() {
             name="content"
             value={formData.content}
             onChange={handleChange}
-            className={`input textarea ${errors.content ? 'input-error' : ''}`}
+            className={`input textarea ${errors.content ? "input-error" : ""}`}
             placeholder="Provide more information so others can help..."
             rows={6}
             maxLength={CONTENT_MAX}
@@ -265,7 +276,10 @@ function Post() {
 
         {/* Submit error message */}
         {submitError && (
-          <div className="alert alert-emergency" style={{ marginBottom: 'var(--space-4)' }}>
+          <div
+            className="alert alert-emergency"
+            style={{ marginBottom: "var(--space-4)" }}
+          >
             {submitError}
           </div>
         )}
@@ -275,23 +289,23 @@ function Post() {
           type="submit"
           className="btn btn-primary btn-block"
           disabled={loading}
-          style={{ marginTop: 'var(--space-4)' }}
+          style={{ marginTop: "var(--space-4)" }}
         >
           {loading ? 'Posting...' : (isEditing ? 'Update Post' : 'Post to community')}
         </button>
 
         {/* Cancel link */}
-        <div style={{ textAlign: 'center', marginTop: 'var(--space-4)' }}>
+        <div style={{ textAlign: "center", marginTop: "var(--space-4)" }}>
           <button
             type="button"
             onClick={handleCancel}
             style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--color-text-secondary)',
-              fontSize: 'var(--text-sm)',
-              cursor: 'pointer',
-              padding: 'var(--space-2)',
+              background: "transparent",
+              border: "none",
+              color: "var(--color-text-secondary)",
+              fontSize: "var(--text-sm)",
+              cursor: "pointer",
+              padding: "var(--space-2)",
             }}
           >
             Cancel

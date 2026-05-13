@@ -1,60 +1,97 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import PageHint from '../components/PageHint';
-
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import PageHint from "../components/PageHint";
 
 function Info() {
   const navigate = useNavigate();
   const { userData } = useAuth();
   const [showHint, setShowHint] = useState(true);
 
-  // Disaster guide data
+  // Disaster tabs
   const disasters = [
     {
-      id: 'flood',
-      name: 'Flood',
-      icon: '🌊',
-      description: 'Heavy rain, river overflow',
-      colorClass: 'flood',
+      id: "flood",
+      name: "Flood",
+      icon: "🌊",
+      description: "Heavy rain, river overflow",
+      colorClass: "flood",
     },
     {
-      id: 'earthquake',
-      name: 'Earthquake',
-      icon: '🌍',
-      description: 'Ground shaking, building damage',
-      colorClass: 'earthquake',
+      id: "earthquake",
+      name: "Earthquake",
+      icon: "🌍",
+      description: "Ground shaking, building damage",
+      colorClass: "earthquake",
     },
     {
-      id: 'wildfire',
-      name: 'Wildfire',
-      icon: '🔥',
-      description: 'Fast-spreading fire and smoke',
-      colorClass: 'wildfire',
+      id: "wildfire",
+      name: "Wildfire",
+      icon: "🔥",
+      description: "Fast-spreading fire and smoke",
+      colorClass: "wildfire",
+    },
+    {
+      id: "tsunami",
+      name: "Tsunami",
+      icon: "🌀",
+      description: "Coastal wave surge after earthquake",
+      colorClass: "tsunami",
+    },
+    {
+      id: "extreme-heat",
+      name: "Extreme Heat",
+      icon: "☀️",
+      description: "Dangerous heat waves and heatstroke",
+      colorClass: "extreme-heat",
+    },
+    {
+      id: "landslide",
+      name: "Landslide",
+      icon: "⛰️",
+      description: "Slope failure, mudslide, debris flow",
+      colorClass: "landslide",
+    },
+    {
+      id: "windstorm",
+      name: "Windstorm",
+      icon: "🌬️",
+      description: "High winds, downed trees and power lines",
+      colorClass: "windstorm",
+    },
+    {
+      id: "wildfire-smoke",
+      name: "Wildfire Smoke",
+      icon: "💨",
+      description: "Poor air quality from regional fires",
+      colorClass: "wildfire-smoke",
     },
   ];
 
-  // TODO: Disaster Detail page
   const handleDisasterClick = (disasterId) => {
     navigate(`/info/${disasterId}`);
   };
 
   return (
     <div className="page-padding">
-
       {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (
         <PageHint
-          message="Tap + to create a post. Filter by In Need or To Help!"
+          message="Tap a guide to learn what to do before, during, and after each disaster."
           onClose={() => setShowHint(false)}
         />
       )}
 
       {/* Page header */}
-      <div style={{ marginBottom: 'var(--space-6)' }}>
-        <h1 style={{ marginBottom: 'var(--space-2)' }}>Disaster Guides</h1>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
-          Be prepared for emergencies
+      <div style={{ marginBottom: "var(--space-6)" }}>
+        <h1 style={{ marginBottom: "var(--space-2)" }}>Disaster Guides</h1>
+        <p
+          style={{
+            color: "var(--color-text-secondary)",
+            fontSize: "var(--text-sm)",
+          }}
+        >
+          Be prepared for emergencies in the Lower Mainland
         </p>
       </div>
 
@@ -70,21 +107,32 @@ function Info() {
           >
             {/* Top row */}
             <div className="disaster-card-header">
-              <div className={`disaster-card-icon ${disaster.colorClass}`} aria-hidden="true">
+              <div
+                className={`disaster-card-icon ${disaster.colorClass}`}
+                aria-hidden="true"
+              >
                 {disaster.icon}
               </div>
               <div className="disaster-card-info">
                 <div className="disaster-card-name">{disaster.name}</div>
                 <div className="disaster-card-desc">{disaster.description}</div>
               </div>
-              <div className="disaster-card-arrow" aria-hidden="true">›</div>
+              <div className="disaster-card-arrow" aria-hidden="true">
+                ›
+              </div>
             </div>
 
             {/* Bottom row: stage tags */}
             <div className="disaster-card-tags">
-              <span className={`disaster-tag ${disaster.colorClass}`}>Before</span>
-              <span className={`disaster-tag ${disaster.colorClass}`}>During</span>
-              <span className={`disaster-tag ${disaster.colorClass}`}>After</span>
+              <span className={`disaster-tag ${disaster.colorClass}`}>
+                Before
+              </span>
+              <span className={`disaster-tag ${disaster.colorClass}`}>
+                During
+              </span>
+              <span className={`disaster-tag ${disaster.colorClass}`}>
+                After
+              </span>
             </div>
           </button>
         ))}

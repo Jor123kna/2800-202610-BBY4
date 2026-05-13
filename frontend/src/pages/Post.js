@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { API_URL } from '../config';
 import PageHint from '../components/PageHint';
 import { useAuth } from '../context/AuthContext';
@@ -7,17 +7,22 @@ import { useAuth } from '../context/AuthContext';
 
 function Post() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const editPost = location.state?.editPost;
+  const isEditing = Boolean(editPost);
   const { userData } = useAuth();
   const [showHint, setShowHint] = useState(true);
   const [formData, setFormData] = useState({
-    title: '',
-    role: '',
-    content: '',
-    neighbourhood: '',
+    title: editPost?.title || '',
+    content: editPost?.content || '',
+    neighbourhood: editPost?.neighbourhood || '',
+    role: editPost?.role || ''
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
+
   const TITLE_MAX = 100;
   const CONTENT_MAX = 500;
   const CONTENT_MIN = 10;
@@ -75,9 +80,12 @@ function Post() {
     setLoading(true);
     setSubmitError('');
 
+
     try {
-      const response = await fetch(`${API_URL}/posts`, {
-        method: 'POST',
+      const response = await fetch(
+       isEditing ? `${API_URL}/posts/${editPost._id}` : `${API_URL}/posts`, 
+        {
+        method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify(formData),
@@ -86,12 +94,12 @@ function Post() {
       const data = await response.json();
 
       if (!response.ok) {
-        setSubmitError(data.message || 'Failed to create post');
+        setSubmitError(data.message || (isEditing ? 'Failed to update post' : 'Failed to create post'));
         setLoading(false);
         return;
       }
 
-      navigate('/community');
+      navigate(isEditing ? '/profile' : '/community');
     } catch (err) {
       setSubmitError('Something went wrong. Please try again.');
       setLoading(false);
@@ -144,7 +152,7 @@ function Post() {
 
       {/* Page header */}
       <div style={{ marginBottom: 'var(--space-6)' }}>
-        <h1 style={{ marginBottom: 'var(--space-2)' }}>Create a post</h1>
+        <h1 style={{ marginBottom: 'var(--space-2)' }}>{isEditing ? 'Edit a Post' : 'Create a post'}</h1>
         <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
           Share with your community
         </p>
@@ -269,7 +277,7 @@ function Post() {
           disabled={loading}
           style={{ marginTop: 'var(--space-4)' }}
         >
-          {loading ? 'Posting...' : 'Post to community'}
+          {loading ? 'Posting...' : (isEditing ? 'Update Post' : 'Post to community')}
         </button>
 
         {/* Cancel link */}

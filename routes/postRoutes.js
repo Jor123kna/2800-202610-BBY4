@@ -65,6 +65,7 @@ router.delete('/:id', isLoggedIn, async (req, res) => {
     }
 });
 
+// GET /posts/mine - get posts created by the logged-in user
 router.get('/mine', isLoggedIn, async (req, res) => {
   try {
     const posts = await Post.find({ author: req.session.user.id })
@@ -84,6 +85,7 @@ router.get('/mine', isLoggedIn, async (req, res) => {
   }
 });
 
+// GET /posts/:id - get a single post by ID
 router.get('/:id', async (req, res) => {
     try {
         const post = await Post.findById(req.params.id)
@@ -101,6 +103,41 @@ router.get('/:id', async (req, res) => {
     } catch (err) {
         res.status(500).json({
             message: 'Error getting post',
+            error: err.message
+        });
+    }
+});
+
+// PUT /posts/:id - update a post
+router.put('/:id', isLoggedIn, async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        // only author or admin can edit
+        if (post.author.toString() !== req.session.user.id && 
+            req.session.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+
+        post.title = req.body.title || post.title;
+        post.content = req.body.content || post.content;
+        post.neighbourhood = req.body.neighbourhood || post.neighbourhood;
+        post.role = req.body.role || post.role;
+
+        const updatedPost = await post.save();
+
+        res.status(200).json({
+            message: 'Post updated',
+            post: updatedPost
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            message: 'Error updating post',
             error: err.message
         });
     }

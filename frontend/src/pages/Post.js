@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { API_URL } from "../config";
 import PageHint from "../components/PageHint";
 import { useAuth } from "../context/AuthContext";
@@ -7,7 +7,6 @@ import { useAuth } from "../context/AuthContext";
 function Post() {
   const navigate = useNavigate();
   const location = useLocation();
-
   const editPost = location.state?.editPost;
   const isEditing = Boolean(editPost);
   const { userData } = useAuth();

@@ -15,6 +15,7 @@ import Info from "./pages/Info";
 import DisasterDetail from "./pages/DisasterDetail";
 import Profile from "./pages/Profile";
 import LocationDetail from "./pages/LocationDetail";
+import Notifications from "./pages/Notifications";
 import { AuthProvider } from "./context/AuthContext";
 
 function App() {

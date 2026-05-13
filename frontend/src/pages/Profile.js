@@ -335,6 +335,12 @@ function Profile() {
                   >
                     Delete post
                   </button>
+                  <button
+                    className="btn-link-danger"
+                    onClick={() => navigate('/post', { state: { editPost: post } })
+                    }                  >
+                    Edit post
+                  </button>
                 </div>
               ))}
 

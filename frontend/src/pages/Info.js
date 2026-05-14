@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import PageHint from "../components/PageHint";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import PageHint, {hints} from '../components/PageHint';
 import DisasterCard from "../components/DisasterCard";
 import { disasters } from "../data/disasterData";
 
@@ -18,7 +18,7 @@ function Info() {
     <div className="page-padding">
       {showHint && userData?.firstTimeMode && (
         <PageHint
-          message="Tap a guide to learn what to do before, during, and after each disaster."
+          message={hints['Info']}
           onClose={() => setShowHint(false)}
         />
       )}

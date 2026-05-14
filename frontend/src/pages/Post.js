@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { API_URL } from "../config";
-import PageHint from "../components/PageHint";
+import PageHint, {hints} from "../components/PageHint";
 import { useAuth } from "../context/AuthContext";
 
 function Post() {
@@ -147,7 +147,7 @@ function Post() {
       {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (
         <PageHint
-          message="Tap + to create a post. Filter by In Need or To Help!"
+          message={hints['Post']}
           onClose={() => setShowHint(false)}
         />
       )}

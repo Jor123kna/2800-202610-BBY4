@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
+import PageHint, {hints} from '../components/PageHint';
 import { useAuth } from '../context/AuthContext';
 
 const REPLIES_PER_PAGE = 5;
@@ -15,6 +16,8 @@ function PostDetail() {
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [showHint, setShowHint] = useState(true);
+    
 
     const [replies, setReplies] = useState([]);
     const [repliesLoading, setRepliesLoading] = useState(true);
@@ -224,6 +227,13 @@ function PostDetail() {
                 >
                     ← Back to community
                 </button>
+                {/* Page Hint */}
+                {showHint && userData?.firstTimeMode && (
+                    <PageHint
+                        message={hints['PostDetails']}
+                        onClose={() => setShowHint(false)}
+                    />
+                )}
 
                 {/* Original post card */}
                 <article className={`post-detail-card post-detail-card-${post.role}`}>

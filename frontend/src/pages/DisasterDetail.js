@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import PageHint, {hints} from '../components/PageHint';
+import { useAuth } from '../context/AuthContext';
 import { disasterDetails } from "../data/disasterData";
 import {
   DisasterDetailHeader,
@@ -11,6 +13,10 @@ import {
 function DisasterDetail() {
   const { disasterId } = useParams();
   const navigate = useNavigate();
+  
+   const { userData } = useAuth();
+  const [showHint, setShowHint] = useState(true);
+  
   const [activeTab, setActiveTab] = useState("overview");
 
   const disaster = disasterDetails[disasterId];
@@ -40,6 +46,13 @@ function DisasterDetail() {
 
   return (
     <div className="page-padding">
+     {/* Page Hint */}
+      {showHint && userData?.firstTimeMode && (
+        <PageHint
+          message={hints['DisasterDetails']}
+          onClose={() => setShowHint(false)}
+        />
+      )}
       <DisasterDetailHeader disaster={disaster} onBack={() => navigate("/info")} />
       <DisasterDetailTabs activeTab={activeTab} setActiveTab={setActiveTab} />
       {activeTab === "overview" ? (

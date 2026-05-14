@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
-import PageHint, {hints} from '../components/PageHint';
+import PageHint, { hints } from '../components/PageHint';
 import { useAuth } from '../context/AuthContext';
 
 const REPLIES_PER_PAGE = 5;
@@ -17,7 +17,7 @@ function PostDetail() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showHint, setShowHint] = useState(true);
-    
+
 
     const [replies, setReplies] = useState([]);
     const [repliesLoading, setRepliesLoading] = useState(true);
@@ -29,6 +29,10 @@ function PostDetail() {
 
     // Track which reply is currently being deleted
     const [deletingId, setDeletingId] = useState(null);
+
+    // Bookmark state
+    const [isSaved, setIsSaved] = useState(false);
+    const [savingBookmark, setSavingBookmark] = useState(false);
 
     // Fetch single post + replies in parallel
     useEffect(() => {
@@ -65,6 +69,32 @@ function PostDetail() {
         fetchPostAndReplies();
     }, [id]);
 
+    // Check if user has already bookmarked this post
+    useEffect(() => {
+        if (!id || !userData) return;
+
+        const checkIfSaved = async () => {
+            try {
+                const response = await fetch(`${API_URL}/users/saved`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const saved = (data.savedPosts || []).some(
+                        (p) => p._id === id
+                    );
+                    setIsSaved(saved);
+                }
+            } catch (err) {
+                console.error('Error checking bookmark status:', err);
+            }
+        };
+
+        checkIfSaved();
+    }, [id, userData]);
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -88,6 +118,36 @@ function PostDetail() {
 
     const handleLoadMore = () => {
         setVisibleCount((prev) => prev + REPLIES_PER_PAGE);
+    };
+
+    // Toggle bookmark on/off
+    const handleToggleBookmark = async () => {
+        if (!userData) {
+            navigate('/signin');
+            return;
+        }
+        if (savingBookmark) return;
+
+        setSavingBookmark(true);
+
+        try {
+            const method = isSaved ? 'DELETE' : 'POST';
+            const response = await fetch(`${API_URL}/users/saved/${id}`, {
+                method,
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                setIsSaved(!isSaved);
+            } else {
+                const data = await response.json();
+                console.error('Bookmark toggle failed:', data.message);
+            }
+        } catch (err) {
+            console.error('Error toggling bookmark:', err);
+        } finally {
+            setSavingBookmark(false);
+        }
     };
 
     // Submit reply to backend
@@ -140,7 +200,6 @@ function PostDetail() {
 
     // Delete a reply
     const handleDeleteReply = async (replyId) => {
-        // Confirm before deleting
         if (!window.confirm('Delete this reply? This cannot be undone.')) {
             return;
         }
@@ -261,6 +320,18 @@ function PostDetail() {
                                     {formatDate(post.createdAt)}
                                 </span>
                             </div>
+
+                            {/* Bookmark button */}
+                            <button
+                                type="button"
+                                className={`post-bookmark-btn ${isSaved ? 'saved' : ''}`}
+                                onClick={handleToggleBookmark}
+                                disabled={savingBookmark}
+                                aria-label={isSaved ? 'Remove bookmark' : 'Save post'}
+                                title={isSaved ? 'Saved' : 'Save for later'}
+                            >
+                                {isSaved ? '🔖' : '🏷️'}
+                            </button>
                         </div>
 
                         <p className="post-detail-content">{post.content}</p>
@@ -328,7 +399,6 @@ function PostDetail() {
                                     );
                                 })}
 
-                                {/* invisible anchor for auto-scroll after sending a reply */}
                                 <div ref={replyListEndRef} aria-hidden="true" />
                             </div>
 

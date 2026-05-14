@@ -230,4 +230,125 @@ router.put('/update', async (req, res) => {
     }
 });
 
+// Bookmark / Saved posts feature
+// GET /users/saved - list all posts the user has bookmarked
+router.get('/saved', async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.status(401).json({
+                message: 'Not logged in'
+            });
+        }
+
+        const user = await User.findById(req.session.user.id).populate({
+            path: 'savedPosts',
+            populate: {
+                path: 'author',
+                select: 'firstName lastName role'
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found'
+            });
+        }
+
+        res.json({
+            savedPosts: user.savedPosts || []
+        });
+
+    } catch (err) {
+        console.error('Get saved posts error:', err);
+        res.status(500).json({
+            message: 'Error getting saved posts',
+            error: err.message
+        });
+    }
+});
+
+
+// POST /users/saved/:postId - bookmark a post
+router.post('/saved/:postId', async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.status(401).json({
+                message: 'Not logged in'
+            });
+        }
+
+        const user = await User.findById(req.session.user.id);
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found'
+            });
+        }
+
+        const postId = req.params.postId;
+
+        // Skip if already saved
+        const alreadySaved = user.savedPosts.some(
+            (id) => id.toString() === postId
+        );
+
+        if (!alreadySaved) {
+            user.savedPosts.push(postId);
+            await user.save();
+        }
+
+        res.json({
+            message: 'Post saved',
+            saved: true
+        });
+
+    } catch (err) {
+        console.error('Save post error:', err);
+        res.status(500).json({
+            message: 'Error saving post',
+            error: err.message
+        });
+    }
+});
+
+
+// DELETE /users/saved/:postId - remove a bookmark
+router.delete('/saved/:postId', async (req, res) => {
+    try {
+        if (!req.session.user) {
+            return res.status(401).json({
+                message: 'Not logged in'
+            });
+        }
+
+        const user = await User.findById(req.session.user.id);
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found'
+            });
+        }
+
+        const postId = req.params.postId;
+
+        user.savedPosts = user.savedPosts.filter(
+            (id) => id.toString() !== postId
+        );
+
+        await user.save();
+
+        res.json({
+            message: 'Post unsaved',
+            saved: false
+        });
+
+    } catch (err) {
+        console.error('Unsave post error:', err);
+        res.status(500).json({
+            message: 'Error removing bookmark',
+            error: err.message
+        });
+    }
+});
+
 module.exports = router;

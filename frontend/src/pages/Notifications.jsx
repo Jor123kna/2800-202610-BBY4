@@ -1,67 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageHint, {hints} from '../components/PageHint';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../config';
 
-const MOCK_MY_POSTS_NOTIFS = [
-    {
-        postId: 'p1',
-        postTitle: 'Need water in West End',
-        postRole: 'in-need',
-        replies: [
-            {
-                _id: 'r1',
-                author: { firstName: 'Mike', lastName: 'Johnson' },
-                content: 'I have 6 bottles. Can drop off in 30 min.',
-                createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString()
-            },
-            {
-                _id: 'r2',
-                author: { firstName: 'Anna', lastName: 'Lee' },
-                content: "I'm nearby too if you need more.",
-                createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString()
-            }
-        ]
-    },
-    {
-        postId: 'p2',
-        postTitle: 'Free meal share — Mt Pleasant',
-        postRole: 'helper',
-        replies: [
-            {
-                _id: 'r3',
-                author: { firstName: 'David', lastName: 'Park' },
-                content: 'Coming by at 6, thanks!',
-                createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString()
-            }
-        ]
-    }
-];
-
-// replies on posts you replied to
-const MOCK_MY_REPLIES_NOTIFS = [
-    {
-        postId: 'p3',
-        postTitle: 'Lost cat near Stanley Park',
-        postRole: 'in-need',
-        replies: [
-            {
-                _id: 'r4',
-                author: { firstName: 'Emily', lastName: 'Chen' },
-                content: 'Was it grey with white paws?',
-                createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString()
-            }
-        ]
-    }
-];
 
 function Notifications() {
     const navigate = useNavigate();
     const { userData, authLoading } = useAuth();
 
     const [showHint, setShowHint] = useState(true);
-
     const [activeTab, setActiveTab] = useState('my-posts');
+
+    const [myPostsNotifs, setMyPostsNotifs] = useState([]);
+    const [myRepliesNotifs, setMyRepliesNotifs] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+
+    useEffect(() => {
+        localStorage.setItem('notifsLastSeen', Date.now().toString());
+
+        const fetchNotifications = async () => {
+            try {
+                const response = await fetch(`${API_URL}/replies/notifications`, {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    setMyPostsNotifs(data.myPosts || []);
+
+                    const merged = mergeReplyGroupsByPost(data.myReplies || []);
+
+                    setMyRepliesNotifs(merged);
+                } else {
+                    console.error(data.message || 'Failed to load notifications');
+                }
+
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (userData) {
+            fetchNotifications();
+        } else if (!authLoading) {
+            setLoading(false);
+        }
+    }, [userData, authLoading]);
+
+    const mergeReplyGroupsByPost = (groups) => {
+        const grouped = {};
+
+        groups.forEach((group) => {
+            const key = group.postId.toString();
+
+            if (!grouped[key]) {
+                grouped[key] = {
+                    postId: group.postId,
+                    postTitle: group.postTitle,
+                    postRole: group.postRole,
+                    replies: []
+                };
+            }
+
+            grouped[key].replies.push(...group.replies);
+        });
+
+        return Object.values(grouped);
+    };
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -104,20 +115,16 @@ function Notifications() {
         );
     }
 
-    const currentList = activeTab === 'my-posts'
-        ? MOCK_MY_POSTS_NOTIFS
-        : MOCK_MY_REPLIES_NOTIFS;
-
-    // Count total replies across all groups (for tab badges)
-    const myPostsCount = MOCK_MY_POSTS_NOTIFS.reduce((sum, g) => sum + g.replies.length, 0);
-    const myRepliesCount = MOCK_MY_REPLIES_NOTIFS.reduce((sum, g) => sum + g.replies.length, 0);
+    const currentList = activeTab === 'my-posts' ? myPostsNotifs : myRepliesNotifs;
+    const myPostsCount = myPostsNotifs.reduce((sum, group) => sum + group.replies.length, 0);
+    const myRepliesCount = myRepliesNotifs.reduce((sum, group) => sum + group.replies.length, 0);
 
     return (
         <div className="notifications-page">
             {/* Page Hint */}
             {showHint && userData?.firstTimeMode && (
                 <PageHint
-                    message={hints['notifications']}
+                    message={hints['Notifications']}
                     onClose={() => setShowHint(false)}
                 />
             )}
@@ -157,7 +164,10 @@ function Notifications() {
             ) : (
                 <div className="notif-list">
                     {currentList.map((group) => (
-                        <div key={group.postId} className="notif-group">
+                        <div
+                            key={`${activeTab}-${group.postId}`}
+                            className="notif-group"
+                        >
                             {/* Post header */}
                             <button
                                 className="notif-group-header"

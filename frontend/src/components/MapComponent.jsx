@@ -1,13 +1,14 @@
-import React, { useEffect, useRef } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useEffect, useRef } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 const vancouverBounds = [
     [49.002, -123.324], 
     [49.390, -122.690]  
   ];
 
-function MapComponent({ locations = [] }) {
+
+function MapComponent({ showFood, onLocationError, onLocationFound , locations=[]}) {
   const mapContainerRef = useRef(null);
   const leafletMapRef = useRef(null);
   const userMarkerRef = useRef(null);
@@ -20,6 +21,17 @@ function MapComponent({ locations = [] }) {
 //     [49.002, -123.324], 
 //     [49.390, -122.690]  
 //   ];
+  const geoJsonLayerRef = useRef(null);
+  const geoJsonDataRef = useRef(null);
+
+  const onLocationErrorRef = useRef(onLocationError);
+  const onLocationFoundRef = useRef(onLocationFound);
+  useEffect(() => {
+    onLocationErrorRef.current = onLocationError;
+  }, [onLocationError]);
+  useEffect(() => {
+    onLocationFoundRef.current = onLocationFound;
+  }, [onLocationFound]);
 
   useEffect(() => {
     if (!mapContainerRef.current || leafletMapRef.current) return;
@@ -41,11 +53,14 @@ function MapComponent({ locations = [] }) {
     // Initialize the layer group for markers
     markersLayerRef.current = L.layerGroup().addTo(map);
 
-    function onLocationFound(e) {
+ 
+    function onFound(e) {
       const { latlng, accuracy } = e;
 
       if (!userMarkerRef.current) {
-        userMarkerRef.current = L.marker(latlng).addTo(map).bindPopup('You');
+        userMarkerRef.current = L.marker(latlng)
+          .addTo(map)
+          .bindPopup("You are here");
       } else {
         userMarkerRef.current.setLatLng(latlng);
       }
@@ -54,6 +69,8 @@ function MapComponent({ locations = [] }) {
         accuracyCircleRef.current = L.circle(latlng, {
           radius: accuracy,
           color: '#136aec',
+          color: "#136aec",
+          fillColor: "#136aec",
           fillOpacity: 0.15,
         }).addTo(map);
       } else {
@@ -69,7 +86,61 @@ function MapComponent({ locations = [] }) {
     map.on('locationfound', onLocationFound);
     map.locate({ watch: true, enableHighAccuracy: true });
 
+  
+    function onError(e) {
+      console.error("Location error:", e.message);
+      onLocationErrorRef.current?.(e.message);
+    }
+
+    map.on("locationfound", onFound);
+    map.on("locationerror", onError);
+
+    map.locate({
+      watch: true,
+      setView: false,
+      maxZoom: 16,
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    });
+
+    fetch("/community-centres-2.geojson")
+      .then((res) => res.json())
+      .then((data) => {
+        geoJsonDataRef.current = data;
+
+        const layer = L.geoJSON(data, {
+          pointToLayer: (feature, latlng) =>
+            L.circleMarker(latlng, {
+              radius: 8,
+              fillColor: "#d62828",
+              color: "#ffffff",
+              weight: 2,
+              opacity: 1,
+              fillOpacity: 0.9,
+            }),
+          onEachFeature: (feature, layer) => {
+            const name = feature.properties?.name || "Community Centre";
+            const address =
+              feature.properties?.address || "No address available";
+            const area = feature.properties?.geolocalarea || "Unknown area";
+            layer.bindPopup(`
+              <div>
+                <strong>${name}</strong><br/>
+                ${address}<br/>
+                <em>${area}</em>
+              </div>
+            `);
+          },
+        }).addTo(map);
+
+        geoJsonLayerRef.current = layer;
+      })
+      .catch((err) => console.error("Error loading GeoJSON:", err));
+
     return () => {
+      map.off("locationfound", onFound);
+      map.off("locationerror", onError);
       map.stopLocate();
       map.remove();
       leafletMapRef.current = null;
@@ -138,9 +209,50 @@ function MapComponent({ locations = [] }) {
       }
     }
   }, [locations]);
-  // Hardcoding the height and width here cause of autofocus issue 
+ 
+  useEffect(() => {
+    const map = leafletMapRef.current;
+    const allData = geoJsonDataRef.current;
+    if (!map || !allData) return;
+
+    if (geoJsonLayerRef.current) map.removeLayer(geoJsonLayerRef.current);
+
+    const filteredFeatures = showFood
+      ? allData.features.filter((f) => f.properties?.hasFood === true)
+      : allData.features;
+
+    const newLayer = L.geoJSON(
+      { ...allData, features: filteredFeatures },
+      {
+        pointToLayer: (feature, latlng) =>
+          L.circleMarker(latlng, {
+            radius: 8,
+            fillColor: "#d62828",
+            color: "#ffffff",
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 0.9,
+          }),
+        onEachFeature: (feature, layer) => {
+          const name = feature.properties?.name || "Community Centre";
+          const address = feature.properties?.address || "No address available";
+          const area = feature.properties?.geolocalarea || "Unknown area";
+          layer.bindPopup(`
+          <div>
+            <strong>${name}</strong><br/>
+            ${address}<br/>
+            <em>${area}</em>
+          </div>
+        `);
+        },
+      },
+    ).addTo(map);
+
+    geoJsonLayerRef.current = newLayer;
+  }, [showFood]);
+
   return (
-    <div ref={mapContainerRef} style={{ height: '250px', width: '100%',borderRadius:'12px' }} />
+    <div ref={mapContainerRef} style={{ height: "500px", width: "100%" }} />
   );
 }
 

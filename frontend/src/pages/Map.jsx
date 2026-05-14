@@ -1,30 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { API_URL } from '../config';
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect } from "react";
+import { API_URL } from "../config";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-// using useSate a hook that lets thi page store checkbox on of value 
 
-import MapComponent from '../components/MapComponent';
-import PageHint from '../components/PageHint';
+import MapComponent from "../components/MapComponent";
+import PageHint, { hints } from "../components/PageHint";
 
-
-/* The map area is currently a mock visual. */
 function Map() {
   const [locations, setLocations] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [locationError, setLocationError] = useState(false);
   const [showHint, setShowHint] = useState(true);
-  const { userData} = useAuth();
+  const navigate = useNavigate();
+  const { userData } = useAuth();
 
- 
+  const userType = userData?.role;
 
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const response = await fetch(`${API_URL}/locations`);
+        const response = await fetch(`${API_URL}/locations`, {
+          credentials: "include",
+        });
         const data = await response.json();
         setLocations(data.locations || []);
       } catch (error) {
@@ -62,9 +62,17 @@ function Map() {
     if (filter === "other") {
       return type === "other";
     }
-    return false;
+  // If location access is denied, we show an error banner with retry button
+  const handleRetryLocation = () => {
+    setLocationError(false);
+    // Prompt browser to re-request, user must have allowed in settings first.
+    // Reloading the map component is the cleanest way; we toggle a key to remount it.
+    setMapKey((k) => k + 1);
   };
-   
+
+  const [mapKey, setMapKey] = useState(0);
+
+  
   const filteredLocations = locations.filter((loc) => {
     const matchesSearch =
       loc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -74,6 +82,7 @@ function Map() {
     const matchesFilter = filterMatchesLocation(activeFilter, loc); 
     
     return matchesSearch && matchesFilter;
+  
   });
    
   
@@ -120,25 +129,36 @@ function Map() {
     }
   };
 
-  const filters = [
-    { value: "all", label: "All" },
-    { value: "shelter", label: "🏠 Shelter" },
-    { value: "food", label: "🍞 Food" },
-    { value: "community", label: "🏘️ Community" },
-    { value: "hub", label: "🆘 Hubs" },
-    { value: "support", label: "🏥 Support" },
-    { value: "other", label: "📍 Other" },
-  ];
+  const getFilters = () => {
+    const categoryFilters = [
+      { value: "all", label: "All" },
+      { value: "shelter", label: "🏠 Shelter" },
+      { value: "food", label: "🍞 Food" },
+      { value: "community", label: "🏘️ Community" },
+      { value: "hub", label: "🆘 Hubs" },
+      { value: "support", label: "🏥 Support" },
+      { value: "other", label: "📍 Other" },
+    ];
+    if (userType === "in-need")
+      return [
+        { value: "available", label: "✅ Has Space" },
+        ...categoryFilters,
+      ];
+    if (userType === "helper")
+      return [
+        { value: "needs-help", label: "🙏 Needs Help" },
+        ...categoryFilters,
+      ];
+    return categoryFilters;
+  };
+
+  const filters = getFilters();
 
   return (
     <div className="page-padding-wide map-page">
-
       {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (
-        <PageHint
-          message="Tap + to create a post. Filter by In Need or To Help!"
-          onClose={() => setShowHint(false)}
-        />
+        <PageHint message={hints["Map"]} onClose={() => setShowHint(false)} />
       )}
 
       {/* Search bar */}
@@ -186,48 +206,42 @@ function Map() {
         ))}
       </div>
 
-      {/* Mock map area */}
+      {/* Location error banner — shown above the map, no browser alert */}
+      {locationError && (
+        <div className="map-location-error" role="alert">
+          <span className="map-location-error-icon" aria-hidden="true">
+            📍
+          </span>
+          <div className="map-location-error-body">
+            <p className="map-location-error-title">Location access denied</p>
+            <p className="map-location-error-desc">
+              Allow location access in your browser settings, then try again.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="map-location-error-btn"
+            onClick={handleRetryLocation}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
+      {/* Map area */}
       <div
         className="map-area"
         aria-label="Map showing nearby relief locations"
+        style={{ height: "500px", padding: 0, overflow: "hidden" }}
       >
-        {/* Mock streets */}
-        <div className="map-street horizontal" style={{ top: "30%" }}></div>
-        <div className="map-street horizontal" style={{ top: "60%" }}></div>
-        <div className="map-street vertical" style={{ left: "25%" }}></div>
-        <div className="map-street vertical" style={{ left: "70%" }}></div>
-
-        {/* Map markers */}
-        {filteredLocations.slice(0, 5).map((loc, index) => {
-          const positions = [
-            { top: "25%", left: "20%" },
-            { top: "50%", left: "60%" },
-            { top: "40%", left: "40%" },
-            { top: "65%", left: "30%" },
-            { top: "35%", left: "75%" },
-          ];
-          return (
-            <button
-              key={loc._id}
-              type="button"
-              className={`map-marker ${selectedId === loc._id ? "selected" : ""}`}
-              style={positions[index]}
-              onClick={() => setSelectedId(loc._id)}
-              aria-label={`Select ${loc.name}`}
-            >
-              📍
-            </button>
-          );
-        })}
-
-        {/* "Mock map" label */}
-        <div
-          className="map-area"
-          aria-label="Map showing nearby relief locations"
-          style={{ height: "500px", padding: 0, overflow: "hidden" }}
-        >
-          <MapComponent locations={filteredLocations} />
-        </div>
+       <MapComponent
+          key={mapKey}
+          locations={filteredLocations}
+          showFood={activeFilter === "food"}
+          onLocationError={() => setLocationError(true)}
+          onLocationFound={() => setLocationError(false)}
+        />
+      
       </div>
 
       {/* Result count */}
@@ -266,6 +280,28 @@ function Map() {
               <div className="map-location-info">
                 <div className="map-location-name">{loc.name}</div>
                 <div className="map-location-address">{loc.address}</div>
+                {userType === "in-need" && loc.capacity !== null && (
+                  <div className="map-location-capacity">
+                    {loc.capacity === 0
+                      ? "⚠️ Full"
+                      : `${loc.capacity} spots available`}
+                  </div>
+                )}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  alignItems: "flex-end",
+                }}
+              >
+                <span className={`badge ${getStatusClass(loc.status)}`}>
+                  {loc.status}
+                </span>
+                {userType === "helper" && loc.needsSupplies && (
+                  <span className="badge badge-limited">🙏 Needs supplies</span>
+                )}
               </div>
               <span className={`badge ${getStatusClass(loc.status)}`}>
                 {loc.status}

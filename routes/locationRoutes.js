@@ -69,6 +69,7 @@ router.put("/:id", async (req, res) => {
         lng: req.body.lng,
         type: req.body.type,
         status: req.body.status,
+        services: req.body.services,
         capacity: req.body.capacity,
         needsSupplies: req.body.needsSupplies,
         contactInfo: req.body.contactInfo,

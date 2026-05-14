@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 import MapComponent from "../components/MapComponent";
-import PageHint, {hints} from "../components/PageHint";
+import PageHint, { hints } from "../components/PageHint";
 
 function Map() {
   const [locations, setLocations] = useState([]);
@@ -12,18 +12,18 @@ function Map() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [locationError, setLocationError] = useState(false);
   const [showHint, setShowHint] = useState(true);
+  const navigate = useNavigate();
   const { userData } = useAuth();
 
-  // pull userType from your AuthContext — adjust key if yours is different
-  const userType = userData?.role; // 'in-need' | 'helper' | undefined
+  const userType = userData?.role;
 
   useEffect(() => {
     const fetchLocations = async () => {
       try {
         const response = await fetch(`${API_URL}/locations`, {
-          credentials: "include", // send session cookie so backend can filter by role
+          credentials: "include",
         });
         const data = await response.json();
         setLocations(data.locations || []);
@@ -36,41 +36,36 @@ function Map() {
     fetchLocations();
   }, []);
 
-  const filterMatchesLocation = (filter, loc) => {
-    // role-based filters
-    if (filter === "available") {
-      // in-need: show only places with open space
-      return loc.status !== "closed" && loc.capacity !== 0;
-    }
-    if (filter === "needs-help") {
-      // helper: show only places that need supplies/volunteers
-      return loc.needsSupplies === true;
-    }
+  // If location access is denied, we show an error banner with retry button
+  const handleRetryLocation = () => {
+    setLocationError(false);
+    // Prompt browser to re-request, user must have allowed in settings first.
+    // Reloading the map component is the cleanest way; we toggle a key to remount it.
+    setMapKey((k) => k + 1);
+  };
 
-    // category filters — same for all roles
+  const [mapKey, setMapKey] = useState(0);
+
+  const filterMatchesLocation = (filter, loc) => {
+    if (filter === "available")
+      return loc.status !== "closed" && loc.capacity !== 0;
+    if (filter === "needs-help") return loc.needsSupplies === true;
     if (filter === "all") return true;
-    if (filter === "shelter") {
+    if (filter === "shelter")
       return ["emergency shelter", "warming centre", "cooling centre"].includes(
         loc.type,
       );
-    }
-    if (filter === "food") {
+    if (filter === "food")
       return ["food bank", "community fridge", "community kitchen"].includes(
         loc.type,
       );
-    }
-    if (filter === "community") {
+    if (filter === "community")
       return ["community centre", "community kitchen"].includes(loc.type);
-    }
-    if (filter === "hub") {
+    if (filter === "hub")
       return ["disaster support hub", "information centre"].includes(loc.type);
-    }
-    if (filter === "support") {
+    if (filter === "support")
       return ["medical support", "pet support"].includes(loc.type);
-    }
-    if (filter === "other") {
-      return loc.type === "other";
-    }
+    if (filter === "other") return loc.type === "other";
     return false;
   };
 
@@ -78,8 +73,7 @@ function Map() {
     const matchesSearch =
       loc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       loc.address.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterMatchesLocation(activeFilter, loc); // pass whole loc now
-    return matchesSearch && matchesFilter;
+    return matchesSearch && filterMatchesLocation(activeFilter, loc);
   });
 
   const getTypeIcon = (type) => {
@@ -124,7 +118,6 @@ function Map() {
     }
   };
 
-  // role-aware filters — role chip appears first
   const getFilters = () => {
     const categoryFilters = [
       { value: "all", label: "All" },
@@ -135,19 +128,16 @@ function Map() {
       { value: "support", label: "🏥 Support" },
       { value: "other", label: "📍 Other" },
     ];
-
-    if (userType === "in-need") {
+    if (userType === "in-need")
       return [
         { value: "available", label: "✅ Has Space" },
         ...categoryFilters,
       ];
-    }
-    if (userType === "helper") {
+    if (userType === "helper")
       return [
         { value: "needs-help", label: "🙏 Needs Help" },
         ...categoryFilters,
       ];
-    }
     return categoryFilters;
   };
 
@@ -157,10 +147,7 @@ function Map() {
     <div className="page-padding-wide map-page">
       {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (
-        <PageHint
-          message={hints['Map']}
-          onClose={() => setShowHint(false)}
-        />
+        <PageHint message={hints["Map"]} onClose={() => setShowHint(false)} />
       )}
 
       {/* Search bar */}
@@ -208,45 +195,40 @@ function Map() {
         ))}
       </div>
 
+      {/* Location error banner — shown above the map, no browser alert */}
+      {locationError && (
+        <div className="map-location-error" role="alert">
+          <span className="map-location-error-icon" aria-hidden="true">
+            📍
+          </span>
+          <div className="map-location-error-body">
+            <p className="map-location-error-title">Location access denied</p>
+            <p className="map-location-error-desc">
+              Allow location access in your browser settings, then try again.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="map-location-error-btn"
+            onClick={handleRetryLocation}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Map area */}
       <div
         className="map-area"
         aria-label="Map showing nearby relief locations"
+        style={{ height: "500px", padding: 0, overflow: "hidden" }}
       >
-        <div className="map-street horizontal" style={{ top: "30%" }}></div>
-        <div className="map-street horizontal" style={{ top: "60%" }}></div>
-        <div className="map-street vertical" style={{ left: "25%" }}></div>
-        <div className="map-street vertical" style={{ left: "70%" }}></div>
-
-        {filteredLocations.slice(0, 5).map((loc, index) => {
-          const positions = [
-            { top: "25%", left: "20%" },
-            { top: "50%", left: "60%" },
-            { top: "40%", left: "40%" },
-            { top: "65%", left: "30%" },
-            { top: "35%", left: "75%" },
-          ];
-          return (
-            <button
-              key={loc._id}
-              type="button"
-              className={`map-marker ${selectedId === loc._id ? "selected" : ""}`}
-              style={positions[index]}
-              onClick={() => navigate(`/locations/${loc._id}`)}
-              aria-label={`Select ${loc.name}`}
-            >
-              📍
-            </button>
-          );
-        })}
-
-        <div
-          className="map-area"
-          aria-label="Map showing nearby relief locations"
-          style={{ height: "500px", padding: 0, overflow: "hidden" }}
-        >
-          <MapComponent showFood={activeFilter === "food"} />
-        </div>
+        <MapComponent
+          key={mapKey}
+          showFood={activeFilter === "food"}
+          onLocationError={() => setLocationError(true)}
+          onLocationFound={() => setLocationError(false)}
+        />
       </div>
 
       {/* Result count */}
@@ -285,7 +267,6 @@ function Map() {
               <div className="map-location-info">
                 <div className="map-location-name">{loc.name}</div>
                 <div className="map-location-address">{loc.address}</div>
-                {/* in-need: show available spots */}
                 {userType === "in-need" && loc.capacity !== null && (
                   <div className="map-location-capacity">
                     {loc.capacity === 0
@@ -305,7 +286,6 @@ function Map() {
                 <span className={`badge ${getStatusClass(loc.status)}`}>
                   {loc.status}
                 </span>
-                {/* helper: show needs supplies badge */}
                 {userType === "helper" && loc.needsSupplies && (
                   <span className="badge badge-limited">🙏 Needs supplies</span>
                 )}

@@ -16,6 +16,7 @@ import DisasterDetail from "./pages/DisasterDetail";
 import Profile from "./pages/Profile";
 import LocationDetail from "./pages/LocationDetail";
 import Notifications from "./pages/Notifications";
+import AiChat from "./pages/AiChat";
 import { AuthProvider } from "./context/AuthContext";
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
             <Route path="/disaster/:disasterId" element={<DisasterDetail />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/locations/:id" element={<LocationDetail />} />
+            <Route path="/AiChat" element={<AiChat />} />
           </Route>
 
           {/* Redirect unknown URLs to home */}

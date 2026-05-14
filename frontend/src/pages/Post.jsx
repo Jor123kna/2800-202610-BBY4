@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { API_URL } from "../config";
-import PageHint, {hints} from "../components/PageHint";
+import PageHint, { hints } from "../components/PageHint";
 import { useAuth } from "../context/AuthContext";
 
 function Post() {
@@ -12,14 +12,14 @@ function Post() {
   const { userData } = useAuth();
   const [showHint, setShowHint] = useState(true);
   const [formData, setFormData] = useState({
-    title: editPost?.title || '',
-    content: editPost?.content || '',
-    neighbourhood: editPost?.neighbourhood || '',
-    role: editPost?.role || ''
+    title: editPost?.title || "",
+    content: editPost?.content || "",
+    neighbourhood: editPost?.neighbourhood || "",
+    role: editPost?.role || "",
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState('');
+  const [submitError, setSubmitError] = useState("");
 
   const TITLE_MAX = 100;
   const CONTENT_MAX = 500;
@@ -78,26 +78,29 @@ function Post() {
     setLoading(true);
     setSubmitError("");
 
-
     try {
       const response = await fetch(
-       isEditing ? `${API_URL}/posts/${editPost._id}` : `${API_URL}/posts`, 
+        isEditing ? `${API_URL}/posts/${editPost._id}` : `${API_URL}/posts`,
         {
-        method: isEditing ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(formData),
-      });
+          method: isEditing ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(formData),
+        },
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        setSubmitError(data.message || (isEditing ? 'Failed to update post' : 'Failed to create post'));
+        setSubmitError(
+          data.message ||
+            (isEditing ? "Failed to update post" : "Failed to create post"),
+        );
         setLoading(false);
         return;
       }
 
-      navigate(isEditing ? '/profile' : '/community');
+      navigate(isEditing ? "/profile" : "/community");
     } catch (err) {
       setSubmitError("Something went wrong. Please try again.");
       setLoading(false);
@@ -146,16 +149,20 @@ function Post() {
     <div className="page-padding">
       {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (
-        <PageHint
-          message={hints['Post']}
-          onClose={() => setShowHint(false)}
-        />
+        <PageHint message={hints["Post"]} onClose={() => setShowHint(false)} />
       )}
 
       {/* Page header */}
-      <div style={{ marginBottom: 'var(--space-6)' }}>
-        <h1 style={{ marginBottom: 'var(--space-2)' }}>{isEditing ? 'Edit a Post' : 'Create a post'}</h1>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>
+      <div style={{ marginBottom: "var(--space-6)" }}>
+        <h1 style={{ marginBottom: "var(--space-2)" }}>
+          {isEditing ? "Edit a Post" : "Create a post"}
+        </h1>
+        <p
+          style={{
+            color: "var(--color-text-secondary)",
+            fontSize: "var(--text-sm)",
+          }}
+        >
           Share with your community
         </p>
       </div>
@@ -290,7 +297,11 @@ function Post() {
           disabled={loading}
           style={{ marginTop: "var(--space-4)" }}
         >
-          {loading ? 'Posting...' : (isEditing ? 'Update Post' : 'Post to community')}
+          {loading
+            ? "Posting..."
+            : isEditing
+              ? "Update Post"
+              : "Post to community"}
         </button>
 
         {/* Cancel link */}
@@ -311,6 +322,22 @@ function Post() {
           </button>
         </div>
       </form>
+      {/* Floating "✨ Autofill with AI" button */}
+      <button
+        className="fab fab--label"
+        onClick={() =>
+          navigate("/AiChat", {
+            state: {
+              source: "post-autofill",
+              draft: formData,
+              returnTo: "/community",
+            },
+          })
+        }
+        aria-label="Autofill with AI"
+      >
+        ✨ Autofill with AI
+      </button>
     </div>
   );
 }

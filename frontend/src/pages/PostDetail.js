@@ -221,11 +221,11 @@ function PostDetail() {
         <>
             <div className="post-detail-page post-detail-page-with-input">
                 <button
-                    onClick={() => navigate('/community')}
+                    onClick={() => navigate(-1)}
                     className="btn-back"
                     aria-label="Back to community"
                 >
-                    ← Back to community
+                    ← Go back
                 </button>
                 {/* Page Hint */}
                 {showHint && userData?.firstTimeMode && (

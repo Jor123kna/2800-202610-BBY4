@@ -11,6 +11,15 @@ function MapComponent({ showFood, onLocationError, onLocationFound }) {
   const hasCenteredOnUserRef = useRef(false);
   const geoJsonDataRef = useRef(null);
 
+  const onLocationErrorRef = useRef(onLocationError);
+  const onLocationFoundRef = useRef(onLocationFound);
+  useEffect(() => {
+    onLocationErrorRef.current = onLocationError;
+  }, [onLocationError]);
+  useEffect(() => {
+    onLocationFoundRef.current = onLocationFound;
+  }, [onLocationFound]);
+
   useEffect(() => {
     if (!mapContainerRef.current || leafletMapRef.current) return;
 
@@ -54,14 +63,12 @@ function MapComponent({ showFood, onLocationError, onLocationFound }) {
         hasCenteredOnUserRef.current = true;
       }
 
-      // Notify parent that location was found (clears the error banner)
-      if (onLocationFound) onLocationFound();
+      onLocationFoundRef.current?.();
     }
 
     function onError(e) {
       console.error("Location error:", e.message);
-      // Notify parent instead of showing a browser alert
-      if (onLocationError) onLocationError(e.message);
+      onLocationErrorRef.current?.(e.message);
     }
 
     map.on("locationfound", onFound);
@@ -119,7 +126,7 @@ function MapComponent({ showFood, onLocationError, onLocationFound }) {
       userMarkerRef.current = null;
       accuracyCircleRef.current = null;
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const map = leafletMapRef.current;

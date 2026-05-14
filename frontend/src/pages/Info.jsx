@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import PageHint, {hints} from '../components/PageHint';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import PageHint, { hints } from "../components/PageHint";
 import DisasterCard from "../components/DisasterCard";
 import { disasters } from "../data/disasterData";
 
@@ -17,10 +17,7 @@ function Info() {
   return (
     <div className="page-padding">
       {showHint && userData?.firstTimeMode && (
-        <PageHint
-          message={hints['Info']}
-          onClose={() => setShowHint(false)}
-        />
+        <PageHint message={hints["Info"]} onClose={() => setShowHint(false)} />
       )}
 
       <div style={{ marginBottom: "var(--space-6)" }}>
@@ -44,6 +41,15 @@ function Info() {
           />
         ))}
       </div>
+
+      {/* Floating "Chat with ai" button */}
+      <button
+        className="fab fab--label"
+        onClick={() => navigate("/AiChat")}
+        aria-label="Chat with ai"
+      >
+        💬 Chat with ai
+      </button>
     </div>
   );
 }

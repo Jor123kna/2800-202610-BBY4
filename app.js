@@ -45,23 +45,18 @@ app.use(
 );
 
 // API routes
-app.use('/users', require('./routes/userRoutes'));
-app.use('/locations', require('./routes/locationRoutes'));
-app.use('/posts', require('./routes/postRoutes'));
-app.use('/replies', require('./routes/replyRoutes'));
-app.use('/walkthrough', require('./routes/walkthroughRoutes'));
+app.use("/users", require("./routes/userRoutes"));
+app.use("/locations", require("./routes/locationRoutes"));
+app.use("/posts", require("./routes/postRoutes"));
+app.use("/replies", require("./routes/replyRoutes"));
+app.use("/walkthrough", require("./routes/walkthroughRoutes"));
+app.use("/api", require("./routes/chatRoutes"));
 
-// Schema
+// Schemas
 const Location = require("./models/locations");
-
-// test database connection
-app.get("/test-db", (req, res) => {
-  if (mongoose.connection.readyState === 1) {
-    res.json({ message: "Connected to MongoDB!" });
-  } else {
-    res.json({ message: "Not connected to MongoDB." });
-  }
-});
+const Post = require("./models/posts");
+const User = require("./models/users");
+const Reply = require("./models/replies");
 
 // 404 handler
 app.use((req, res) => {

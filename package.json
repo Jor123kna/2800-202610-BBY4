@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.96.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -7,6 +8,7 @@
     "express-session": "^1.19.0",
     "joi": "^18.2.1",
     "mongoose": "^9.6.1",
+    "react-markdown": "^10.1.0",
     "react-scripts": "^5.0.1"
   }
 }

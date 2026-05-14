@@ -36,43 +36,47 @@ function Map() {
     fetchLocations();
   }, []);
 
-  const filterMatchesLocation = (filter, locationType) => {
+   
+   const filterMatchesLocation = (filter, loc) => {
     if (filter === "all") return true;
 
+    // We only declare these ONCE at the top
+    const type = loc.type;
+    const hasService = loc.services && loc.services.includes(filter);
+
     if (filter === "shelter") {
-      return ["emergency shelter", "warming centre", "cooling centre"].includes(
-        locationType,
-      );
+      return ["emergency shelter", "warming centre", "cooling centre"].includes(type) || hasService;
     }
     if (filter === "food") {
-      return ["food bank", "community fridge", "community kitchen"].includes(
-        locationType,
-      );
+      return ["food bank", "community fridge", "community kitchen"].includes(type) || hasService;
     }
     if (filter === "community") {
-      return ["community centre", "community kitchen"].includes(locationType);
+      return ["community centre", "community kitchen"].includes(type);
     }
     if (filter === "hub") {
-      return ["disaster support hub", "information centre"].includes(
-        locationType,
-      );
+      return ["disaster support hub", "information centre"].includes(type) || hasService;
     }
     if (filter === "support") {
-      return ["medical support", "pet support"].includes(locationType);
+      return ["medical support", "pet support"].includes(type) || hasService;
     }
     if (filter === "other") {
-      return locationType === "other";
+      return type === "other";
     }
     return false;
   };
-
+   
   const filteredLocations = locations.filter((loc) => {
     const matchesSearch =
       loc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       loc.address.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterMatchesLocation(activeFilter, loc.type);
+    
+    // This is the line that connects to our new filter logic
+    const matchesFilter = filterMatchesLocation(activeFilter, loc); 
+    
     return matchesSearch && matchesFilter;
   });
+   
+  
 
   const getTypeIcon = (type) => {
     switch (type) {
@@ -222,7 +226,7 @@ function Map() {
           aria-label="Map showing nearby relief locations"
           style={{ height: "500px", padding: 0, overflow: "hidden" }}
         >
-          <MapComponent showFood={activeFilter === "food"} />
+          <MapComponent locations={filteredLocations} />
         </div>
       </div>
 
@@ -266,6 +270,19 @@ function Map() {
               <span className={`badge ${getStatusClass(loc.status)}`}>
                 {loc.status}
               </span>
+                 {loc.needsSupplies && (
+         <span style={{
+            backgroundColor: '#e67e22',
+            color: 'white',
+            padding: '2px 8px',
+             borderRadius: '4px',
+             fontSize: '10px',
+             marginLeft: '8px',
+             fontWeight: 'bold',
+             display: 'inline-block' }}>
+    ⚠️ NEEDS SUPPLIES
+  </span>
+)}
             </button>
           ))}
         </div>

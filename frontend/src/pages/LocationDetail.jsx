@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+const serviceOptions = [
+  { id: 'food', label: '🍞 Food' },
+  { id: 'shelter', label: '🏠 Shelter' },
+  { id: 'hub', label: '🆘 SOS Hub' },
+  { id: 'support', label: '🏥 Medical/Support' }
+];
+
 function LocationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -175,6 +182,35 @@ function LocationDetail() {
           />
           Needs Supplies
         </label>
+        
+<div className="form-group" style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f9f9f9', borderRadius: '8px', border: '1px solid #ddd' }}>
+  <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '10px' }}>
+    Additional Services (Tags)
+  </label>
+  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+    {serviceOptions.map((service) => (
+      <label key={service.id} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', fontSize: '14px' }}>
+        <input
+          type="checkbox"
+          style={{ marginRight: '8px', width: '18px', height: '18px' }}
+          checked={formData.services?.includes(service.id)}
+          onChange={() => {
+            const currentServices = formData.services || [];
+            const newServices = currentServices.includes(service.id)
+              ? currentServices.filter(s => s !== service.id) // Remove if checked
+              : [...currentServices, service.id];             // Add if unchecked
+            
+            setFormData({ ...formData, services: newServices });
+          }}
+        />
+        {service.label}
+      </label>
+    ))}
+  </div>
+</div>
+
+
+
 
         <button type="submit">Save Changes</button>
       </form>

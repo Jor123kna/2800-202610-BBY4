@@ -1,10 +1,12 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const fs = require('fs');
 const Location = require('./models/locations')
 
 // 1. DATABASE CONNECTION
 
-const MONGO_URI = "mongodb+srv://routerelief-admin:RouteRelief123@cluster0.iiljuig.mongodb.net/routerelief?appName=Cluster0";
+// const MONGO_URI = "mongodb+srv://routerelief-admin:RouteRelief123@cluster0.iiljuig.mongodb.net/routerelief?appName=Cluster0";
+const Mongo_URI=process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI)
   .then(() => console.log("MongoDB connected. now seed "))

@@ -8,6 +8,8 @@ function Profile() {
   const [userData, setUserData] = React.useState(null);
   const [userPosts, setUserPosts] = React.useState([]);
   const [visiblePostCount, setVisiblePostCount] = React.useState(3);
+  const [savedPosts, setSavedPosts] = React.useState([]);
+  const [visibleSavedCount, setVisibleSavedCount] = React.useState(3);
 
   React.useEffect(() => {
     const fetchProfile = async () => {
@@ -34,6 +36,20 @@ function Profile() {
           } else {
             console.log(postsData.message);
           }
+
+          const savedResponse = await fetch(`${API_URL}/users/saved`, {
+            method: 'GET',
+            credentials: 'include'
+          });
+
+          const savedData = await savedResponse.json();
+
+          if (savedResponse.ok) {
+            setSavedPosts(savedData.savedPosts || []);
+          } else {
+            console.log(savedData.message);
+          }
+
         } else {
           console.log(data.message);
           setUserData({
@@ -211,6 +227,28 @@ function Profile() {
     setVisiblePostCount(visiblePostCount + 3);
   };
 
+  const handleLoadMoreSaved = () => {
+    setVisibleSavedCount(visibleSavedCount + 3);
+  };
+
+  // Remove a bookmark
+  const handleRemoveBookmark = async (postId) => {
+    if (!window.confirm('Remove this from saved?')) return;
+
+    try {
+      const response = await fetch(`${API_URL}/users/saved/${postId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        setSavedPosts(savedPosts.filter((p) => p._id !== postId));
+      }
+    } catch (err) {
+      console.error('Error removing bookmark:', err);
+    }
+  };
+
   if (!userData) {
     return (
       <div className="page-padding">
@@ -223,8 +261,9 @@ function Profile() {
   const isFirstTimeMode = userData.firstTimeMode === true;
   const visiblePosts = userPosts.slice(0, visiblePostCount);
   const hasMorePosts = visiblePostCount < userPosts.length;
+  const visibleSaved = savedPosts.slice(0, visibleSavedCount);
+  const hasMoreSaved = visibleSavedCount < savedPosts.length;
 
-  // 🆕 ADDED: Get initials from user name (e.g., "Hailey Kim" -> "HK")
   const getInitials = (name) => {
     if (!name) return '?';
     const parts = name.trim().split(' ');
@@ -350,6 +389,54 @@ function Profile() {
                   onClick={handleLoadMorePosts}
                 >
                   Load {userPosts.length === 1 ? 'another post' : 'more posts'}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Saved Posts section */}
+        <div className="profile-section">
+          <div className="profile-section-header">
+            <div className="profile-section-label">🔖 SAVED POSTS</div>
+            <div className="profile-section-count">
+              {savedPosts.length} {savedPosts.length === 1 ? 'post' : 'posts'}
+            </div>
+          </div>
+
+          {savedPosts.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon" aria-hidden="true">🔖</div>
+              <h3 className="empty-state-title">No saved posts yet</h3>
+              <p className="empty-state-desc">
+                Tap the bookmark icon on any post to save it for later.
+              </p>
+            </div>
+          ) : (
+            <div className="post-list">
+              {visibleSaved.map((post) => (
+                <div key={post._id} className="profile-post-item">
+                  <PostCard post={{
+                    ...post,
+                    author: `${post.author.firstName} ${post.author.lastName}`,
+                    role: post.role || post.author.role,
+                    date: post.createdAt
+                  }} />
+                  <button
+                    className="btn-link-danger"
+                    onClick={() => handleRemoveBookmark(post._id)}
+                  >
+                    Remove from saved
+                  </button>
+                </div>
+              ))}
+
+              {hasMoreSaved && (
+                <button
+                  className="btn-secondary-block"
+                  onClick={handleLoadMoreSaved}
+                >
+                  Load more saved posts
                 </button>
               )}
             </div>

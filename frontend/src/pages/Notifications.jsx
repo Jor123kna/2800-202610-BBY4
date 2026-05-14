@@ -18,6 +18,8 @@ function Notifications() {
 
 
     useEffect(() => {
+        localStorage.setItem('notifsLastSeen', Date.now().toString());
+
         const fetchNotifications = async () => {
             try {
                 const response = await fetch(`${API_URL}/replies/notifications`, {
@@ -29,7 +31,10 @@ function Notifications() {
 
                 if (response.ok) {
                     setMyPostsNotifs(data.myPosts || []);
-                    setMyRepliesNotifs(data.myReplies || []);
+
+                    const merged = mergeReplyGroupsByPost(data.myReplies || []);
+
+                    setMyRepliesNotifs(merged);
                 } else {
                     console.error(data.message || 'Failed to load notifications');
                 }
@@ -47,6 +52,27 @@ function Notifications() {
             setLoading(false);
         }
     }, [userData, authLoading]);
+
+    const mergeReplyGroupsByPost = (groups) => {
+        const grouped = {};
+
+        groups.forEach((group) => {
+            const key = group.postId.toString();
+
+            if (!grouped[key]) {
+                grouped[key] = {
+                    postId: group.postId,
+                    postTitle: group.postTitle,
+                    postRole: group.postRole,
+                    replies: []
+                };
+            }
+
+            grouped[key].replies.push(...group.replies);
+        });
+
+        return Object.values(grouped);
+    };
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -138,7 +164,10 @@ function Notifications() {
             ) : (
                 <div className="notif-list">
                     {currentList.map((group) => (
-                        <div key={group.postId} className="notif-group">
+                        <div
+                            key={`${activeTab}-${group.postId}`}
+                            className="notif-group"
+                        >
                             {/* Post header */}
                             <button
                                 className="notif-group-header"

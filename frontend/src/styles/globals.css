@@ -2239,15 +2239,14 @@ h4 {
 /* 7g. ai page */
 .ai-chat-page {
   position: fixed;
-  top: 0;
+  top: 56px;
   left: 0;
   right: 0;
-  bottom: 64px; /* height of your bottom nav */
+  bottom: 64px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
-
 .ai-chat-wrapper {
   position: relative;
   min-height: 100vh;

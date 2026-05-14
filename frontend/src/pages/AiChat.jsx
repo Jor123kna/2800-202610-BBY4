@@ -22,7 +22,10 @@ function AiChat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [usageInfo, setUsageInfo] = useState(null);
-  const [latestAssistantText, setLatestAssistantText] = useState("");
+
+  // Only set when AI has sent a fully-structured POST_READY response
+  const [pendingPost, setPendingPost] = useState(null);
+
   const [postError, setPostError] = useState("");
   const [postLoading, setPostLoading] = useState(false);
   const bottomRef = useRef(null);
@@ -68,6 +71,9 @@ function AiChat() {
     setMessages(updatedMessages);
     setInput("");
     setLoading(true);
+    // Clear any previous pending post when the user sends a new message
+    setPendingPost(null);
+    setPostError("");
 
     try {
       const response = await fetch(`${API_URL}/api/chat`, {
@@ -83,31 +89,25 @@ function AiChat() {
         }),
       });
 
-      console.log("Chat response status:", response.status);
-
       const data = await response.json();
       if (data.usage) {
         setUsageInfo(data.usage);
       }
 
       if (!response.ok) {
-        console.error("Backend error:", data);
         throw new Error(data.error || "Server error");
       }
 
       const reply =
         data.reply || "Sorry, I could not get a response. Please try again.";
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-      if (isPostAutofill) {
-        setLatestAssistantText(reply);
 
-        // Check if AI has provided structured post data
-        if (reply.trim().startsWith("POST_READY")) {
-          const postData = parsePostDataFromAi(reply);
-          if (postData) {
-            // Automatically create the post
-            createPostFromStructuredData(postData);
-          }
+      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+
+      // Only enable the confirm button when AI returns fully structured POST_READY data
+      if (isPostAutofill && reply.trim().startsWith("POST_READY")) {
+        const postData = parsePostDataFromAi(reply);
+        if (postData) {
+          setPendingPost(postData);
         }
       }
     } catch (err) {
@@ -147,75 +147,6 @@ function AiChat() {
     inputRef.current?.focus();
   };
 
-  const looksLikePostDraft = (text) => {
-    if (!text) return false;
-    const normalized = text.toLowerCase().trim();
-
-    // Don't treat structured post data as a draft
-    if (normalized.startsWith("post_ready")) {
-      return false;
-    }
-
-    const promptPhrases = [
-      "please provide",
-      "tell me more",
-      "what details",
-      "what would you like",
-      "can you",
-      "could you",
-      "describe",
-      "help me understand",
-      "provide more",
-      "need more",
-      "please share",
-      "let me know",
-    ];
-
-    if (promptPhrases.some((phrase) => normalized.includes(phrase))) {
-      return false;
-    }
-    if (normalized.endsWith("?")) {
-      return false;
-    }
-    if (/^(i can|i can't|i cannot|i'm not|i am not|i need)/.test(normalized)) {
-      return false;
-    }
-
-    return normalized.length >= 30;
-  };
-
-  const derivePostTitleFromAi = (text) => {
-    if (!text) return draftData.title || "Community update";
-    const lines = text
-      .trim()
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
-
-    if (lines.length === 0) return draftData.title || "Community update";
-
-    const first = lines[0];
-    if (/^title\s*:/i.test(first)) {
-      return (
-        first.replace(/^title\s*:/i, "").trim() ||
-        draftData.title ||
-        "Community update"
-      );
-    }
-
-    if (first.length <= 80) {
-      return first;
-    }
-
-    return draftData.title || "Community update";
-  };
-
-  const cleanMarkdownForPost = (text) => {
-    if (!text) return "";
-    // Remove markdown bold syntax (*text*)
-    return text.replace(/\*([^*]+)\*/g, "$1");
-  };
-
   const parsePostDataFromAi = (text) => {
     if (!text || !text.trim().startsWith("POST_READY")) return null;
 
@@ -228,20 +159,22 @@ function AiChat() {
       } else if (line.startsWith("Content: ")) {
         postData.content = line.substring(9).trim();
       } else if (line.startsWith("Neighbourhood: ")) {
-        postData.neighbourhood = line.substring(14).trim();
+        postData.neighbourhood = line.substring(15).trim();
       } else if (line.startsWith("Role: ")) {
         postData.role = line.substring(6).trim();
       }
     }
 
-    // Validate that we have the required fields
+    // All three required fields must be present
     if (postData.title && postData.content && postData.role) {
       return postData;
     }
     return null;
   };
 
-  const createPostFromStructuredData = async (postData) => {
+  const confirmAndPublishPost = async () => {
+    if (!pendingPost) return;
+
     setPostError("");
     setPostLoading(true);
 
@@ -251,54 +184,22 @@ function AiChat() {
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title: postData.title,
-          content: postData.content,
+          title: pendingPost.title,
+          content: pendingPost.content,
           neighbourhood:
-            postData.neighbourhood || draftData.neighbourhood || "",
-          role: postData.role,
+            pendingPost.neighbourhood || draftData.neighbourhood || "",
+          role: pendingPost.role,
         }),
       });
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create post from AI data");
+        throw new Error(data.error || "Failed to create post");
       }
 
       navigate(returnPath);
     } catch (err) {
-      setPostError(err.message || "Could not create post from AI data.");
-    } finally {
-      setPostLoading(false);
-    }
-  };
-
-  const createPostFromAiDraft = async () => {
-    if (!latestAssistantText) return;
-
-    setPostError("");
-    setPostLoading(true);
-
-    try {
-      const response = await fetch(`${API_URL}/posts/autofill`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: derivePostTitleFromAi(latestAssistantText),
-          content: cleanMarkdownForPost(latestAssistantText),
-          neighbourhood: draftData.neighbourhood || "",
-          role: draftData.role || "in-need",
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create post from AI draft");
-      }
-
-      navigate(returnPath);
-    } catch (err) {
-      setPostError(err.message || "Could not create post from AI draft.");
+      setPostError(err.message || "Could not publish post. Please try again.");
     } finally {
       setPostLoading(false);
     }
@@ -351,43 +252,32 @@ function AiChat() {
           </div>
         ))}
 
-        {isPostAutofill &&
-          !loading &&
-          latestAssistantText &&
-          messages.length > 3 && (
-            <div className="ai-chat-bubble-row assistant ai-chat-confirm-row">
-              <div className="ai-chat-confirm-box">
-                {looksLikePostDraft(latestAssistantText) ? (
-                  <>
-                    <p style={{ margin: 0, marginBottom: "0.5rem" }}>
-                      If this looks like your post, confirm it to publish.
-                    </p>
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={createPostFromAiDraft}
-                      disabled={postLoading}
-                    >
-                      {postLoading ? "Publishing..." : "Confirm post"}
-                    </button>
-                  </>
-                ) : (
-                  <p style={{ margin: 0, marginBottom: "0.5rem" }}>
-                    I need more details to draft your post. Please describe what
-                    you want the post to say.
-                  </p>
-                )}
-                {postError && (
-                  <p
-                    className="input-error-message"
-                    style={{ marginTop: "0.75rem" }}
-                  >
-                    {postError}
-                  </p>
-                )}
-              </div>
+        {/* Confirm button ONLY appears when AI has returned complete POST_READY data */}
+        {isPostAutofill && pendingPost && !loading && (
+          <div className="ai-chat-bubble-row assistant ai-chat-confirm-row">
+            <div className="ai-chat-confirm-box">
+              <p style={{ margin: 0, marginBottom: "0.5rem" }}>
+                Your post is ready. Confirm to publish it to your neighbourhood.
+              </p>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={confirmAndPublishPost}
+                disabled={postLoading}
+              >
+                {postLoading ? "Publishing..." : "Confirm post"}
+              </button>
+              {postError && (
+                <p
+                  className="input-error-message"
+                  style={{ marginTop: "0.75rem" }}
+                >
+                  {postError}
+                </p>
+              )}
             </div>
-          )}
+          </div>
+        )}
 
         {loading && (
           <div className="ai-chat-bubble-row assistant">
@@ -448,6 +338,7 @@ function AiChat() {
           ↑
         </button>
       </div>
+
       <div className="ai-chat-usage-hint">
         {authLoading ? (
           <p>Loading authentication...</p>
@@ -458,16 +349,12 @@ function AiChat() {
                 <span>AI Daily Usage</span>
                 <span>{usageInfo.percentUsed}%</span>
               </div>
-
               <div className="ai-usage-bar">
                 <div
                   className="ai-usage-fill"
-                  style={{
-                    width: `${usageInfo.percentUsed}%`,
-                  }}
+                  style={{ width: `${usageInfo.percentUsed}%` }}
                 />
               </div>
-
               <p className="ai-usage-refresh">
                 Refreshes tomorrow at {usageInfo.refreshAt}
               </p>

@@ -4,23 +4,29 @@ import { API_URL } from "../config";
 import { useAuth } from "../context/AuthContext";
 
 const serviceOptions = [
-  { id: 'food', label: '🍞 Food' },
-  { id: 'shelter', label: '🏠 Shelter' },
-  { id: 'hub', label: '🆘 SOS Hub' },
-  { id: 'support', label: '🏥 Medical/Support' }
+  { id: 'food', label: '🍞', name: 'Food' },
+  { id: 'shelter', label: '🏠', name: 'Shelter' },
+  { id: 'hub', label: '🆘', name: 'SOS Hub' },
+  { id: 'support', label: '🏥', name: 'Medical' }
+];
+
+const typeOptions = [
+  'disaster support hub', 'emergency shelter', 'warming centre',
+  'cooling centre', 'food bank', 'community fridge', 'community kitchen',
+  'community centre', 'medical support', 'information centre',
+  'pet support', 'other'
 ];
 
 function LocationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { userData } = useAuth();
-  const userType = userData?.role; // 'in-need' | 'helper' | undefined
+  const userType = userData?.role;
 
   const [loc, setLoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // only helpers use this form state
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -76,6 +82,18 @@ function LocationDetail() {
     });
   };
 
+  const toggleService = (serviceId) => {
+    const current = formData.services || [];
+    const updated = current.includes(serviceId)
+      ? current.filter(s => s !== serviceId)
+      : [...current, serviceId];
+    setFormData({ ...formData, services: updated });
+  };
+
+  const setStatus = (newStatus) => {
+    setFormData({ ...formData, status: newStatus });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -96,216 +114,290 @@ function LocationDetail() {
     }
   };
 
-  if (loading) return <div className="page-padding-wide">Loading...</div>;
-  if (error) return <div className="page-padding-wide">{error}</div>;
+  if (loading) {
+    return (
+      <div className="location-detail-page">
+        <p style={{ color: 'var(--color-text-secondary)' }}>Loading...</p>
+      </div>
+    );
+  }
+
+  if (error || !loc) {
+    return (
+      <div className="location-detail-page">
+        <button
+          onClick={() => navigate('/map')}
+          className="btn-back"
+        >
+          ← Back to map
+        </button>
+        <div className="empty-state">
+          <div className="empty-state-icon" aria-hidden="true">😕</div>
+          <h3 className="empty-state-title">Location not found</h3>
+          <p className="empty-state-desc">
+            {error || 'This location may have been removed.'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Helpers for display 
+  const statusColors = {
+    open: { bg: '#EAF3DE', text: '#3B6D11', dot: '●' },
+    limited: { bg: '#FAEEDA', text: '#854F0B', dot: '●' },
+    closed: { bg: '#FCEBEB', text: '#A32D2D', dot: '●' }
+  };
+  const statusStyle = statusColors[loc.status] || statusColors.open;
 
   return (
-    <div className="page-padding-wide">
-      <button onClick={() => navigate("/map")}>← Back to map</button>
+    <div className="location-detail-page">
+      <button
+        onClick={() => navigate('/map')}
+        className="btn-back"
+        aria-label="Back to map"
+      >
+        ← Back to map
+      </button>
 
-      {/* ── Location Info (shown to everyone) ── */}
-      <h1>{loc.name}</h1>
-      <p>{loc.address}</p>
-      <p>Type: {loc.type}</p>
-
-      <span className={`badge badge-${loc.status}`}>{loc.status}</span>
-
-      {loc.capacity !== null && loc.capacity !== undefined && (
-        <p>
-          {loc.capacity === 0
-            ? "⚠️ Currently full"
-            : `${loc.capacity} spots available`}
-        </p>
-      )}
-
-      
-      {loc.updatedBy?.username && (
-        <p style={{ fontSize: "13px", color: "gray" }}>
-          Last updated by {loc.updatedBy.username} on{" "}
-          {new Date(loc.updatedAt).toLocaleString()}
-        </p>
-      )}
-
-      <hr />
-
-      {/* ── IN NEED: directions + call ── */}
-      {userType === "in-need" && (
-        <div className="location-actions">
-          <h2>Get Help Here</h2>
-
-          {loc.contactInfo && (
-            <a href={`tel:${loc.contactInfo}`}>
-              <button type="button">📞 Call {loc.contactInfo}</button>
-            </a>
+      {/* Title card */}
+      <div className="loc-card loc-title-card">
+        <div className="loc-card-strip" />
+        <div className="loc-card-body">
+          <div className="loc-title-row">
+            <h1 className="loc-title">{loc.name}</h1>
+          </div>
+          <div className="loc-status-line"
+            style={{ color: statusStyle.text }}>
+            <span>{statusStyle.dot}</span>
+            <span style={{ textTransform: 'uppercase', fontWeight: 500, fontSize: '11px', letterSpacing: '0.5px' }}>
+              {loc.status}
+            </span>
+            {loc.capacity !== null && loc.capacity !== undefined && (
+              <>
+                <span className="loc-status-divider">·</span>
+                <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
+                  {loc.capacity === 0
+                    ? 'Currently full'
+                    : `${loc.capacity} spots available`}
+                </span>
+              </>
+            )}
+          </div>
+          <div className="loc-address">📍 {loc.address}</div>
+          {loc.type && (
+            <div className="loc-type">{loc.type}</div>
           )}
+        </div>
+      </div>
 
+      {/* Services card */}
+      {loc.services && loc.services.length > 0 && (
+        <div className="loc-card">
+          <div className="loc-card-label">SERVICES</div>
+          <div className="loc-services-list">
+            {loc.services.map((sId) => {
+              const opt = serviceOptions.find(o => o.id === sId);
+              if (!opt) return null;
+              return (
+                <span key={sId} className="loc-service-pill">
+                  {opt.label} {opt.name}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Volunteer call-out */}
+      {loc.needsSupplies && (
+        <div className="loc-callout">
+          <span className="loc-callout-icon">🙏</span>
+          <span>This location also needs donations & volunteers</span>
+        </div>
+      )}
+
+      {/* directions + call */}
+      {userType === 'in-need' && (
+        <div className="loc-actions-stack">
           <a
             href={`https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`}
             target="_blank"
             rel="noreferrer"
+            className="loc-action-link"
           >
-            <button type="button">🗺️ Get Directions</button>
+            <button type="button" className="btn-primary-block">
+              🗺️ Get directions
+            </button>
           </a>
-
-          {loc.needsSupplies && (
-            <p style={{ marginTop: "12px" }}>
-              🙏 This location also needs supply donations or volunteers.
-            </p>
+          {loc.contactInfo && (
+            <a href={`tel:${loc.contactInfo}`} className="loc-action-link">
+              <button type="button" className="btn-outline-block">
+                📞 Call {loc.contactInfo}
+              </button>
+            </a>
           )}
         </div>
       )}
-      
-        <div className="form-group" style={{ marginTop: '15px', padding: '10px', backgroundColor: '#f4f4f4', borderRadius: '8px' }}>
-  <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Additional Services</label>
-  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-    {serviceOptions.map((service) => (
-      <label key={service.id} style={{ fontSize: '14px', display: 'flex', alignItems: 'center' }}>
-        <input
-          type="checkbox"
-          style={{ marginRight: '5px' }}
-          checked={formData.services?.includes(service.id)}
-          onChange={() => {
-            const current = formData.services || [];
-            const updated = current.includes(service.id)
-              ? current.filter(s => s !== service.id)
-              : [...current, service.id];
-            setFormData({ ...formData, services: updated });
-          }}
-        />
-        {service.label}
-      </label>
-    ))}
-  </div>
-</div>
-      
 
+      {/* HELPER edit form */}
+      {userType === 'helper' && (
+        <form onSubmit={handleSubmit} className="loc-helper-form">
 
-      {/* ── HELPER: full edit form ── */}
-      {userType === "helper" && (
-        <div className="location-actions">
-          <h2>Update Location</h2>
+          {/* Status card */}
+          <div className="loc-card">
+            <div className="loc-card-label">STATUS</div>
+            <div className="loc-status-buttons">
+              {['open', 'limited', 'closed'].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setStatus(s)}
+                  className={`loc-status-btn ${formData.status === s ? 'active' : ''}`}
+                >
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </button>
+              ))}
+            </div>
+            <label className="loc-field-label">Capacity</label>
+            <input
+              type="number"
+              name="capacity"
+              value={formData.capacity}
+              onChange={handleChange}
+              placeholder="Number (0 = full, blank = unknown)"
+              className="loc-input"
+            />
+          </div>
 
-          <form onSubmit={handleSubmit}>
-            <label>
-              Name
-              <input
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Location Name"
-              />
-            </label>
-
-            <label>
-              Address
-              <input
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                placeholder="Address"
-              />
-            </label>
-
-            <label>
-              Latitude
-              <input
-                type="number"
-                step="any"
-                name="lat"
-                value={formData.lat}
-                onChange={handleChange}
-                placeholder="Latitude"
-              />
-            </label>
-
-            <label>
-              Longitude
-              <input
-                type="number"
-                step="any"
-                name="lng"
-                value={formData.lng}
-                onChange={handleChange}
-                placeholder="Longitude"
-              />
-            </label>
-
-            <label>
-              Type
-              <select name="type" value={formData.type} onChange={handleChange}>
-                <option value="disaster support hub">
-                  Disaster Support Hub
+          {/* Basic info card */}
+          <div className="loc-card">
+            <div className="loc-card-label">LOCATION INFO</div>
+            <label className="loc-field-label">Name</label>
+            <input
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="loc-input"
+            />
+            <label className="loc-field-label">Address</label>
+            <input
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              className="loc-input"
+            />
+            <div className="loc-grid-2">
+              <div>
+                <label className="loc-field-label">Latitude</label>
+                <input
+                  type="number"
+                  step="any"
+                  name="lat"
+                  value={formData.lat}
+                  onChange={handleChange}
+                  className="loc-input"
+                />
+              </div>
+              <div>
+                <label className="loc-field-label">Longitude</label>
+                <input
+                  type="number"
+                  step="any"
+                  name="lng"
+                  value={formData.lng}
+                  onChange={handleChange}
+                  className="loc-input"
+                />
+              </div>
+            </div>
+            <label className="loc-field-label">Type</label>
+            <select
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              className="loc-input"
+            >
+              {typeOptions.map((t) => (
+                <option key={t} value={t}>
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
                 </option>
-                <option value="emergency shelter">Emergency Shelter</option>
-                <option value="warming centre">Warming Centre</option>
-                <option value="cooling centre">Cooling Centre</option>
-                <option value="food bank">Food Bank</option>
-                <option value="community fridge">Community Fridge</option>
-                <option value="community kitchen">Community Kitchen</option>
-                <option value="community centre">Community Centre</option>
-                <option value="medical support">Medical Support</option>
-                <option value="information centre">Information Centre</option>
-                <option value="pet support">Pet Support</option>
-                <option value="other">Other</option>
-              </select>
-            </label>
+              ))}
+            </select>
+          </div>
 
-            <label>
-              Status
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-              >
-                <option value="open">Open</option>
-                <option value="limited">Limited</option>
-                <option value="closed">Closed</option>
-              </select>
-            </label>
+          {/* Services card */}
+          <div className="loc-card">
+            <div className="loc-card-label">SERVICES OFFERED</div>
+            <div className="loc-services-grid">
+              {serviceOptions.map((service) => {
+                const isActive = formData.services?.includes(service.id);
+                return (
+                  <label
+                    key={service.id}
+                    className={`loc-service-checkbox ${isActive ? 'active' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isActive || false}
+                      onChange={() => toggleService(service.id)}
+                    />
+                    <span>{service.label} {service.name}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
 
-            <label>
-              Capacity
-              <input
-                type="number"
-                name="capacity"
-                value={formData.capacity}
-                onChange={handleChange}
-                placeholder="Capacity (0 = full, leave blank = unknown)"
-              />
-            </label>
+          {/* Contact card */}
+          <div className="loc-card">
+            <div className="loc-card-label">CONTACT</div>
+            <input
+              name="contactInfo"
+              value={formData.contactInfo}
+              onChange={handleChange}
+              placeholder="Phone number or email"
+              className="loc-input"
+            />
+          </div>
 
-            <label>
-              Contact Info
-              <input
-                name="contactInfo"
-                value={formData.contactInfo}
-                onChange={handleChange}
-                placeholder="Phone number or email"
-              />
-            </label>
+          {/* Needs supplies toggle */}
+          <label className="loc-supplies-toggle">
+            <input
+              type="checkbox"
+              name="needsSupplies"
+              checked={formData.needsSupplies}
+              onChange={handleChange}
+            />
+            <span>🙏 This location needs supplies / volunteers</span>
+          </label>
 
-            <label>
-              <input
-                type="checkbox"
-                name="needsSupplies"
-                checked={formData.needsSupplies}
-                onChange={handleChange}
-              />{" "}
-              Needs Supplies / Volunteers
-            </label>
+          <button type="submit" className="btn-primary-block">
+            Save changes
+          </button>
+        </form>
+      )}
 
-            <button type="submit">Save Changes</button>
-          </form>
+      {/* Not logged in */}
+      {!userType && (
+        <div className="loc-signin-prompt">
+          <p style={{ marginTop: 0, color: 'var(--color-text-secondary)', fontSize: '14px' }}>
+            Sign in to get directions or update this location.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate('/signin')}
+            className="btn-primary-block"
+          >
+            Sign in
+          </button>
         </div>
       )}
 
-      {/* NOT LOGGED IN: prompt to sign in */}
-      {!userType && (
-        <div style={{ marginTop: "1rem" }}>
-          <p>Sign in to get directions or update this location.</p>
-          <button type="button" onClick={() => navigate("/login")}>
-            Sign In
-          </button>
+      {/* Last updated meta */}
+      {loc.updatedBy?.username && (
+        <div className="loc-meta">
+          Last updated by {loc.updatedBy.username} · {new Date(loc.updatedAt).toLocaleDateString()}
         </div>
       )}
     </div>

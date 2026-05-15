@@ -212,6 +212,18 @@ function AiChat() {
   return (
     <div className="ai-chat-page">
       <div className="ai-chat-header">
+        <button
+          onClick={() => navigate(-1)}
+          className="btn-back"
+          aria-label="Go back"
+          style={{
+            minHeight: "unset",
+            padding: "var(--space-2)",
+            borderRadius: "var(--radius-full)",
+          }}
+        >
+          ← Back
+        </button>
         <div className="ai-chat-header-icon" aria-hidden="true">
           🤖
         </div>

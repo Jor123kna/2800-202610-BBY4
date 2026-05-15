@@ -18,9 +18,7 @@ function PostCard({ post }) {
     return date.toLocaleDateString();
   };
 
-  const handleClick = () => {
-    navigate(`/post/${post._id}`);
-  };
+  const handleClick = () => navigate(`/post/${post._id}`);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -28,6 +26,8 @@ function PostCard({ post }) {
       handleClick();
     }
   };
+
+  const replyCount = post.replies?.length ?? post.replyCount ?? 0;
 
   return (
     <article
@@ -38,22 +38,28 @@ function PostCard({ post }) {
       tabIndex={0}
       aria-label={`View post: ${post.title}`}
     >
-      {/* Role badge at top */}
+      {/* Top row: badges left, reply count right */}
       <div className="post-card-header">
-        <span className={`role-tag role-tag-${post.role}`}>
-          {post.role === "in-need" ? "🆘 In Need" : "🤝 To Help"}
+        <div className="post-card-badges">
+          <span className={`role-tag role-tag-${post.role}`}>
+            {post.role === "in-need" ? "🆘 In Need" : "🤝 To Help"}
+          </span>
+          {post.aigenerated && (
+            <span className="role-tag role-tag-ai">🤖 AI Generated</span>
+          )}
+        </div>
+        <span
+          className="post-card-reply-count"
+          aria-label={`${replyCount} replies`}
+        >
+          💬 {replyCount}
         </span>
-        {post.aigenerated && (
-          <span className="role-tag role-tag-ai">🤖 AI Generated</span>
-        )}
       </div>
 
       {/* Title */}
-      <div className="post-card-title-row">
-        <h3 className="post-card-title">{post.title}</h3>
-      </div>
+      <h3 className="post-card-title">{post.title}</h3>
 
-      {/* Content preview (~first 150 characters)*/}
+      {/* Content preview */}
       <p className="post-card-content">
         {post.content.length > 150
           ? `${post.content.substring(0, 150)}...`
@@ -62,11 +68,9 @@ function PostCard({ post }) {
 
       {/* Footer: author + date */}
       <div className="post-card-footer">
-        {/* author is now an object */}
         <span className="post-card-author">
           {post.author?.firstName} {post.author?.lastName}
         </span>
-        {/* date field is createdAt */}
         <span className="post-card-date">{formatDate(post.createdAt)}</span>
       </div>
     </article>

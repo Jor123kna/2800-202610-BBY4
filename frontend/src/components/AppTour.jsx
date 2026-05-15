@@ -9,28 +9,38 @@ function AppTour() {
 
   const steps = [
     {
+      target: 'body',
+      content: 'Welcome to RouteRelief! This quick walkthrough will show you the main parts of the app.',
+      placement: 'center'
+    },
+    {
       target: '.nav-community',
       content: 'This is the Community page. Here you can see posts from people asking for help or offering help.',
       placement: 'top'
     },
     {
-      target: '.nav-post',
-      content: 'Use Post to ask for help or offer support to your community.',
+      target: '.tour-create-post',
+      content: 'Tap this plus button to create a new post when you need help or want to offer support.',
+      placement: 'left'
+    },
+    {
+      target: '.nav-notifications',
+      content: 'Notifications show replies and updates connected to your posts and conversations.',
       placement: 'top'
     },
     {
       target: '.nav-map',
-      content: 'Use the Map to find shelters, resources, and safe locations nearby.',
+      content: 'Use the Map to find shelters, food resources, community centres, and emergency support locations nearby.',
       placement: 'top'
     },
     {
       target: '.nav-info',
-      content: 'The Info page has emergency tips and helpful guidance.',
+      content: 'The Info page has disaster guides with tips for before, during, and after emergencies.',
       placement: 'top'
     },
     {
       target: '.nav-profile',
-      content: 'Your Profile lets you update your role, manage your posts, and change settings.',
+      content: 'Your Profile lets you update your role, manage your posts, and change your first-time mode.',
       placement: 'top'
     }
   ];
@@ -70,10 +80,11 @@ function AppTour() {
       showSkipButton={true}
       showProgress={true}
       disableScrolling={true}
+      disableBeacon={true}
       callback={handleJoyrideCallback}
       styles={{
         options: {
-          zIndex: 10000
+          zIndex: 99999
         }
       }}
     />

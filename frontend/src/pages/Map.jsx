@@ -16,6 +16,8 @@ function Map() {
   const [showHint, setShowHint] = useState(true);
   const navigate = useNavigate();
   const { userData } = useAuth();
+  const [mapKey, setMapKey] = useState(0);
+
 
   const userType = userData?.role;
 
@@ -36,8 +38,8 @@ function Map() {
     fetchLocations();
   }, []);
 
-   
-   const filterMatchesLocation = (filter, loc) => {
+
+  const filterMatchesLocation = (filter, loc) => {
     if (filter === "all") return true;
 
     // We only declare these ONCE at the top
@@ -62,6 +64,8 @@ function Map() {
     if (filter === "other") {
       return type === "other";
     }
+    return false;
+  };
   // If location access is denied, we show an error banner with retry button
   const handleRetryLocation = () => {
     setLocationError(false);
@@ -70,22 +74,21 @@ function Map() {
     setMapKey((k) => k + 1);
   };
 
-  const [mapKey, setMapKey] = useState(0);
 
-  
+
   const filteredLocations = locations.filter((loc) => {
     const matchesSearch =
       loc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       loc.address.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     // This is the line that connects to our new filter logic
-    const matchesFilter = filterMatchesLocation(activeFilter, loc); 
-    
+    const matchesFilter = filterMatchesLocation(activeFilter, loc);
+
     return matchesSearch && matchesFilter;
-  
+
   });
-   
-  
+
+
 
   const getTypeIcon = (type) => {
     switch (type) {
@@ -234,14 +237,14 @@ function Map() {
         aria-label="Map showing nearby relief locations"
         style={{ height: "500px", padding: 0, overflow: "hidden" }}
       >
-       <MapComponent
+        <MapComponent
           key={mapKey}
           locations={filteredLocations}
           showFood={activeFilter === "food"}
           onLocationError={() => setLocationError(true)}
           onLocationFound={() => setLocationError(false)}
         />
-      
+
       </div>
 
       {/* Result count */}
@@ -306,19 +309,20 @@ function Map() {
               <span className={`badge ${getStatusClass(loc.status)}`}>
                 {loc.status}
               </span>
-                 {loc.needsSupplies && (
-         <span style={{
-            backgroundColor: '#e67e22',
-            color: 'white',
-            padding: '2px 8px',
-             borderRadius: '4px',
-             fontSize: '10px',
-             marginLeft: '8px',
-             fontWeight: 'bold',
-             display: 'inline-block' }}>
-    ⚠️ NEEDS SUPPLIES
-  </span>
-)}
+              {loc.needsSupplies && (
+                <span style={{
+                  backgroundColor: '#e67e22',
+                  color: 'white',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontSize: '10px',
+                  marginLeft: '8px',
+                  fontWeight: 'bold',
+                  display: 'inline-block'
+                }}>
+                  ⚠️ NEEDS SUPPLIES
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -326,5 +330,6 @@ function Map() {
     </div>
   );
 }
+
 
 export default Map;

@@ -14,7 +14,7 @@ function Layout({ showBack = false, hideBottomNav = false }) {
       </main>
 
       {!hideBottomNav && <BottomNav />}
-      {!hideBottomNav && <AppTour />}
+    <AppTour />
     </div>
   );
 }

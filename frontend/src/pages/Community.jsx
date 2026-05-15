@@ -225,7 +225,7 @@ function Community() {
 
       {/* Floating "+" button */}
       <button
-        className="fab"
+        className="fab tour-create-post"
         onClick={() => navigate("/post")}
         aria-label="Create new post"
       >

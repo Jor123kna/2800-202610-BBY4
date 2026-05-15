@@ -34,6 +34,10 @@ function PostDetail() {
   const [editText, setEditText] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
 
+  // Bookmark state
+  const [isSaved, setIsSaved] = useState(false);
+  const [savingBookmark, setSavingBookmark] = useState(false);
+
   // Fetch single post + replies in parallel
   useEffect(() => {
     const fetchPostAndReplies = async () => {
@@ -68,6 +72,30 @@ function PostDetail() {
     fetchPostAndReplies();
   }, [id]);
 
+  // Check if user has bookmarked this post
+  useEffect(() => {
+    if (!id || !userData) return;
+
+    const checkIfSaved = async () => {
+      try {
+        const response = await fetch(`${API_URL}/users/saved`, {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const saved = (data.savedPosts || []).some((p) => p._id === id);
+          setIsSaved(saved);
+        }
+      } catch (err) {
+        console.error("Error checking bookmark status:", err);
+      }
+    };
+
+    checkIfSaved();
+  }, [id, userData]);
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -91,6 +119,36 @@ function PostDetail() {
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + REPLIES_PER_PAGE);
+  };
+
+  // Toggle bookmark
+  const handleToggleBookmark = async () => {
+    if (!userData) {
+      navigate("/signin");
+      return;
+    }
+    if (savingBookmark) return;
+
+    setSavingBookmark(true);
+
+    try {
+      const method = isSaved ? "DELETE" : "POST";
+      const response = await fetch(`${API_URL}/users/saved/${id}`, {
+        method,
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        setIsSaved(!isSaved);
+      } else {
+        const data = await response.json();
+        console.error("Bookmark toggle failed:", data.message);
+      }
+    } catch (err) {
+      console.error("Error toggling bookmark:", err);
+    } finally {
+      setSavingBookmark(false);
+    }
   };
 
   // Submit reply to backend
@@ -307,6 +365,18 @@ function PostDetail() {
                   {formatDate(post.createdAt)}
                 </span>
               </div>
+
+              {/* Bookmark button */}
+              <button
+                type="button"
+                className={`post-bookmark-btn ${isSaved ? "saved" : ""}`}
+                onClick={handleToggleBookmark}
+                disabled={savingBookmark}
+                aria-label={isSaved ? "Remove bookmark" : "Save post"}
+                title={isSaved ? "Saved" : "Save for later"}
+              >
+                {isSaved ? "🔖" : "🏷️"}
+              </button>
             </div>
 
             <p className="post-detail-content">{post.content}</p>

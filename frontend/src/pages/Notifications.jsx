@@ -135,7 +135,7 @@ function Notifications() {
                 <button
                     role="tab"
                     aria-selected={activeTab === 'my-posts'}
-                    className={`notif-tab ${activeTab === 'my-posts' ? 'active' : ''}`}
+                    className={`notif-tab ${activeTab === 'my-posts' ? 'active' : ''}"tour-your-posts-tab"`}
                     onClick={() => setActiveTab('my-posts')}
                 >
                     Your posts ({myPostsCount})
@@ -143,7 +143,7 @@ function Notifications() {
                 <button
                     role="tab"
                     aria-selected={activeTab === 'my-replies'}
-                    className={`notif-tab ${activeTab === 'my-replies' ? 'active' : ''}`}
+                    className={`notif-tab ${activeTab === 'my-replies' ? 'active' : ''}"tour-your-replies-tab"`}
                     onClick={() => setActiveTab('my-replies')}
                 >
                     Your replies ({myRepliesCount})

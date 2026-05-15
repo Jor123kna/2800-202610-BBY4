@@ -147,6 +147,13 @@ function Post() {
 
   return (
     <div className="page-padding">
+       <button
+          onClick={() => navigate(-1)}
+          className="btn-back"
+          aria-label="Back to community"
+        >
+          ← Back 
+        </button>
       {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (
         <PageHint message={hints["Post"]} onClose={() => setShowHint(false)} />
@@ -324,7 +331,7 @@ function Post() {
       </form>
       {/* Floating "✨ Autofill with AI" button */}
       <button
-        className="fab fab--label"
+        className="fab fab--label tour-autofill"
         onClick={() =>
           navigate("/AiChat", {
             state: {

@@ -186,11 +186,11 @@ function PostDetail() {
     return (
       <div className="post-detail-page">
         <button
-          onClick={() => navigate("/community")}
+          onClick={() => navigate(-1)}
           className="btn-back"
           aria-label="Back to community"
         >
-          ← Back to community
+          ← Back 
         </button>
         <div className="empty-state">
           <div className="empty-state-icon" aria-hidden="true">
@@ -217,11 +217,11 @@ function PostDetail() {
     <>
       <div className="post-detail-page post-detail-page-with-input">
         <button
-          onClick={() => navigate("/community")}
+          onClick={() => navigate(-1)}
           className="btn-back"
           aria-label="Back to community"
         >
-          ← Back to community
+          ← Back
         </button>
         {/* Page Hint */}
         {showHint && userData?.firstTimeMode && (

@@ -41,7 +41,7 @@ router.get('/notifications', isLoggedIn, async (req, res) => {
 
         const myRepliesGroups = myReplies
             .filter((reply) => {
-                return reply.post.author.toString() !== userId;
+                return reply.post && reply.post.author.toString() !== userId;
             })
             .map((reply) => {
                 return {

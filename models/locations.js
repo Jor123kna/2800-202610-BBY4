@@ -35,6 +35,19 @@ const locationSchema = new mongoose.Schema({
     ],
     required: true,
   },
+    // small addition in schema cause i want one location to have
+    //multiple tags like a community centre can also be a food bank, so we can have more flexible filtering in the frontend.
+   services: {
+    type: [String], 
+    default: [], 
+  },
+
+
+  volunteers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+
   status: {
     type: String,
     enum: ["open", "limited", "closed"],
@@ -54,7 +67,7 @@ const locationSchema = new mongoose.Schema({
   },
   updatedBy: {
     type: mongoose.Schema.Types.ObjectId, // User object
-    ref: "User", // Foreign key to user collection
+    ref: "User", 
   },
   updatedAt: {
     type: Date,

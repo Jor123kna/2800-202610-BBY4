@@ -3,6 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { API_URL } from "../config";
 import { useAuth } from "../context/AuthContext";
 
+const serviceOptions = [
+  { id: 'food', label: '🍞 Food' },
+  { id: 'shelter', label: '🏠 Shelter' },
+  { id: 'hub', label: '🆘 SOS Hub' },
+  { id: 'support', label: '🏥 Medical/Support' }
+];
+
 function LocationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -24,6 +31,7 @@ function LocationDetail() {
     capacity: "",
     needsSupplies: false,
     contactInfo: "",
+    services: [],
   });
 
   useEffect(() => {
@@ -48,6 +56,7 @@ function LocationDetail() {
           capacity: data.capacity ?? "",
           needsSupplies: data.needsSupplies || false,
           contactInfo: data.contactInfo || "",
+          services: data.services || [],
         });
       } catch (err) {
         setError("Could not load this location.");
@@ -109,6 +118,7 @@ function LocationDetail() {
         </p>
       )}
 
+      
       {loc.updatedBy?.username && (
         <p style={{ fontSize: "13px", color: "gray" }}>
           Last updated by {loc.updatedBy.username} on{" "}
@@ -144,6 +154,31 @@ function LocationDetail() {
           )}
         </div>
       )}
+      
+        <div className="form-group" style={{ marginTop: '15px', padding: '10px', backgroundColor: '#f4f4f4', borderRadius: '8px' }}>
+  <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Additional Services</label>
+  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+    {serviceOptions.map((service) => (
+      <label key={service.id} style={{ fontSize: '14px', display: 'flex', alignItems: 'center' }}>
+        <input
+          type="checkbox"
+          style={{ marginRight: '5px' }}
+          checked={formData.services?.includes(service.id)}
+          onChange={() => {
+            const current = formData.services || [];
+            const updated = current.includes(service.id)
+              ? current.filter(s => s !== service.id)
+              : [...current, service.id];
+            setFormData({ ...formData, services: updated });
+          }}
+        />
+        {service.label}
+      </label>
+    ))}
+  </div>
+</div>
+      
+
 
       {/* ── HELPER: full edit form ── */}
       {userType === "helper" && (

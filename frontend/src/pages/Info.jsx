@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import PageHint, { hints } from "../components/PageHint";
 import DisasterCard from "../components/DisasterCard";
 import { disasters } from "../data/disasterData";
+import InstallGuideCard from "../components/InstallGuideCard";
 
 function Info() {
   const navigate = useNavigate();
@@ -32,6 +33,9 @@ function Info() {
         </p>
       </div>
 
+      {/* Install app card */}
+      <InstallGuideCard />
+
       <div className="disaster-list">
         {disasters.map((disaster) => (
           <DisasterCard
@@ -42,7 +46,6 @@ function Info() {
         ))}
       </div>
 
-      {/* Floating "Chat with ai" button */}
       <button
         className="fab fab--label"
         onClick={() => navigate("/AiChat")}

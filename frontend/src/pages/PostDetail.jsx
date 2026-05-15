@@ -29,6 +29,11 @@ function PostDetail() {
   // Track which reply is currently being deleted
   const [deletingId, setDeletingId] = useState(null);
 
+  // Reply editing state
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
   // Fetch single post + replies in parallel
   useEffect(() => {
     const fetchPostAndReplies = async () => {
@@ -165,6 +170,53 @@ function PostDetail() {
     }
   };
 
+  // Start editing a reply
+  const handleStartEdit = (reply) => {
+    setEditingId(reply._id);
+    setEditText(reply.content);
+  };
+
+  // Cancel editing
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditText("");
+  };
+
+  // Save edited reply
+  const handleSaveEdit = async (replyId) => {
+    const trimmed = editText.trim();
+    if (!trimmed || savingEdit) return;
+
+    setSavingEdit(true);
+
+    try {
+      const response = await fetch(`${API_URL}/replies/${replyId}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: trimmed }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Replace the old reply with the updated one
+        setReplies((prev) =>
+          prev.map((r) => (r._id === replyId ? data.reply : r)),
+        );
+        setEditingId(null);
+        setEditText("");
+      } else {
+        alert(data.message || "Failed to update reply");
+      }
+    } catch (err) {
+      console.error("Error updating reply:", err);
+      alert("Could not update reply. Please try again.");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -190,7 +242,7 @@ function PostDetail() {
           className="btn-back"
           aria-label="Back to community"
         >
-          ← Back 
+          ← Back
         </button>
         <div className="empty-state">
           <div className="empty-state-icon" aria-hidden="true">
@@ -285,6 +337,7 @@ function PostDetail() {
                   const isPostAuthor = reply.author?._id === postAuthorId;
                   const isMyReply = reply.author?._id === currentUserId;
                   const isDeleting = deletingId === reply._id;
+                  const isEditing = editingId === reply._id;
 
                   return (
                     <div
@@ -309,19 +362,72 @@ function PostDetail() {
                             {formatDate(reply.createdAt)}
                           </span>
                         </div>
-                        <p className="reply-content">{reply.content}</p>
 
-                        {/* Delete button */}
-                        {isMyReply && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteReply(reply._id)}
-                            disabled={isDeleting}
-                            className="btn-reply-delete"
-                            aria-label="Delete this reply"
-                          >
-                            {isDeleting ? "Deleting..." : "Delete"}
-                          </button>
+                        {/* show edit form OR content */}
+                        {isEditing ? (
+                          <div className="reply-edit-form">
+                            <textarea
+                              className="reply-edit-textarea"
+                              value={editText}
+                              onChange={(e) => setEditText(e.target.value)}
+                              maxLength={500}
+                              rows={3}
+                              autoFocus
+                              disabled={savingEdit}
+                              aria-label="Edit reply text"
+                            />
+                            <div className="reply-edit-actions">
+                              <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                className="btn-reply-cancel"
+                                disabled={savingEdit}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleSaveEdit(reply._id)}
+                                disabled={!editText.trim() || savingEdit}
+                                className="btn-reply-save"
+                              >
+                                {savingEdit ? "Saving..." : "Save"}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="reply-content">
+                              {reply.content}
+                              {/* (edited) tag */}
+                              {reply.editedAt && (
+                                <span className="reply-edited-tag"> · (edited)</span>
+                              )}
+                            </p>
+
+                            {/* Edit + Delete buttons */}
+                            {isMyReply && (
+                              <div className="reply-actions">
+                                <button
+                                  type="button"
+                                  onClick={() => handleStartEdit(reply)}
+                                  className="btn-reply-edit"
+                                  aria-label="Edit this reply"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteReply(reply._id)}
+                                  disabled={isDeleting}
+                                  className="btn-reply-delete"
+                                  aria-label="Delete this reply"
+                                >
+                                  {isDeleting ? "Deleting..." : "Delete"}
+                                </button>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>

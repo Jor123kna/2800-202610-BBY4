@@ -294,35 +294,20 @@ function Map() {
               <div
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  gap: "4px",
-                  alignItems: "flex-end",
+                  flexDirection: "row",
+                  gap: "6px",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  justifyContent: "flex-end",
                 }}
               >
                 <span className={`badge ${getStatusClass(loc.status)}`}>
                   {loc.status}
                 </span>
-                {userType === "helper" && loc.needsSupplies && (
-                  <span className="badge badge-limited">🙏 Needs supplies</span>
+                {loc.needsSupplies && (
+                  <span className="badge badge-supplies">🙏 Needs supplies</span>
                 )}
               </div>
-              <span className={`badge ${getStatusClass(loc.status)}`}>
-                {loc.status}
-              </span>
-              {loc.needsSupplies && (
-                <span style={{
-                  backgroundColor: '#e67e22',
-                  color: 'white',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  fontSize: '10px',
-                  marginLeft: '8px',
-                  fontWeight: 'bold',
-                  display: 'inline-block'
-                }}>
-                  ⚠️ NEEDS SUPPLIES
-                </span>
-              )}
             </button>
           ))}
         </div>

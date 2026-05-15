@@ -149,5 +149,54 @@ router.delete('/:id', isLoggedIn, async (req, res) => {
     }
 });
 
+// PUT /replies/:id - edit a reply (author only)
+router.put('/:id', isLoggedIn, async (req, res) => {
+    try {
+        const userId = req.session.user.id;
+        const { content } = req.body;
+
+        if (!content || !content.trim()) {
+            return res.status(400).json({
+                message: 'Reply content cannot be empty'
+            });
+        }
+
+        const reply = await Reply.findById(req.params.id);
+
+        if (!reply) {
+            return res.status(404).json({
+                message: 'Reply not found'
+            });
+        }
+
+        // Only author can edit
+        if (reply.author.toString() !== userId) {
+            return res.status(403).json({
+                message: 'You can only edit your own replies'
+            });
+        }
+
+        reply.content = content.trim();
+        reply.editedAt = new Date();
+        await reply.save();
+
+        // Re-populate author for the response
+        const updatedReply = await Reply.findById(reply._id)
+            .populate('author', 'firstName lastName');
+
+        res.json({
+            message: 'Reply updated successfully',
+            reply: updatedReply
+        });
+
+    } catch (err) {
+        console.error('Edit reply error:', err);
+        res.status(500).json({
+            message: 'Error updating reply',
+            error: err.message
+        });
+    }
+});
+
 
 module.exports = router;

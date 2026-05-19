@@ -1,20 +1,41 @@
 import React from "react";
 
-export function DisasterDetailHeader({ disaster, onBack }) {
+export function DisasterDetailHeader({ disaster, onBack, onTriggerEffect }) {
   return (
     <>
-      <button
-        className="back-link"
-        onClick={onBack}
-        aria-label="Back to disaster guides"
-      >
-        ‹ Back to guides
-      </button>
+      <div className="disaster-detail-header-actions">
+        <button
+          className="back-link"
+          onClick={onBack}
+          aria-label="Back to disaster guides"
+        >
+          ‹ Back to guides
+        </button>
+      </div>
 
       <div className="disaster-detail-header">
-        <div className="disaster-detail-icon" aria-hidden="true">
-          {disaster.icon}
-        </div>
+        <button
+          type="button"
+          className={`disaster-detail-icon-button ${disaster.id}`}
+          onClick={onTriggerEffect}
+          aria-label={`Trigger ${disaster.name} effect`}
+          style={{
+            background: "none",
+            border: "none",
+            padding: 0,
+            margin: 0,
+            cursor: "pointer",
+            WebkitTapHighlightColor: "transparent",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <span className="disaster-detail-icon" aria-hidden="true">
+            {disaster.icon}
+          </span>
+        </button>
+
         <h1 className="disaster-detail-name">{disaster.name}</h1>
         <p className="disaster-detail-desc">{disaster.description}</p>
 

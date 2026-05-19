@@ -9,13 +9,10 @@ const reportSchema = new mongoose.Schema({
   field: {
     type: String,
     enum: [
-      "status",
       "foodLevel",
       "waterLevel",
       "shelterLevel",
       "suppliesLevel",
-      "capacity",
-      "needsSupplies"
     ],
     required: true
   },
@@ -68,8 +65,6 @@ const locationSchema = new mongoose.Schema({
     ],
     required: true,
   },
-  // small addition in schema cause i want one location to have
-  //multiple tags like a community centre can also be a food bank, so we can have more flexible filtering in the frontend.
   services: {
     type: [String],
     enum: [
@@ -130,14 +125,6 @@ const locationSchema = new mongoose.Schema({
     enum: ["unknown", "none", "low", "medium", "high"],
     default: "unknown"
   },
-  capacity: {
-    type: Number,
-    default: null, // null = unknown, 0 = full, >0 = spots available
-  },
-  needsSupplies: {
-    type: Boolean,
-    default: false,
-  },
   contactInfo: {
     phone: {
       type: String,
@@ -156,13 +143,6 @@ const locationSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
-
-  volunteers: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User"
-    }
-  ],
   reports: {
     type: [reportSchema],
     default: []

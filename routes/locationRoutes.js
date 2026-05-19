@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Location = require("../models/locations");
+const { isLoggedIn } = require('../middleware/requireLogin');
 
 // GET /locations - get all locations
 router.get("/", async (req, res) => {
@@ -85,6 +86,107 @@ router.put("/:id", async (req, res) => {
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /locations/:id/report-update
+router.post("/:id/report-update", isLoggedIn, async (req, res) => {
+  try {
+    const { field, value } = req.body;
+
+    const allowedValues = {
+      status: ["open", "limited", "closed"],
+      foodLevel: ["unknown", "none", "low", "medium", "high"],
+      waterLevel: ["unknown", "none", "low", "medium", "high"],
+      shelterLevel: ["unknown", "none", "low", "medium", "high"],
+      suppliesLevel: ["unknown", "none", "low", "medium", "high"],
+      capacity: ["0", "1", "2", "3", "4", "5", "10", "20", "50"],
+      needsSupplies: ["true", "false"]
+    };
+
+    if (!allowedValues[field]) {
+      return res.status(400).json({
+        message: "Invalid update type."
+      });
+    }
+
+    if (!allowedValues[field].includes(String(value))) {
+      return res.status(400).json({
+        message: "Invalid update value."
+      });
+    }
+
+    const location = await Location.findById(req.params.id);
+
+    if (!location) {
+      return res.status(404).json({
+        message: "Location not found."
+      });
+    }
+
+    const alreadyReportedSameUpdate = location.reports.some((report) => {
+      return (
+        report.user.toString() === req.session.user.id &&
+        report.field === field &&
+        report.value === String(value)
+      );
+    });
+
+    if (alreadyReportedSameUpdate) {
+      return res.status(400).json({
+        message: "You already reported this update."
+      });
+    }
+
+    location.reports.push({
+      user: req.session.user.id,
+      field,
+      value: String(value)
+    });
+
+    const matchingReports = location.reports.filter((report) => {
+      return report.field === field && report.value === String(value);
+    });
+
+    if (matchingReports.length >= 2) {
+      if (field === "capacity") {
+        location[field] = Number(value);
+      } else if (field === "needsSupplies") {
+        location[field] = value === "true";
+      } else {
+        location[field] = value;
+      }
+
+      location.updatedBy = req.session.user.id;
+      location.updatedAt = new Date();
+
+      // Clear only the reports for this field after saving the accepted change.
+      location.reports = location.reports.filter((report) => {
+        return report.field !== field;
+      });
+
+      await location.save();
+
+      return res.json({
+        message: `${field} updated to ${value}.`,
+        location
+      });
+    }
+
+    await location.save();
+
+    res.json({
+      message: "Report submitted. One more matching report is needed before this location updates.",
+      location
+    });
+
+  } catch (err) {
+    console.error("Report location update error:", err);
+
+    res.status(500).json({
+      message: "Error reporting location update.",
+      error: err.message
+    });
   }
 });
 

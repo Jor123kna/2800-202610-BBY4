@@ -48,6 +48,42 @@ function Map() {
     const type = loc.type;
     const services = loc.services || [];
 
+    const serviceLevels = [
+      { service: "food", field: "foodLevel" },
+      { service: "water", field: "waterLevel" },
+      { service: "shelter", field: "shelterLevel" },
+      { service: "supplies", field: "suppliesLevel" },
+    ];
+
+    const offersService = (service) => {
+    return services.includes(service);
+  };
+
+  const hasProblemLevel = (field) => {
+    return loc[field] === "low" || loc[field] === "none";
+  };
+
+  const hasGoodLevel = (field) => {
+    return loc[field] === "medium" || loc[field] === "high";
+  };
+
+  if (filter === "available") {
+  const offeredServiceLevels = serviceLevels.filter((item) =>
+    offersService(item.service)
+  );
+
+  return (
+    offeredServiceLevels.length > 0 &&
+    offeredServiceLevels.every((item) => !hasProblemLevel(item.field))
+  );
+}
+
+  if (filter === "needs-help") {
+    return serviceLevels.some((item) => {
+      return offersService(item.service) && hasProblemLevel(item.field);
+    });
+  }
+
     if (filter === "shelter") {
       return (
         ["emergency shelter", "warming centre", "cooling centre"].includes(type) ||
@@ -101,6 +137,7 @@ function Map() {
         services.includes("disaster support hub")
       );
     }
+  
 
     return false;
   };
@@ -186,7 +223,7 @@ function Map() {
     ];
     if (userType === "in-need")
       return [
-        { value: "available", label: "✅ Has Space" },
+        { value: "available", label: "✅ Available to help" },
         ...categoryFilters,
       ];
     if (userType === "helper")
@@ -375,13 +412,7 @@ function Map() {
                   <div className="map-location-name">{loc.name}</div>
                   <div className="map-location-address">{loc.address}</div>
 
-                  {/* {userType === "in-need" && loc.capacity !== null && (
-                    <div className="map-location-capacity">
-                      {loc.capacity === 0
-                        ? "⚠️ Full"
-                        : `${loc.capacity} spots available`}
-                    </div>
-                  )} */}
+    
                 </div>
 
                 <div

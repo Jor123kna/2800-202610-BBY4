@@ -121,12 +121,12 @@ function LocationDetail() {
   };
 
   const formatTypeName = (type) => {
-  if (!type) return "";
+    if (!type) return "";
 
-  const lowerType = type.toLowerCase();
+    const lowerType = type.toLowerCase();
 
-  return lowerType.charAt(0).toUpperCase() + lowerType.slice(1);
-};
+    return lowerType.charAt(0).toUpperCase() + lowerType.slice(1);
+  };
 
   // Makes service names nicer to read in the services pills
   const formatServiceName = (service) => {
@@ -184,25 +184,25 @@ function LocationDetail() {
   // These cards only appear if the location has the matching service
   const serviceVoteOptions = [
     {
-      service: "food",
+      services: ["food", "low-cost meals", "community kitchen"],
       field: "foodLevel",
       label: "FOOD STATUS",
       values: ["none", "low", "medium", "high"],
     },
     {
-      service: "water",
+      services: ["water"],
       field: "waterLevel",
       label: "WATER STATUS",
       values: ["none", "low", "medium", "high"],
     },
     {
-      service: "shelter",
+      services: ["shelter", "warming centre", "cooling centre", "disaster support hub"],
       field: "shelterLevel",
       label: "SHELTER STATUS",
       values: ["none", "low", "medium", "high"],
     },
     {
-      service: "supplies",
+      services: ["supplies"],
       field: "suppliesLevel",
       label: "SUPPLIES STATUS",
       values: ["none", "low", "medium", "high"],
@@ -221,7 +221,7 @@ function LocationDetail() {
 
       {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (
-        <PageHint message={hints["Map"]} onClose={() => setShowHint(false)} />
+        <PageHint message={hints["LocationDetails"]} onClose={() => setShowHint(false)} />
       )}
 
       {/* Title card */}
@@ -247,21 +247,6 @@ function LocationDetail() {
               {openInfo.label}
             </span>
 
-            {loc.capacity !== null && loc.capacity !== undefined && (
-              <>
-                <span className="loc-status-divider">·</span>
-                <span
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--color-text-secondary)",
-                  }}
-                >
-                  {loc.capacity === 0
-                    ? "Currently full"
-                    : `${loc.capacity} spots available`}
-                </span>
-              </>
-            )}
           </div>
 
           <div className="loc-address">
@@ -271,8 +256,8 @@ function LocationDetail() {
 
           {loc.type && <div className="loc-address">
             {getTypeIcon(loc.type)} {formatTypeName(loc.type)}
-            </div>
-            }
+          </div>
+          }
 
 
           {loc.notes && (
@@ -317,8 +302,12 @@ function LocationDetail() {
       )}
 
       {/* Service voting cards */}
-      {serviceVoteOptions.map((option) => {
-        if (!loc.services?.includes(option.service)) {
+      {userType && serviceVoteOptions.map((option) => {
+        const hasMatchingService = option.services.some((service) =>
+          loc.services?.includes(service)
+        );
+
+        if (!hasMatchingService) {
           return null;
         }
 
@@ -451,7 +440,7 @@ function LocationDetail() {
               fontSize: "14px",
             }}
           >
-            Sign in to get directions or update this location.
+            Sign in to get report updates for this location.
           </p>
 
           <button

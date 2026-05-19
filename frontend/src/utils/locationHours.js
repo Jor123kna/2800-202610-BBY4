@@ -98,7 +98,7 @@ export function getLocationOpenInfo(loc) {
 
   return {
     isOpen,
-    label: isOpen ? "Open now" : "Closed now",
+    label: isOpen ? "Open" : "Closed",
     todayHours: `${today.open} - ${today.close}`
   };
 }

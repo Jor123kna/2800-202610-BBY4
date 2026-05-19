@@ -1,14 +1,25 @@
 import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 const vancouverBounds = [
-    [49.002, -123.324], 
-    [49.390, -122.690]  
-  ];
+  [49.002, -123.324],
+  [49.390, -122.690]
+];
 
 
-function MapComponent({ showFood, onLocationError, onLocationFound , locations=[]}) {
+function MapComponent({ onLocationError, onLocationFound, locations = [] }) {
   const mapContainerRef = useRef(null);
   const leafletMapRef = useRef(null);
   const userMarkerRef = useRef(null);
@@ -16,13 +27,6 @@ function MapComponent({ showFood, onLocationError, onLocationFound , locations=[
   const hasCenteredOnUserRef = useRef(false);
   const markersLayerRef = useRef(null);
 
-  // Define map boundaries for the Vancouver area
-//   const vancouverBounds = [
-//     [49.002, -123.324], 
-//     [49.390, -122.690]  
-//   ];
-  const geoJsonLayerRef = useRef(null);
-  const geoJsonDataRef = useRef(null);
 
   const onLocationErrorRef = useRef(onLocationError);
   const onLocationFoundRef = useRef(onLocationFound);
@@ -33,13 +37,14 @@ function MapComponent({ showFood, onLocationError, onLocationFound , locations=[
     onLocationFoundRef.current = onLocationFound;
   }, [onLocationFound]);
 
+
   useEffect(() => {
     if (!mapContainerRef.current || leafletMapRef.current) return;
 
     // Initialize map with Vancouver boundary constraints
     const map = L.map(mapContainerRef.current, {
       maxBounds: vancouverBounds,
-      maxBoundsViscosity: 1.0, 
+      maxBoundsViscosity: 1.0,
       minZoom: 11
     }).setView([49.2827, -123.1207], 12);
 
@@ -53,7 +58,7 @@ function MapComponent({ showFood, onLocationError, onLocationFound , locations=[
     // Initialize the layer group for markers
     markersLayerRef.current = L.layerGroup().addTo(map);
 
- 
+
     function onFound(e) {
       const { latlng, accuracy } = e;
 
@@ -69,7 +74,6 @@ function MapComponent({ showFood, onLocationError, onLocationFound , locations=[
         accuracyCircleRef.current = L.circle(latlng, {
           radius: accuracy,
           color: '#136aec',
-          color: "#136aec",
           fillColor: "#136aec",
           fillOpacity: 0.15,
         }).addTo(map);
@@ -83,10 +87,9 @@ function MapComponent({ showFood, onLocationError, onLocationFound , locations=[
       }
     }
 
-    map.on('locationfound', onLocationFound);
-    map.locate({ watch: true, enableHighAccuracy: true });
+    // map.locate({ watch: true, enableHighAccuracy: true });
 
-  
+
     function onError(e) {
       console.error("Location error:", e.message);
       onLocationErrorRef.current?.(e.message);
@@ -104,39 +107,6 @@ function MapComponent({ showFood, onLocationError, onLocationFound , locations=[
       maximumAge: 0,
     });
 
-    fetch("/community-centres-2.geojson")
-      .then((res) => res.json())
-      .then((data) => {
-        geoJsonDataRef.current = data;
-
-        const layer = L.geoJSON(data, {
-          pointToLayer: (feature, latlng) =>
-            L.circleMarker(latlng, {
-              radius: 8,
-              fillColor: "#d62828",
-              color: "#ffffff",
-              weight: 2,
-              opacity: 1,
-              fillOpacity: 0.9,
-            }),
-          onEachFeature: (feature, layer) => {
-            const name = feature.properties?.name || "Community Centre";
-            const address =
-              feature.properties?.address || "No address available";
-            const area = feature.properties?.geolocalarea || "Unknown area";
-            layer.bindPopup(`
-              <div>
-                <strong>${name}</strong><br/>
-                ${address}<br/>
-                <em>${area}</em>
-              </div>
-            `);
-          },
-        }).addTo(map);
-
-        geoJsonLayerRef.current = layer;
-      })
-      .catch((err) => console.error("Error loading GeoJSON:", err));
 
     return () => {
       map.off("locationfound", onFound);
@@ -148,13 +118,13 @@ function MapComponent({ showFood, onLocationError, onLocationFound , locations=[
   }, []);
 
   // Update markers and adjust camera when locations prop changes
- useEffect(() => {
+  useEffect(() => {
     if (!leafletMapRef.current || !markersLayerRef.current) return;
 
     markersLayerRef.current.clearLayers();
 
     // 1. Filter valid locations from the database
-    const validLocations = locations.filter(loc => 
+    const validLocations = locations.filter(loc =>
       loc.lat && loc.lng && loc.lat !== 0
     );
 
@@ -169,9 +139,9 @@ function MapComponent({ showFood, onLocationError, onLocationFound , locations=[
       });
 
       // No neeed for it upgraded to get location 
-    //   marker.bindPopup(`<b>${loc.name}</b><br/>${loc.address}`);
-     
-    // Construct the Google Maps Directions URL
+      //   marker.bindPopup(`<b>${loc.name}</b><br/>${loc.address}`);
+
+      // Construct the Google Maps Directions URL
       const mapLink = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
 
       // Get Directions button added
@@ -184,8 +154,8 @@ function MapComponent({ showFood, onLocationError, onLocationFound , locations=[
     </a>
   </div>
       `);
-    
-    markersLayerRef.current.addLayer(marker);
+
+      markersLayerRef.current.addLayer(marker);
     });
 
     // 3. CAMERA LOGIC: Only trigger if there are pins to show
@@ -200,56 +170,56 @@ function MapComponent({ showFood, onLocationError, onLocationFound , locations=[
       }
 
       if (allPoints.length > 1) {
-        leafletMapRef.current.fitBounds(allPoints, { 
-          padding: [50, 50], 
-          maxZoom: 15 
+        leafletMapRef.current.fitBounds(allPoints, {
+          padding: [50, 50],
+          maxZoom: 15
         });
       } else {
         leafletMapRef.current.setView(allPoints[0], 15);
       }
     }
   }, [locations]);
- 
-  useEffect(() => {
-    const map = leafletMapRef.current;
-    const allData = geoJsonDataRef.current;
-    if (!map || !allData) return;
 
-    if (geoJsonLayerRef.current) map.removeLayer(geoJsonLayerRef.current);
+  // useEffect(() => {
+  //   const map = leafletMapRef.current;
+  //   const allData = geoJsonDataRef.current;
+  //   if (!map || !allData) return;
 
-    const filteredFeatures = showFood
-      ? allData.features.filter((f) => f.properties?.hasFood === true)
-      : allData.features;
+  //   if (geoJsonLayerRef.current) map.removeLayer(geoJsonLayerRef.current);
 
-    const newLayer = L.geoJSON(
-      { ...allData, features: filteredFeatures },
-      {
-        pointToLayer: (feature, latlng) =>
-          L.circleMarker(latlng, {
-            radius: 8,
-            fillColor: "#d62828",
-            color: "#ffffff",
-            weight: 2,
-            opacity: 1,
-            fillOpacity: 0.9,
-          }),
-        onEachFeature: (feature, layer) => {
-          const name = feature.properties?.name || "Community Centre";
-          const address = feature.properties?.address || "No address available";
-          const area = feature.properties?.geolocalarea || "Unknown area";
-          layer.bindPopup(`
-          <div>
-            <strong>${name}</strong><br/>
-            ${address}<br/>
-            <em>${area}</em>
-          </div>
-        `);
-        },
-      },
-    ).addTo(map);
+  //   const filteredFeatures = showFood
+  //     ? allData.features.filter((f) => f.properties?.hasFood === true)
+  //     : allData.features;
 
-    geoJsonLayerRef.current = newLayer;
-  }, [showFood]);
+  //   const newLayer = L.geoJSON(
+  //     { ...allData, features: filteredFeatures },
+  //     {
+  //       pointToLayer: (feature, latlng) =>
+  //         L.circleMarker(latlng, {
+  //           radius: 8,
+  //           fillColor: "#d62828",
+  //           color: "#ffffff",
+  //           weight: 2,
+  //           opacity: 1,
+  //           fillOpacity: 0.9,
+  //         }),
+  //       onEachFeature: (feature, layer) => {
+  //         const name = feature.properties?.name || "Community Centre";
+  //         const address = feature.properties?.address || "No address available";
+  //         const area = feature.properties?.geolocalarea || "Unknown area";
+  //         layer.bindPopup(`
+  //         <div>
+  //           <strong>${name}</strong><br/>
+  //           ${address}<br/>
+  //           <em>${area}</em>
+  //         </div>
+  //       `);
+  //       },
+  //     },
+  //   ).addTo(map);
+
+  //   geoJsonLayerRef.current = newLayer;
+  // }, [showFood]);
 
   return (
     <div ref={mapContainerRef} style={{ height: "500px", width: "100%" }} />

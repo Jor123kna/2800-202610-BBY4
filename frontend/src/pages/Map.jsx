@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { API_URL } from "../config";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { getLocationOpenInfo } from "../utils/locationHours";
+
 
 import MapComponent from "../components/MapComponent";
 import PageHint, { hints } from "../components/PageHint";
@@ -17,6 +19,7 @@ function Map() {
   const navigate = useNavigate();
   const { userData } = useAuth();
   const [mapKey, setMapKey] = useState(0);
+
 
 
   const userType = userData?.role;
@@ -42,30 +45,67 @@ function Map() {
   const filterMatchesLocation = (filter, loc) => {
     if (filter === "all") return true;
 
-    // We only declare these ONCE at the top
     const type = loc.type;
-    const hasService = loc.services && loc.services.includes(filter);
+    const services = loc.services || [];
 
     if (filter === "shelter") {
-      return ["emergency shelter", "warming centre", "cooling centre"].includes(type) || hasService;
+      return (
+        ["emergency shelter", "warming centre", "cooling centre"].includes(type) ||
+        services.includes("shelter") ||
+        services.includes("warming centre") ||
+        services.includes("cooling centre")
+      );
     }
+
     if (filter === "food") {
-      return ["food bank", "community fridge", "community kitchen"].includes(type) || hasService;
+      return (
+        ["food bank", "community fridge", "community kitchen"].includes(type) ||
+        services.includes("food") ||
+        services.includes("low-cost meals")
+      );
     }
+
+    if (filter === "water") {
+      return services.includes("water");
+    }
+
+    if (filter === "supplies") {
+      return services.includes("supplies");
+    }
+
     if (filter === "community") {
-      return ["community centre", "community kitchen"].includes(type);
+      return (
+        type === "community centre" ||
+        services.includes("community gathering") ||
+        services.includes("youth programs") ||
+        services.includes("senior programs") ||
+        services.includes("newcomer support")
+      );
     }
-    if (filter === "hub") {
-      return ["disaster support hub", "information centre"].includes(type) || hasService;
+
+    if (filter === "medical") {
+      return type === "medical support" || services.includes("medical support");
     }
-    if (filter === "support") {
-      return ["medical support", "pet support"].includes(type) || hasService;
+
+    if (filter === "pet") {
+      return type === "pet support" || services.includes("pet support");
     }
-    if (filter === "other") {
-      return type === "other";
+
+    if (filter === "info") {
+      return (
+        type === "information centre" ||
+        type === "disaster support hub" ||
+        services.includes("information") ||
+        services.includes("recovery information") ||
+        services.includes("family reunification") ||
+        services.includes("disaster support hub")
+      );
     }
+
     return false;
   };
+
+
   // If location access is denied, we show an error banner with retry button
   const handleRetryLocation = () => {
     setLocationError(false);
@@ -137,10 +177,12 @@ function Map() {
       { value: "all", label: "All" },
       { value: "shelter", label: "🏠 Shelter" },
       { value: "food", label: "🍞 Food" },
+      { value: "water", label: "💧 Water" },
+      { value: "supplies", label: "📦 Supplies" },
       { value: "community", label: "🏘️ Community" },
-      { value: "hub", label: "🆘 Hubs" },
-      { value: "support", label: "🏥 Support" },
-      { value: "other", label: "📍 Other" },
+      { value: "medical", label: "🏥 Medical" },
+      { value: "pet", label: "🐾 Pet Help" },
+      { value: "info", label: "ℹ️ Info" }
     ];
     if (userType === "in-need")
       return [
@@ -156,6 +198,7 @@ function Map() {
   };
 
   const filters = getFilters();
+
 
   return (
     <div className="page-padding-wide map-page">
@@ -269,47 +312,108 @@ function Map() {
         </div>
       ) : (
         <div className="map-location-list">
-          {filteredLocations.map((loc) => (
-            <button
-              key={loc._id}
-              type="button"
-              className={`map-location-card ${selectedId === loc._id ? "selected" : ""}`}
-              onClick={() => navigate(`/locations/${loc._id}`)}
-              aria-label={`View details for ${loc.name}`}
-            >
-              <div className="map-location-icon" aria-hidden="true">
-                {getTypeIcon(loc.type)}
-              </div>
-              <div className="map-location-info">
-                <div className="map-location-name">{loc.name}</div>
-                <div className="map-location-address">{loc.address}</div>
-                {userType === "in-need" && loc.capacity !== null && (
-                  <div className="map-location-capacity">
-                    {loc.capacity === 0
-                      ? "⚠️ Full"
-                      : `${loc.capacity} spots available`}
-                  </div>
-                )}
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: "6px",
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                  justifyContent: "flex-end",
-                }}
+          {filteredLocations.map((loc) => {
+            const openInfo = getLocationOpenInfo(loc);
+
+            const serviceBadges = [
+              {
+                service: "food",
+                field: "foodLevel",
+                icon: "🍞",
+                labels: {
+                  low: "Low food",
+                  none: "No food"
+                }
+              },
+              {
+                service: "water",
+                field: "waterLevel",
+                icon: "💧",
+                labels: {
+                  low: "Low water",
+                  none: "No water"
+                }
+              },
+              {
+                service: "supplies",
+                field: "suppliesLevel",
+                icon: "📦",
+                labels: {
+                  low: "Low supplies",
+                  none: "No supplies"
+                }
+              },
+              {
+                service: "shelter",
+                field: "shelterLevel",
+                icon: "🏠",
+                labels: {
+                  low: "Low shelter",
+                  none: "No shelter"
+                }
+              },
+            ].filter((item) => {
+              const offersService = loc.services?.includes(item.service);
+              const hasLowOrNone = loc[item.field] === "low" || loc[item.field] === "none";
+
+              return offersService && hasLowOrNone;
+            });
+
+            return (
+              <button
+                key={loc._id}
+                type="button"
+                className={`map-location-card ${selectedId === loc._id ? "selected" : ""}`}
+                onClick={() => navigate(`/locations/${loc._id}`)}
+                aria-label={`View details for ${loc.name}`}
               >
-                <span className={`badge ${getStatusClass(loc.status)}`}>
-                  {loc.status}
-                </span>
-                {loc.needsSupplies && (
-                  <span className="badge badge-supplies">🙏 Needs supplies</span>
-                )}
-              </div>
-            </button>
-          ))}
+                <div className="map-location-icon" aria-hidden="true">
+                  {getTypeIcon(loc.type)}
+                </div>
+
+                <div className="map-location-info">
+                  <div className="map-location-name">{loc.name}</div>
+                  <div className="map-location-address">{loc.address}</div>
+
+                  {/* {userType === "in-need" && loc.capacity !== null && (
+                    <div className="map-location-capacity">
+                      {loc.capacity === 0
+                        ? "⚠️ Full"
+                        : `${loc.capacity} spots available`}
+                    </div>
+                  )} */}
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: "6px",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  {serviceBadges.map((badge) => (
+                    <span key={badge.field} className="badge badge-limited">
+                      {badge.icon} {badge.labels[loc[badge.field]]}
+                    </span>
+                  ))}
+                  <span
+                    className={`badge ${openInfo.isOpen === true
+                      ? "badge-open"
+                      : openInfo.isOpen === false
+                        ? "badge-closed"
+                        : "badge-limited"
+                      }`}
+                  >
+                    {openInfo.label}
+                  </span>
+
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

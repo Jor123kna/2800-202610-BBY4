@@ -9,6 +9,7 @@ import {
   DisasterOverview,
   DisasterTodo,
 } from "../components/DisasterDetailComponents";
+import DisasterEffects from "../components/DisasterEffects";
 
 function DisasterDetail() {
   const { disasterId } = useParams();
@@ -16,10 +17,15 @@ function DisasterDetail() {
 
   const { userData } = useAuth();
   const [showHint, setShowHint] = useState(true);
-
   const [activeTab, setActiveTab] = useState("overview");
+  const [activeEffect, setActiveEffect] = useState(null);
 
   const disaster = disasterDetails[disasterId];
+
+  const triggerEffect = () => {
+    setActiveEffect(`disaster_${disaster.id}`);
+    setTimeout(() => setActiveEffect(null), 4000);
+  };
 
   if (!disaster) {
     return (
@@ -48,25 +54,27 @@ function DisasterDetail() {
 
   return (
     <div className="page-padding">
-      {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (
         <PageHint
           message={hints["DisasterDetails"]}
           onClose={() => setShowHint(false)}
         />
       )}
+
       <DisasterDetailHeader
         disaster={disaster}
         onBack={() => navigate("/info")}
+        onTriggerEffect={triggerEffect}
       />
+
       <DisasterDetailTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+
       {activeTab === "overview" ? (
         <DisasterOverview overview={disaster.overview} />
       ) : (
         <DisasterTodo todo={disaster.todo} />
       )}
 
-      {/* Floating "Chat with ai" button */}
       <button
         className="fab fab--label"
         onClick={() => navigate("/AiChat")}
@@ -74,6 +82,8 @@ function DisasterDetail() {
       >
         💬 Chat with ai
       </button>
+
+      <DisasterEffects type={activeEffect} />
     </div>
   );
 }

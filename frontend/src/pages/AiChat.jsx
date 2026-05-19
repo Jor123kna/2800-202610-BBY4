@@ -71,7 +71,6 @@ function AiChat() {
     setMessages(updatedMessages);
     setInput("");
     setLoading(true);
-    // Clear any previous pending post when the user sends a new message
     setPendingPost(null);
     setPostError("");
 
@@ -101,14 +100,33 @@ function AiChat() {
       const reply =
         data.reply || "Sorry, I could not get a response. Please try again.";
 
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+      // AI sometimes adds a preamble before POST_READY so use includes not startsWith
+      if (isPostAutofill && reply.includes("POST_READY")) {
+        const postReadyIndex = reply.indexOf("POST_READY");
+        const friendlyText = reply.slice(0, postReadyIndex).trim();
+        const postReadyBlock = reply.slice(postReadyIndex);
 
-      // Only enable the confirm button when AI returns fully structured POST_READY data
-      if (isPostAutofill && reply.trim().startsWith("POST_READY")) {
-        const postData = parsePostDataFromAi(reply);
+        const postData = parsePostDataFromAi(postReadyBlock);
         if (postData) {
           setPendingPost(postData);
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content:
+                friendlyText ||
+                "Your post is ready. Confirm below to publish it to your neighbourhood.",
+            },
+          ]);
+        } else {
+          // Parsing failed — show the full raw reply so nothing is silently lost
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: reply },
+          ]);
         }
+      } else {
+        setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
       }
     } catch (err) {
       console.error("Fetch error:", err.message);
@@ -147,25 +165,29 @@ function AiChat() {
     inputRef.current?.focus();
   };
 
+  // Handles both single-line and multi-line POST_READY responses from the AI
   const parsePostDataFromAi = (text) => {
-    if (!text || !text.trim().startsWith("POST_READY")) return null;
+    if (!text || !text.includes("POST_READY")) return null;
 
-    const lines = text.split("\n");
     const postData = {};
 
-    for (const line of lines) {
-      if (line.startsWith("Title: ")) {
-        postData.title = line.substring(7).trim();
-      } else if (line.startsWith("Content: ")) {
-        postData.content = line.substring(9).trim();
-      } else if (line.startsWith("Neighbourhood: ")) {
-        postData.neighbourhood = line.substring(15).trim();
-      } else if (line.startsWith("Role: ")) {
-        postData.role = line.substring(6).trim();
-      }
-    }
+    // Regex handles fields whether they're on separate lines or all on one line.
+    // Each field value runs until the next known field keyword or end of string.
+    const titleMatch = text.match(/Title:\s*(.*?)(?=\s*Content:|$)/s);
+    const contentMatch = text.match(
+      /Content:\s*(.*?)(?=\s*Neighbourhood:|Role:|$)/s,
+    );
+    const neighbourhoodMatch = text.match(
+      /Neighbourhood:\s*(.*?)(?=\s*Role:|$)/s,
+    );
+    const roleMatch = text.match(/Role:\s*(.*?)(?=\s*$)/s);
 
-    // All three required fields must be present
+    if (titleMatch) postData.title = titleMatch[1].trim();
+    if (contentMatch) postData.content = contentMatch[1].trim();
+    if (neighbourhoodMatch)
+      postData.neighbourhood = neighbourhoodMatch[1].trim();
+    if (roleMatch) postData.role = roleMatch[1].trim();
+
     if (postData.title && postData.content && postData.role) {
       return postData;
     }
@@ -214,13 +236,18 @@ function AiChat() {
       <div className="ai-chat-header">
         <button
           onClick={() => navigate(-1)}
-          className="btn-back"
-          aria-label="Go back"
           style={{
-            minHeight: "unset",
+            background: "none",
+            border: "none",
+            color: "var(--color-brand)",
+            fontSize: "var(--text-sm)",
+            fontWeight: "var(--font-weight-medium)",
+            cursor: "pointer",
             padding: "var(--space-2)",
-            borderRadius: "var(--radius-full)",
+            flexShrink: 0,
+            fontFamily: "inherit",
           }}
+          aria-label="Go back"
         >
           ← Back
         </button>
@@ -264,13 +291,10 @@ function AiChat() {
           </div>
         ))}
 
-        {/* Confirm button ONLY appears when AI has returned complete POST_READY data */}
+        {/* Confirm button appears after AI returns complete POST_READY data */}
         {isPostAutofill && pendingPost && !loading && (
           <div className="ai-chat-bubble-row assistant ai-chat-confirm-row">
             <div className="ai-chat-confirm-box">
-              <p style={{ margin: 0, marginBottom: "0.5rem" }}>
-                Your post is ready. Confirm to publish it to your neighbourhood.
-              </p>
               <button
                 type="button"
                 className="btn btn-primary"

@@ -31,6 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
+//Sets up the session
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "routereliefsecret",

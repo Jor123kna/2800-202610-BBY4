@@ -114,7 +114,7 @@ function Post() {
   if (!userData && userData !== null) {
     return (
       <div className="page-padding">
-        <p style={{ color: "var(--color-text-secondary)" }}>Loading...</p>
+        <p style={{ color: "var(--color-text-secondary)" }}>Loading post...</p>
       </div>
     );
   }
@@ -152,7 +152,7 @@ function Post() {
           className="btn-back"
           aria-label="Back to community"
         >
-          ← Back 
+          ← Back
         </button>
       {/* Page Hint */}
       {showHint && userData?.firstTimeMode && (

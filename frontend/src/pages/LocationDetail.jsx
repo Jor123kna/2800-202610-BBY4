@@ -144,7 +144,7 @@ function LocationDetail() {
   if (loading) {
     return (
       <div className="location-detail-page">
-        <p style={{ color: "var(--color-text-secondary)" }}>Loading...</p>
+        <p style={{ color: "var(--color-text-secondary)" }}>Loading location...</p>
       </div>
     );
   }

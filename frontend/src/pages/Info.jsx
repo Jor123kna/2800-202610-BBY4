@@ -53,6 +53,7 @@ function Info() {
       >
         💬 Chat with ai
       </button>
+      <div style={{ height: "var(--space-8)" }}></div>
     </div>
   );
 }

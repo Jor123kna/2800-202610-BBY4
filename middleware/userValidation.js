@@ -1,5 +1,6 @@
 const Joi = require('joi');
 
+//Validates that the users signup information is proper and safe.
 const signupSchema = Joi.object({
     firstName: Joi.string()
         .trim()
@@ -53,6 +54,7 @@ const signupSchema = Joi.object({
         .optional()
 });
 
+//Validates that the users log in information is correct to an already existing account.
 const signinSchema = Joi.object({
     email: Joi.string()
         .trim()
@@ -72,6 +74,7 @@ const signinSchema = Joi.object({
         })
 });
 
+// Validates that the users sign up information is valid.
 function validateSignup(req, res, next) {
     const { error } = signupSchema.validate(req.body, {
         abortEarly: false
@@ -86,6 +89,7 @@ function validateSignup(req, res, next) {
     next();
 }
 
+// Validates that the users login information is valid.
 function validateSignin(req, res, next) {
     const { error } = signinSchema.validate(req.body, {
         abortEarly: false

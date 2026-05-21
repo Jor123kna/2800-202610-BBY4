@@ -1,0 +1,28 @@
+/* Alert banners */
+.alert {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  border-left: 3px solid;
+}
+
+.alert-emergency {
+  background: var(--color-emergency-bg);
+  color: var(--color-emergency-text);
+  border-left-color: var(--color-emergency);
+}
+
+.alert-warning {
+  background: var(--color-accent-bg);
+  color: var(--color-accent-text);
+  border-left-color: var(--color-accent);
+}
+
+.alert-info {
+  background: var(--color-brand-bg);
+  color: var(--color-brand-text);
+  border-left-color: var(--color-brand);
+}

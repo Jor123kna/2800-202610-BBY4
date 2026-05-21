@@ -1,0 +1,99 @@
+/* Inputs */
+.input {
+  width: 100%;
+  min-height: var(--tap-target-min);
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-surface-base);
+  transition: border-color 0.15s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-brand);
+}
+
+.input::placeholder {
+  color: var(--color-text-disabled);
+}
+
+.input-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.input-group {
+  margin-bottom: var(--space-4);
+}
+
+/* Role toggle */
+.role-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.role-toggle-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  min-height: 120px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-base);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.role-toggle-option:hover {
+  border-color: var(--color-text-secondary);
+  background: var(--color-surface-raised);
+}
+
+/* Selected state - In Need */
+.role-toggle-option.selected.in-need {
+  border-color: var(--color-role-in-need);
+  background: var(--color-role-in-need-bg);
+  color: var(--color-role-in-need);
+}
+
+/* Selected state - Helper */
+.role-toggle-option.selected.helper {
+  border-color: var(--color-role-helper);
+  background: var(--color-role-helper-bg);
+  color: var(--color-role-helper);
+}
+
+.role-toggle-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.role-toggle-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-medium);
+}
+
+.role-toggle-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.role-toggle-option.selected .role-toggle-desc {
+  color: inherit;
+  opacity: 0.85;
+}

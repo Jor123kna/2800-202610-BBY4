@@ -1,0 +1,75 @@
+/* 4. FORM ELEMENTS */
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target-min);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition:
+    background-color 0.15s ease,
+    transform 0.05s ease;
+  text-decoration: none;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Full-width modifier */
+.btn-block {
+  width: 100%;
+}
+
+/* Primary action */
+.btn-primary {
+  background: var(--color-brand);
+  color: var(--color-text-inverse);
+}
+.btn-primary:hover {
+  background: var(--color-brand-hover);
+}
+
+/* Secondary action */
+.btn-secondary {
+  background: var(--color-surface-base);
+  color: var(--color-brand);
+  border: 1.5px solid var(--color-brand);
+}
+.btn-secondary:hover {
+  background: var(--color-brand-bg);
+}
+
+/* Tertiary action */
+.btn-tertiary {
+  background: transparent;
+  color: var(--color-text-primary);
+}
+.btn-tertiary:hover {
+  background: var(--color-surface-raised);
+}
+
+/* Accent action */
+.btn-accent {
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+.btn-accent:hover {
+  background: var(--color-accent-hover);
+}
+
+/* Emergency action */
+.btn-emergency {
+  background: var(--color-emergency);
+  color: var(--color-text-inverse);
+}
+.btn-emergency:hover {
+  background: var(--color-emergency-hover);
+}

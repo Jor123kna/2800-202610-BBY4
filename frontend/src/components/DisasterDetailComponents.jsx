@@ -19,17 +19,6 @@ export function DisasterDetailHeader({ disaster, onBack, onTriggerEffect }) {
           className={`disaster-detail-icon-button ${disaster.id}`}
           onClick={onTriggerEffect}
           aria-label={`Trigger ${disaster.name} effect`}
-          style={{
-            background: "none",
-            border: "none",
-            padding: 0,
-            margin: 0,
-            cursor: "pointer",
-            WebkitTapHighlightColor: "transparent",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
         >
           <span className="disaster-detail-icon" aria-hidden="true">
             {disaster.icon}

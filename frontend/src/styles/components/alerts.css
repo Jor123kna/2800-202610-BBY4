@@ -26,3 +26,23 @@
   color: var(--color-brand-text);
   border-left-color: var(--color-brand);
 }
+
+.page-hint {
+  background: var(--color-brand);
+  color: white;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.page-hint-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+}

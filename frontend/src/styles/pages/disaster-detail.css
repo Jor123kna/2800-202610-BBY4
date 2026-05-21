@@ -66,6 +66,45 @@
   margin-bottom: var(--space-2);
 }
 
+.disaster-detail-icon-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.disaster-detail-icon-button:hover,
+.disaster-detail-icon-button:focus-visible {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 4px rgba(81, 147, 255, 0.16);
+}
+
+.disaster-detail-icon-button:active {
+  transform: scale(0.94);
+}
+
+.disaster-detail-icon-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(28, 114, 234, 0.22);
+}
+
+.disaster-detail-icon-button[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .disaster-detail-name {
   font-size: var(--text-2xl);
   font-weight: var(--font-weight-semibold);
@@ -448,6 +487,7 @@ body.de-page-melt .app-container,
 }
 
 body.de-page-landslide .app-container,
+#root.de-page-landslide .app-container,
 .app-container.de-page-landslide {
   animation: de-page-landslide 1.8s ease-in-out forwards;
   will-change: transform, filter;
@@ -839,4 +879,3 @@ body.de-page-smoke .app-container,
 .todo-stage-item.after::before {
   background: #047857;
 }
-

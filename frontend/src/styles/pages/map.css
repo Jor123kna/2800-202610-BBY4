@@ -160,6 +160,37 @@
   font-weight: var(--font-weight-semibold);
 }
 
+/* Map container */
+.map-component-container {
+  height: 500px;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* Custom Leaflet locate control */
+.custom-locate-btn {
+  background: var(--color-surface-base);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 999px;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.custom-locate-btn:hover {
+  background: var(--color-border-subtle);
+}
+
+.custom-locate-icon {
+  display: block;
+  fill: var(--color-text-primary);
+}
+
 /* Mock map area */
 .map-area {
   position: relative;
@@ -299,4 +330,3 @@
 .map-area .leaflet-container {
   z-index: 1;
 }
-

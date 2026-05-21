@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import PageHint, { hints } from "../components/PageHint";
 import { useAuth } from "../context/AuthContext";
@@ -19,12 +19,37 @@ function DisasterDetail() {
   const [showHint, setShowHint] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [activeEffect, setActiveEffect] = useState(null);
+  const [effectLocked, setEffectLocked] = useState(false);
+  const effectTimerRef = useRef([]);
 
   const disaster = disasterDetails[disasterId];
 
+  useEffect(() => {
+    return () => {
+      effectTimerRef.current.forEach((timerId) => clearTimeout(timerId));
+      effectTimerRef.current = [];
+    };
+  }, []);
+
   const triggerEffect = () => {
+    if (effectLocked) return;
+
     setActiveEffect(`disaster_${disaster.id}`);
-    setTimeout(() => setActiveEffect(null), 4000);
+    setEffectLocked(true);
+
+    const effectDuration = 4000;
+    const bufferDuration = 1000;
+
+    const hideTimer = window.setTimeout(
+      () => setActiveEffect(null),
+      effectDuration,
+    );
+    const unlockTimer = window.setTimeout(
+      () => setEffectLocked(false),
+      effectDuration + bufferDuration,
+    );
+
+    effectTimerRef.current = [hideTimer, unlockTimer];
   };
 
   if (!disaster) {
@@ -65,6 +90,7 @@ function DisasterDetail() {
         disaster={disaster}
         onBack={() => navigate("/info")}
         onTriggerEffect={triggerEffect}
+        disabled={effectLocked}
       />
 
       <DisasterDetailTabs activeTab={activeTab} setActiveTab={setActiveTab} />

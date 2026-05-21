@@ -20,7 +20,7 @@ function Map() {
   const { userData } = useAuth();
   const [mapKey, setMapKey] = useState(0);
 
-
+ const [userCoords, setUserCoords] = useState(null);
 
   const userType = userData?.role;
 
@@ -42,69 +42,31 @@ function Map() {
   }, []);
 
 
-  const filterMatchesLocation = (filter, loc) => {
-    if (filter === "all") return true;
+ // Helper to evaluate if a location matches the active filter chip category
+const filterMatchesLocation = (filter, loc) => {
+  if (filter === "all") return true;
 
-    const type = loc.type;
-    const services = loc.services || [];
+  const type = loc.type?.toLowerCase();
+  const services = loc.services || [];
 
-    if (filter === "shelter") {
-      return (
-        ["emergency shelter", "warming centre", "cooling centre"].includes(type) ||
-        services.includes("shelter") ||
-        services.includes("warming centre") ||
-        services.includes("cooling centre")
-      );
-    }
-
-    if (filter === "food") {
-      return (
-        ["food bank", "community fridge", "community kitchen"].includes(type) ||
-        services.includes("food") ||
-        services.includes("low-cost meals")
-      );
-    }
-
-    if (filter === "water") {
-      return services.includes("water");
-    }
-
-    if (filter === "supplies") {
-      return services.includes("supplies");
-    }
-
-    if (filter === "community") {
-      return (
-        type === "community centre" ||
-        services.includes("community gathering") ||
-        services.includes("youth programs") ||
-        services.includes("senior programs") ||
-        services.includes("newcomer support")
-      );
-    }
-
-    if (filter === "medical") {
-      return type === "medical support" || services.includes("medical support");
-    }
-
-    if (filter === "pet") {
-      return type === "pet support" || services.includes("pet support");
-    }
-
-    if (filter === "info") {
-      return (
-        type === "information centre" ||
-        type === "disaster support hub" ||
-        services.includes("information") ||
-        services.includes("recovery information") ||
-        services.includes("family reunification") ||
-        services.includes("disaster support hub")
-      );
-    }
-
-    return false;
+  // Group filter rules into a clean configuration map
+  const filterRules = {
+    shelter: () => ["emergency shelter", "warming centre", "cooling centre"].includes(type) || 
+                   ["shelter", "warming centre", "cooling centre"].some(s => services.includes(s)),
+    food: () => ["food bank", "community fridge", "community kitchen"].includes(type) || 
+                 ["food", "low-cost meals"].some(s => services.includes(s)),
+    water: () => services.includes("water"),
+    supplies: () => services.includes("supplies"),
+    community: () => type === "community centre" || 
+                     ["community gathering", "youth programs", "senior programs", "newcomer support"].some(s => services.includes(s)),
+    medical: () => type === "medical support" || services.includes("medical support"),
+    pet: () => type === "pet support" || services.includes("pet support"),
+    info: () => ["information centre", "disaster support hub"].includes(type) || 
+                 ["information", "recovery information", "family reunification", "disaster support hub"].some(s => services.includes(s))
   };
 
+  return filterRules[filter] ? filterRules[filter]() : false;
+};
 
   // If location access is denied, we show an error banner with retry button
   const handleRetryLocation = () => {
@@ -129,6 +91,25 @@ function Map() {
   });
 
 
+  //  // testing 
+  // console.log("??? PARENT MAP.JSX USERCOORDS STATE IS:", userCoords);
+
+  const processedDisplayList = !userCoords
+    ? filteredLocations
+    : [...filteredLocations].sort((a, b) => {
+        const userLat = parseFloat(userCoords.lat);
+        const userLng = parseFloat(userCoords.lng);
+        
+        const latA = parseFloat(a.lat) || 0;
+        const lngA = parseFloat(a.lng) || 0;
+        const latB = parseFloat(b.lat) || 0;
+        const lngB = parseFloat(b.lng) || 0;
+
+        const deltaA = Math.abs(latA - userLat) + Math.abs(lngA - userLng);
+        const deltaB = Math.abs(latB - userLat) + Math.abs(lngB - userLng);
+        
+        return deltaA - deltaB;
+      });
 
   const getTypeIcon = (type) => {
     switch (type) {
@@ -285,22 +266,28 @@ function Map() {
           locations={filteredLocations}
           showFood={activeFilter === "food"}
           onLocationError={() => setLocationError(true)}
-          onLocationFound={() => setLocationError(false)}
+          onLocationFound={(latlng) => {
+            setLocationError(false);
+            setUserCoords({ lat: latlng.lat, lng: latlng.lng });
+          }}
         />
 
       </div>
+
+
+    
 
       {/* Result count */}
       <div className="map-results-header">
         <span className="map-results-count">
           {loading
             ? "Loading..."
-            : `${filteredLocations.length} location${filteredLocations.length !== 1 ? "s" : ""}`}
+            : `${processedDisplayList.length} location${processedDisplayList.length !== 1 ? "s" : ""}`}
         </span>
       </div>
 
       {/* Location list */}
-      {!loading && filteredLocations.length === 0 ? (
+      {!loading && processedDisplayList.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon" aria-hidden="true">
             🔍
@@ -312,7 +299,7 @@ function Map() {
         </div>
       ) : (
         <div className="map-location-list">
-          {filteredLocations.map((loc) => {
+          {processedDisplayList.map((loc) => {
             const openInfo = getLocationOpenInfo(loc);
 
             const serviceBadges = [

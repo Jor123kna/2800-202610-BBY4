@@ -3813,3 +3813,41 @@ body.de-page-smoke .app-container,
 .post-bookmark-btn.saved:hover:not(:disabled) {
   background: #ffedd5;
 }
+
+
+.custom-locate-btn {
+  background-color: #ffffff;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none !important;
+  border-radius: 50% !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s;
+}
+
+.custom-locate-btn:hover {
+  background-color: #f4f4f4;
+}
+
+.custom-locate-icon {
+  fill: #1a73e8;
+  display: block;
+}
+
+
+/* Customfloating emoji markers for relief map pins */
+.custom-relief-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 24px;
+}
+
+
+ 

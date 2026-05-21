@@ -5,6 +5,53 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
+
+// funtion to be used to get the distance btw user and the community 
+function getDistance(userLat,userLng,destinationLat,destinationLng){
+// if you want to get the answer in miles change to 3959
+  const R =6371; // Radius of the Earth in km
+
+// findid the diff btw btw user lat and dest lat & dest long - userlng
+// then we will convert it to radian JS dont get degres on curved surface 
+const dLat=(destinationLat-userLat)*Math.PI/180;
+const dLon=(destinationLng-userLng)*Math.PI/180;
+
+
+// find the staring line distance
+  /* first we calculate the distance by thinking it as of 2d 
+drawing a line btw user and the destination straight line 
+first find north south move 
+second east west move
+*/
+
+// Cutting through the sphere and knowing the disctance btw two points
+const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(userLat * Math.PI / 180) * Math.cos(destinationLat * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+// since we cant go from point a to b by cutting through the sphere
+//  we need to find the angle between the two points and then multiply it by the radius of the earth to get the distance
+const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+// now mulltiple it by raidus of earth to get the distance
+return R * c;
+}
+
+
+// generate custom map icons based on location type
+function createLocationIcon(type) {
+  const isFood = type === 'food bank' || type === 'community fridge' || type === 'community kitchen';
+  const isShelter = ['emergency shelter', 'warming centre', 'cooling centre'].includes(type);
+  const emoji = isFood ? '🍞' : (isShelter ? '🏠' : '📍');
+
+  return L.divIcon({
+    className: 'custom-relief-marker', // Hooks into our CSS class rule
+    html: `<div>${emoji}</div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
+  });
+}
+
+
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -26,6 +73,9 @@ function MapComponent({ onLocationError, onLocationFound, locations = [] }) {
   const accuracyCircleRef = useRef(null);
   const hasCenteredOnUserRef = useRef(false);
   const markersLayerRef = useRef(null);
+
+    // we track the user lat/lng to execute proximity sorting
+  const [userProximityCoords, setUserProximityCoords] = React.useState(null);
 
 
   const onLocationErrorRef = useRef(onLocationError);
@@ -55,6 +105,38 @@ function MapComponent({ onLocationError, onLocationFound, locations = [] }) {
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
+    
+    // Locate ME
+     
+     markersLayerRef.current = L.layerGroup().addTo(map);
+
+    const LocateControl = L.Control.extend({
+      options: { position: "topright" },
+      onAdd: function () {
+        const btn = L.DomUtil.create("button", "custom-locate-btn");
+        
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="18" height="18" class="custom-locate-icon">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.54-7.49-7.49H7v-2h-.49C7.01 6.54 10.05 3.5 14 3.01V4h2v-.99c3.95.49 7 3.54 7.49 7.49H23v2h-.49c-.49 3.95-3.54 7-7.49 7.49V20h-2v-.07zM12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
+          </svg>
+        `;
+
+        L.DomEvent.on(btn, "click", function (e) {
+          L.DomEvent.stopPropagation(e);
+          if (userMarkerRef.current) {
+            const currentLatLng = userMarkerRef.current.getLatLng();
+            map.setView(currentLatLng, 15);
+          }
+        });
+
+        return btn;
+      }
+    });
+
+    map.addControl(new LocateControl());
+
+    leafletMapRef.current = map;   
+     
     // Initialize the layer group for markers
     markersLayerRef.current = L.layerGroup().addTo(map);
 
@@ -62,8 +144,17 @@ function MapComponent({ onLocationError, onLocationFound, locations = [] }) {
     function onFound(e) {
       const { latlng, accuracy } = e;
 
+      setUserProximityCoords({ lat: latlng.lat, lng: latlng.lng });
+          
+      // // testing 
+      // console.log("!!! MAP COMPONENT FOUND USER AT:", latlng);
+      
+     if (onLocationFoundRef.current) {
+    onLocationFoundRef.current(latlng);
+      }
+
       if (!userMarkerRef.current) {
-        userMarkerRef.current = L.marker(latlng)
+         userMarkerRef.current = L.marker(latlng)
           .addTo(map)
           .bindPopup("You are here");
       } else {
@@ -91,6 +182,11 @@ function MapComponent({ onLocationError, onLocationFound, locations = [] }) {
 
 
     function onError(e) {
+       // Ignore background 'position unavailable' spam from browser simulation watchers
+      if (e.message.toLowerCase().includes("position unavailable")) {
+        return;
+      }
+
       console.error("Location error:", e.message);
       onLocationErrorRef.current?.(e.message);
     }
@@ -102,9 +198,9 @@ function MapComponent({ onLocationError, onLocationFound, locations = [] }) {
       watch: true,
       setView: false,
       maxZoom: 16,
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0,
+      enableHighAccuracy: false,
+      timeout: 20000,
+      maximumAge: 6000,
     });
 
 
@@ -128,38 +224,47 @@ function MapComponent({ onLocationError, onLocationFound, locations = [] }) {
       loc.lat && loc.lng && loc.lat !== 0
     );
 
-    // 2. Draw service pins
-    validLocations.forEach((loc) => {
-      const marker = L.circleMarker([loc.lat, loc.lng], {
-        radius: 8,
-        fillColor: '#d62828',
-        color: '#fff',
-        weight: 2,
-        fillOpacity: 0.9,
+    // SORTING LOGIC: If we have the user's location, sort the array!
+    if (userProximityCoords) {
+      validLocations.sort((a, b) => {
+        const distanceA = getDistance(userProximityCoords.lat, userProximityCoords.lng, a.lat, a.lng);
+        const distanceB = getDistance(userProximityCoords.lat, userProximityCoords.lng, b.lat, b.lng);
+        return distanceA - distanceB; 
       });
+    }
 
-      // No neeed for it upgraded to get location 
-      //   marker.bindPopup(`<b>${loc.name}</b><br/>${loc.address}`);
+    // 2. Draw custom markers for each location
+   validLocations.forEach((item) => {
 
-      // Construct the Google Maps Directions URL
-      const mapLink = `https://www.google.com/maps/dir/?api=1&destination=${loc.lat},${loc.lng}`;
+    const markerIcon=createLocationIcon(item.type);
+      
+      // Initialize the marker using the new custom icon
+      const marker = L.marker([item.lat, item.lng], { icon: markerIcon });
 
-      // Get Directions button added
+      const navigationUrl = "https://www.google.com/maps/dir/?api=1&destination=" + item.lat + "," + item.lng;
       marker.bindPopup(`
-        <div>
-    <strong>${loc.name}</strong>
-    <p>${loc.address}</p>
-    <a href="${mapLink}" target="_blank">
-      Get Directions
-    </a>
-  </div>
+        <div style="text-align: center; min-width: 150px; font-family: Arial, sans-serif;">
+          <strong style="font-size: 1.1em; display: block; margin-bottom: 4px;">${item.name}</strong>
+          <p style="margin: 0 0 10px 0; font-size: 0.9em; color: #555;">${item.address}</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="/locations/${item._id}" 
+               style="background-color: #136aec; color: #ffffff; padding: 8px 12px; text-decoration: none; border-radius: 4px; font-weight: bold; display: block; font-size: 0.9em;">
+              View Details
+            </a>
+            <a href="${navigationUrl}" target="_blank" 
+               style="background-color: #f0f0f0; color: #333333; padding: 6px 12px; text-decoration: none; border-radius: 4px; border: 1px solid #cccccc; display: block; font-size: 0.85em;">
+              Get Directions
+            </a>
+          </div>
+        </div>
       `);
 
       markersLayerRef.current.addLayer(marker);
     });
 
     // 3. CAMERA LOGIC: Only trigger if there are pins to show
-    // This prevents the map from jumping to the boundary edge on initial load
+    //  preventing the map from jumping to the boundary edge on initial load
     if (validLocations.length > 0) {
       let allPoints = validLocations.map(loc => [loc.lat, loc.lng]);
 
@@ -178,48 +283,8 @@ function MapComponent({ onLocationError, onLocationFound, locations = [] }) {
         leafletMapRef.current.setView(allPoints[0], 15);
       }
     }
-  }, [locations]);
+  }, [locations,userProximityCoords]);
 
-  // useEffect(() => {
-  //   const map = leafletMapRef.current;
-  //   const allData = geoJsonDataRef.current;
-  //   if (!map || !allData) return;
-
-  //   if (geoJsonLayerRef.current) map.removeLayer(geoJsonLayerRef.current);
-
-  //   const filteredFeatures = showFood
-  //     ? allData.features.filter((f) => f.properties?.hasFood === true)
-  //     : allData.features;
-
-  //   const newLayer = L.geoJSON(
-  //     { ...allData, features: filteredFeatures },
-  //     {
-  //       pointToLayer: (feature, latlng) =>
-  //         L.circleMarker(latlng, {
-  //           radius: 8,
-  //           fillColor: "#d62828",
-  //           color: "#ffffff",
-  //           weight: 2,
-  //           opacity: 1,
-  //           fillOpacity: 0.9,
-  //         }),
-  //       onEachFeature: (feature, layer) => {
-  //         const name = feature.properties?.name || "Community Centre";
-  //         const address = feature.properties?.address || "No address available";
-  //         const area = feature.properties?.geolocalarea || "Unknown area";
-  //         layer.bindPopup(`
-  //         <div>
-  //           <strong>${name}</strong><br/>
-  //           ${address}<br/>
-  //           <em>${area}</em>
-  //         </div>
-  //       `);
-  //       },
-  //     },
-  //   ).addTo(map);
-
-  //   geoJsonLayerRef.current = newLayer;
-  // }, [showFood]);
 
   return (
     <div ref={mapContainerRef} style={{ height: "500px", width: "100%" }} />

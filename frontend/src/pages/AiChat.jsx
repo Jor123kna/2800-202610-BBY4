@@ -236,17 +236,7 @@ function AiChat() {
       <div className="ai-chat-header">
         <button
           onClick={() => navigate(-1)}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--color-brand)",
-            fontSize: "var(--text-sm)",
-            fontWeight: "var(--font-weight-medium)",
-            cursor: "pointer",
-            padding: "var(--space-2)",
-            flexShrink: 0,
-            fontFamily: "inherit",
-          }}
+          className="btn-back"
           aria-label="Go back"
         >
           ← Back
@@ -396,7 +386,7 @@ function AiChat() {
               </p>
             </>
           ) : (
-            <p>Loading AI usage info…</p>
+            <p>Loading AI usage info...</p>
           )
         ) : null}
       </div>

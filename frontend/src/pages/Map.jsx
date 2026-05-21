@@ -167,7 +167,7 @@ const filterMatchesLocation = (filter, loc) => {
     ];
     if (userType === "in-need")
       return [
-        { value: "available", label: "✅ Has Space" },
+        { value: "available", label: "✅ Available to help" },
         ...categoryFilters,
       ];
     if (userType === "helper")
@@ -362,13 +362,7 @@ const filterMatchesLocation = (filter, loc) => {
                   <div className="map-location-name">{loc.name}</div>
                   <div className="map-location-address">{loc.address}</div>
 
-                  {/* {userType === "in-need" && loc.capacity !== null && (
-                    <div className="map-location-capacity">
-                      {loc.capacity === 0
-                        ? "⚠️ Full"
-                        : `${loc.capacity} spots available`}
-                    </div>
-                  )} */}
+    
                 </div>
 
                 <div

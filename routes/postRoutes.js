@@ -4,6 +4,9 @@ const Post = require("../models/posts");
 const Reply = require("../models/replies");
 const { isLoggedIn } = require("../middleware/requireLogin");
 
+// Helper — create a new post record from provided fields
+// Accepts author, title, content, neighbourhood, role, and an optional
+// aigenerated flag, then saves a new Post document.
 const createPostEntry = async ({
   author,
   title,
@@ -23,6 +26,8 @@ const createPostEntry = async ({
 };
 
 // Helper — attach replyCount to an array of posts
+// Counts replies for each post and returns posts with an added replyCount
+// field for easier client-side display.
 const attachReplyCounts = async (posts) => {
   const postIds = posts.map((p) => p._id);
   const counts = await Reply.aggregate([
@@ -42,6 +47,7 @@ const attachReplyCounts = async (posts) => {
 };
 
 // POST /posts - create a new post
+// Create a new post for the authenticated user using submitted form data.
 router.post("/", isLoggedIn, async (req, res) => {
   try {
     const post = await createPostEntry({
@@ -58,6 +64,8 @@ router.post("/", isLoggedIn, async (req, res) => {
 });
 
 // POST /posts/autofill
+// Create a new AI-generated post entry using provided defaults when fields
+// are missing, and mark the post as generated content.
 router.post("/autofill", isLoggedIn, async (req, res) => {
   try {
     const post = await createPostEntry({
@@ -77,6 +85,7 @@ router.post("/autofill", isLoggedIn, async (req, res) => {
 });
 
 // GET /posts - get all posts with reply counts
+// Retrieve all posts, populate author details, and attach reply counts.
 router.get("/", async (req, res) => {
   try {
     const posts = await Post.find().populate(
@@ -93,6 +102,7 @@ router.get("/", async (req, res) => {
 });
 
 // GET /posts/mine - get logged-in user's posts with reply counts
+// Retrieve the current user's posts, sorted newest first, and attach reply counts.
 router.get("/mine", isLoggedIn, async (req, res) => {
   try {
     const posts = await Post.find({ author: req.session.user.id })
@@ -110,6 +120,7 @@ router.get("/mine", isLoggedIn, async (req, res) => {
 });
 
 // GET /posts/:id
+// Retrieve a single post by its ID and include author details.
 router.get("/:id", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id).populate(
@@ -124,6 +135,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // DELETE /posts/:id
+// Delete a post if the current user is the author or an admin.
 router.delete("/:id", isLoggedIn, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -142,6 +154,7 @@ router.delete("/:id", isLoggedIn, async (req, res) => {
 });
 
 // PUT /posts/:id
+// Update a post if the current user is the author or has admin privileges.
 router.put("/:id", isLoggedIn, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);

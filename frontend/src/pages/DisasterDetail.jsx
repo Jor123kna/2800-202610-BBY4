@@ -84,6 +84,7 @@ function DisasterDetail() {
       </button>
 
       <DisasterEffects type={activeEffect} />
+      <div style={{ height: "var(--space-8)" }}></div>
     </div>
   );
 }

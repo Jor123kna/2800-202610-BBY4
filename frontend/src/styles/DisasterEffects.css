@@ -39,6 +39,7 @@
   animation: de-rain-fall 0.1s linear infinite;
   opacity: 0;
   transition: opacity 0.3s;
+  z-index: 8;
 }
 .de-overlay--flood.de-visible .de-rain {
   opacity: 1;
@@ -59,6 +60,7 @@
   right: 0;
   bottom: 0;
   height: 120%;
+  clip-path: ellipse(60% 38% at 50% 100%);
   background: linear-gradient(
     to top,
     rgba(0, 8, 35, 0.99) 0%,
@@ -70,11 +72,12 @@
     rgba(35, 125, 225, 0.09) 90%,
     transparent 100%
   );
-  transform: translateY(100%);
-  transition: transform 2.5s cubic-bezier(0.1, 0.85, 0.2, 1);
+  transform: translateY(108%);
+  transition: transform 2.1s cubic-bezier(0.16, 0.68, 0.19, 1);
+  z-index: 1;
 }
 .de-overlay--flood.de-visible .de-flood-water {
-  transform: translateY(20%);
+  transform: translateY(8%);
 }
 
 /* Wave surface layer 1 — main dark swell body */
@@ -82,18 +85,37 @@
   position: fixed;
   left: -35%;
   right: -35%;
-  bottom: 77%;
-  height: 158px;
+  bottom: 76%;
+  height: 168px;
   background: linear-gradient(
     to bottom,
-    rgba(6, 62, 165, 0.92),
-    rgba(3, 42, 125, 0.72) 55%,
+    rgba(6, 62, 165, 0.96),
+    rgba(3, 42, 125, 0.8) 55%,
     transparent
+  );
+  clip-path: polygon(
+    0 62%,
+    8% 53%,
+    18% 58%,
+    28% 50%,
+    36% 56%,
+    46% 48%,
+    56% 55%,
+    66% 46%,
+    76% 53%,
+    86% 48%,
+    96% 54%,
+    100% 49%,
+    100% 100%,
+    0 100%
   );
   border-radius: 46% 54% 0 0 / 36% 40% 0 0;
   opacity: 0;
   transition: opacity 0.5s 0.65s;
-  animation: de-wave-roll-1 2.4s ease-in-out infinite;
+  animation:
+    de-wave-roll-1 2.4s ease-in-out infinite,
+    de-wave-swell 5.4s ease-in-out infinite;
+  z-index: 2;
 }
 .de-overlay--flood.de-visible .de-flood-wave-l1 {
   opacity: 1;
@@ -113,19 +135,38 @@
 /* Wave surface layer 2 — secondary swell, lighter offset timing */
 .de-flood-wave-l2 {
   position: fixed;
-  left: -48%;
-  right: -48%;
-  bottom: 78%;
-  height: 118px;
+  left: -46%;
+  right: -46%;
+  bottom: 78.5%;
+  height: 128px;
   background: linear-gradient(
     to bottom,
-    rgba(18, 92, 208, 0.78),
-    transparent 62%
+    rgba(18, 92, 208, 0.82),
+    rgba(8, 62, 145, 0.55) 55%,
+    transparent 68%
+  );
+  clip-path: polygon(
+    0 58%,
+    10% 52%,
+    22% 58%,
+    32% 50%,
+    44% 57%,
+    56% 49%,
+    64% 54%,
+    74% 46%,
+    86% 53%,
+    96% 48%,
+    100% 50%,
+    100% 100%,
+    0 100%
   );
   border-radius: 56% 44% 0 0 / 45% 33% 0 0;
   opacity: 0;
   transition: opacity 0.5s 0.85s;
-  animation: de-wave-roll-2 3.1s ease-in-out infinite 0.55s;
+  animation:
+    de-wave-roll-2 3.1s ease-in-out infinite 0.45s,
+    de-wave-swell 4.8s ease-in-out infinite reverse;
+  z-index: 3;
 }
 .de-overlay--flood.de-visible .de-flood-wave-l2 {
   opacity: 1;
@@ -137,29 +178,66 @@
     border-radius: 56% 44% 0 0 / 45% 33% 0 0;
   }
   50% {
-    transform: scaleX(1.11) translateY(-15px);
+    transform: scaleX(1.11) translateY(-15px) translateX(4px);
     border-radius: 44% 56% 0 0 / 36% 50% 0 0;
+  }
+}
+
+@keyframes de-wave-swell {
+  0%,
+  100% {
+    transform: translateX(0) translateY(0) scaleX(1);
+  }
+  20% {
+    transform: translateX(6px) translateY(-4px) scaleX(1.02);
+  }
+  40% {
+    transform: translateX(-6px) translateY(-8px) scaleX(1.04);
+  }
+  60% {
+    transform: translateX(4px) translateY(-6px) scaleX(1.03);
+  }
+  80% {
+    transform: translateX(-4px) translateY(-3px) scaleX(1.01);
   }
 }
 
 /* Wave surface layer 3 — foamy whitecap crest */
 .de-flood-wave-l3 {
   position: fixed;
-  left: -22%;
-  right: -22%;
-  bottom: 79.5%;
-  height: 38px;
+  left: -24%;
+  right: -24%;
+  bottom: 80.5%;
+  height: 50px;
   background: linear-gradient(
     to bottom,
-    rgba(228, 244, 255, 0.94),
-    rgba(172, 218, 255, 0.62) 55%,
+    rgba(228, 244, 255, 0.96),
+    rgba(172, 218, 255, 0.7) 45%,
     transparent
   );
-  border-radius: 50%;
-  filter: blur(3px);
+  clip-path: polygon(
+    0 35%,
+    10% 30%,
+    20% 36%,
+    30% 30%,
+    40% 38%,
+    50% 32%,
+    60% 40%,
+    70% 33%,
+    80% 41%,
+    90% 36%,
+    100% 38%,
+    100% 100%,
+    0 100%
+  );
+  border-radius: 55% 45% 0 0;
+  filter: blur(2.5px);
   opacity: 0;
   transition: opacity 0.3s 1.05s;
-  animation: de-foam-churn 0.6s ease-in-out infinite alternate;
+  animation:
+    de-foam-churn 0.6s ease-in-out infinite alternate,
+    de-wave-swell 4.2s ease-in-out infinite;
+  z-index: 4;
 }
 .de-overlay--flood.de-visible .de-flood-wave-l3 {
   opacity: 1;
@@ -182,6 +260,7 @@
   border: 1.5px solid rgba(165, 218, 255, 0.72);
   border-radius: 50%;
   opacity: 0;
+  z-index: 5;
 }
 .de-splash--1 {
   left: 5%;
@@ -249,6 +328,7 @@
   opacity: 0;
   transition: opacity 0.4s 1.1s;
   animation: de-float-bob 3s ease-in-out infinite;
+  z-index: 6;
 }
 .de-overlay--flood.de-visible .de-float {
   opacity: 1;
@@ -290,6 +370,7 @@
   animation: de-page-quake 0.45s ease-in-out 6;
   will-change: transform;
 }
+
 @keyframes de-page-quake {
   0% {
     transform: translate(0, 0) rotate(0deg);
@@ -317,88 +398,6 @@
   }
   100% {
     transform: translate(0, 0) rotate(0deg);
-  }
-}
-
-/* SVG crack overlay — covers the full viewport */
-.de-crack-svg {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-/* Lava glow layer: thick, blurred orange-red behind the crack */
-.de-crack-glow {
-  fill: none;
-  stroke: rgba(255, 118, 8, 0.58);
-  stroke-width: 16;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: blur(7px);
-  stroke-dasharray: 2500;
-  stroke-dashoffset: 2500;
-}
-
-/* Main crack: sharp, near-black, drop-shadow for depth */
-.de-crack-main {
-  fill: none;
-  stroke: rgba(5, 2, 0, 0.97);
-  stroke-width: 3.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 2500;
-  stroke-dashoffset: 2500;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9));
-}
-
-/* Branch cracks radiating from main fracture */
-.de-crack-branch {
-  fill: none;
-  stroke: rgba(5, 2, 0, 0.88);
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 620;
-  stroke-dashoffset: 620;
-}
-
-/* Thin stress sub-fractures at branch junctions */
-.de-crack-thin {
-  fill: none;
-  stroke: rgba(5, 2, 0, 0.62);
-  stroke-width: 1.2;
-  stroke-linecap: round;
-  stroke-dasharray: 290;
-  stroke-dashoffset: 290;
-}
-
-/* Animation sequencing — main crack first, then branches, then sub-fractures */
-.de-overlay--earthquake.de-visible .de-crack-glow,
-.de-overlay--earthquake.de-visible .de-crack-main {
-  animation: de-crack-draw 0.38s ease-out 0.07s forwards;
-}
-.de-overlay--earthquake.de-visible .de-crack-b1,
-.de-overlay--earthquake.de-visible .de-crack-b2 {
-  animation: de-crack-draw 0.28s ease-out 0.33s forwards;
-}
-.de-overlay--earthquake.de-visible .de-crack-b3,
-.de-overlay--earthquake.de-visible .de-crack-b4 {
-  animation: de-crack-draw 0.28s ease-out 0.5s forwards;
-}
-.de-overlay--earthquake.de-visible .de-crack-b5,
-.de-overlay--earthquake.de-visible .de-crack-b6 {
-  animation: de-crack-draw 0.25s ease-out 0.64s forwards;
-}
-.de-overlay--earthquake.de-visible .de-crack-t1,
-.de-overlay--earthquake.de-visible .de-crack-t2,
-.de-overlay--earthquake.de-visible .de-crack-t3 {
-  animation: de-crack-draw 0.18s ease-out 0.76s forwards;
-}
-@keyframes de-crack-draw {
-  to {
-    stroke-dashoffset: 0;
   }
 }
 
@@ -617,170 +616,581 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   🌀 TSUNAMI
+   🌊 TSUNAMI
 ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Page-level shake on impact ─────────────────────────────────────────── */
 .de-page-tsunami {
-  animation: de-tsunami-slam 0.55s cubic-bezier(0.08, 0.85, 0.28, 1) 1.45s both;
+  animation: de-tsunami-impact 2.2s cubic-bezier(0.22, 0.68, 0.2, 1.1) 1.6s both;
   will-change: transform;
 }
-@keyframes de-tsunami-slam {
+@keyframes de-tsunami-impact {
   0% {
-    transform: translateX(0) rotate(0deg);
+    transform: none;
+  }
+  8% {
+    transform: translateY(-24px) scaleX(1.015) skewX(-1.2deg);
   }
   18% {
-    transform: translateX(90px) rotate(2.2deg) scaleX(0.97);
+    transform: translateY(38px) scaleX(0.975) skewX(2deg);
   }
-  45% {
-    transform: translateX(-28px) rotate(-1.2deg);
+  30% {
+    transform: translateY(-14px) scaleX(1.01) skewX(-0.8deg);
   }
-  68% {
-    transform: translateX(12px) rotate(0.4deg);
+  44% {
+    transform: translateY(10px) scaleX(0.99);
   }
-  85% {
-    transform: translateX(-4px);
+  60% {
+    transform: translateY(-5px);
   }
   100% {
-    transform: translateX(0) rotate(0deg);
+    transform: none;
   }
 }
 
-/* Pre-wave atmospheric shadow — dark pressure front sliding in from left */
-.de-tsunami-shadow {
+/* ── PHASE 1: recession ──────────────────────────────────────── */
+.de-tsunami-seafloor {
   position: fixed;
-  top: 0;
+  left: 0;
+  right: 0;
   bottom: 0;
-  left: -120%;
-  width: 165%;
+  height: 12%;
+  background: repeating-linear-gradient(
+    87deg,
+    rgba(105, 84, 52, 0.9) 0px,
+    rgba(135, 110, 72, 0.65) 7px,
+    rgba(82, 66, 40, 0.55) 12px,
+    rgba(118, 96, 60, 0.75) 18px
+  );
+  opacity: 0;
+  animation: de-seafloor-expose 0.55s ease-out 0.1s forwards;
+  z-index: 2;
+}
+@keyframes de-seafloor-expose {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Shallow water pulling back over the sand */
+.de-tsunami-recede {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 28%;
   background: linear-gradient(
-    to right,
-    rgba(0, 2, 20, 0.96) 0%,
-    rgba(0, 8, 48, 0.8) 40%,
-    rgba(0, 15, 70, 0.45) 65%,
+    to top,
+    rgba(60, 110, 130, 0.7) 0%,
+    rgba(30, 80, 115, 0.45) 40%,
     transparent 100%
   );
-  transition: left 1.6s cubic-bezier(0.1, 0.7, 0.2, 1);
+  opacity: 0;
+  animation: de-recede-pull 0.8s ease-out 0.15s forwards;
+  z-index: 3;
 }
-.de-overlay--tsunami.de-visible .de-tsunami-shadow {
-  left: -35%;
+@keyframes de-recede-pull {
+  0% {
+    opacity: 0;
+    transform: scaleX(1.1) translateY(0);
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0.5;
+    transform: scaleX(0.88) translateY(10px);
+  }
 }
 
-/* Main wave wall — tall, near-black, massive */
-.de-tsunami-wall {
+/* ── PHASE 2: Atmospheric pressure / darkening sky ──────────────────────── */
+.de-tsunami-horizon {
   position: fixed;
-  top: -50%;
-  bottom: -50%;
-  left: -155%;
-  width: 218%;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 50%;
   background: linear-gradient(
-    to right,
-    rgba(0, 3, 32, 1) 0%,
-    rgba(0, 14, 82, 0.98) 18%,
-    rgba(0, 35, 138, 0.94) 36%,
-    rgba(4, 68, 185, 0.82) 54%,
-    rgba(14, 105, 215, 0.52) 71%,
-    rgba(38, 140, 238, 0.18) 85%,
-    transparent
+    to bottom,
+    rgba(0, 3, 22, 0.96) 0%,
+    rgba(0, 10, 50, 0.82) 30%,
+    rgba(0, 20, 80, 0.52) 62%,
+    transparent 100%
   );
-  border-radius: 0 36% 30% 0 / 0 26% 45% 0;
-  box-shadow: inset -25px 0 90px rgba(0, 15, 90, 0.45);
-  transition: left 1.75s cubic-bezier(0.1, 0.72, 0.22, 1);
+  opacity: 0;
+  animation: de-horizon-darken 1.1s ease-in 0.3s forwards;
+  z-index: 4;
 }
-.de-overlay--tsunami.de-visible .de-tsunami-wall {
-  left: -28%;
+@keyframes de-horizon-darken {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-/* Curling wave crest — lighter blue curl at the towering top */
+/* Distant wall of water on the horizon — thin dark band before the wave arrives */
+.de-tsunami-distant {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 38%;
+  height: 7%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 15, 75, 0.55) 30%,
+    rgba(0, 25, 100, 0.75) 60%,
+    rgba(0, 30, 115, 0.55) 100%
+  );
+  opacity: 0;
+  animation: de-distant-appear 0.6s ease-out 0.5s forwards;
+  z-index: 5;
+}
+@keyframes de-distant-appear {
+  from {
+    opacity: 0;
+    transform: scaleY(0.2);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+/* ── PHASE 3: Main wave rises from below ────────────────────────────────── */
+
+/* Deep water body — the mass of the wave */
+.de-tsunami-body {
+  position: fixed;
+  left: -8%;
+  right: -8%;
+  height: 135%;
+  background: linear-gradient(
+    to top,
+    rgba(0, 3, 28, 1) 0%,
+    rgba(0, 14, 70, 0.99) 12%,
+    rgba(0, 32, 118, 0.96) 28%,
+    rgba(0, 58, 162, 0.9) 44%,
+    rgba(4, 88, 200, 0.78) 58%,
+    rgba(12, 118, 228, 0.55) 72%,
+    rgba(28, 148, 248, 0.28) 85%,
+    transparent 100%
+  );
+  clip-path: polygon(
+    0% 30%,
+    3% 24%,
+    7% 28%,
+    11% 20%,
+    15% 25%,
+    19% 17%,
+    23% 22%,
+    27% 14%,
+    31% 20%,
+    35% 11%,
+    40% 18%,
+    44% 9%,
+    49% 16%,
+    53% 7%,
+    58% 14%,
+    62% 5%,
+    67% 12%,
+    71% 4%,
+    76% 11%,
+    80% 3%,
+    85% 10%,
+    89% 2%,
+    94% 9%,
+    97% 1%,
+    100% 8%,
+    100% 100%,
+    0% 100%
+  );
+  /* KEY FIX: use animation, not transition */
+  animation:
+    de-wave-body-rise 1.55s cubic-bezier(0.35, 0.05, 0.6, 1) 0.75s both,
+    de-wave-body-swell 2s ease-in-out 2.3s infinite;
+  will-change: transform;
+  z-index: 7;
+}
+@keyframes de-wave-body-rise {
+  from {
+    transform: translateY(125%);
+  }
+  to {
+    transform: translateY(-10%);
+  }
+}
+@keyframes de-wave-body-swell {
+  0%,
+  100% {
+    transform: translateY(-10%) scaleX(1);
+  }
+  45% {
+    transform: translateY(-14%) scaleX(1.012);
+  }
+}
+
+/* Mid-wave glassy face — catches light */
+.de-tsunami-face {
+  position: fixed;
+  left: -10%;
+  right: -10%;
+  height: 90%;
+  background: linear-gradient(
+    158deg,
+    rgba(115, 200, 255, 0.18) 0%,
+    rgba(55, 155, 238, 0.32) 20%,
+    rgba(12, 95, 195, 0.52) 48%,
+    rgba(0, 48, 145, 0.72) 74%,
+    transparent 100%
+  );
+  clip-path: polygon(
+    0% 38%,
+    5% 30%,
+    11% 35%,
+    17% 25%,
+    24% 31%,
+    30% 21%,
+    37% 27%,
+    44% 17%,
+    51% 24%,
+    57% 13%,
+    64% 21%,
+    71% 10%,
+    78% 18%,
+    84% 7%,
+    91% 15%,
+    96% 5%,
+    100% 13%,
+    100% 100%,
+    0% 100%
+  );
+  animation:
+    de-wave-face-rise 1.5s cubic-bezier(0.35, 0.05, 0.6, 1) 0.78s both,
+    de-wave-body-swell 2s ease-in-out 2.35s infinite;
+  will-change: transform;
+  z-index: 8;
+}
+@keyframes de-wave-face-rise {
+  from {
+    transform: translateY(125%);
+  }
+  to {
+    transform: translateY(-4%);
+  }
+}
+
+/* Breaking crest — white roiling lip of the wave */
 .de-tsunami-crest {
   position: fixed;
-  top: -18%;
-  left: -155%;
-  width: 85%;
-  bottom: 42%;
+  left: -12%;
+  right: -12%;
+  height: 28%;
   background: linear-gradient(
-    152deg,
-    rgba(148, 212, 255, 0.84) 0%,
-    rgba(72, 160, 238, 0.68) 38%,
-    rgba(22, 90, 198, 0.38) 68%,
-    transparent
+    to top,
+    rgba(15, 115, 210, 0.72) 0%,
+    rgba(80, 175, 250, 0.88) 28%,
+    rgba(200, 238, 255, 0.96) 62%,
+    rgba(255, 255, 255, 1) 100%
   );
-  border-radius: 0 52% 72% 0;
-  filter: blur(5px);
-  transition: left 1.75s cubic-bezier(0.1, 0.72, 0.22, 1) 0.04s;
+  clip-path: polygon(
+    0% 62%,
+    3% 50%,
+    7% 57%,
+    11% 44%,
+    15% 52%,
+    19% 38%,
+    24% 47%,
+    29% 33%,
+    34% 43%,
+    39% 28%,
+    44% 38%,
+    50% 22%,
+    55% 34%,
+    60% 18%,
+    65% 30%,
+    70% 14%,
+    75% 27%,
+    80% 11%,
+    85% 24%,
+    90% 8%,
+    95% 20%,
+    98% 5%,
+    100% 16%,
+    100% 100%,
+    0% 100%
+  );
+  filter: blur(2.5px);
+  animation:
+    de-wave-crest-rise 1.45s cubic-bezier(0.32, 0.05, 0.58, 1) 0.82s both,
+    de-crest-churn 0.75s ease-in-out infinite alternate 2.3s;
+  will-change: transform;
+  z-index: 9;
 }
-.de-overlay--tsunami.de-visible .de-tsunami-crest {
-  left: -26%;
+@keyframes de-wave-crest-rise {
+  from {
+    transform: translateY(125%);
+  }
+  to {
+    transform: translateY(6%);
+  }
+}
+@keyframes de-crest-churn {
+  from {
+    transform: translateY(6%) scaleX(0.968) skewX(-0.8deg);
+    filter: blur(2px);
+  }
+  to {
+    transform: translateY(2%) scaleX(1.032) skewX(0.8deg);
+    filter: blur(3.5px);
+  }
 }
 
-/* Explosive foam at the leading edge */
-.de-tsunami-foam {
-  position: fixed;
-  top: 4%;
-  bottom: 4%;
-  left: -138%;
-  width: 95px;
-  background: rgba(255, 255, 255, 0.97);
-  filter: blur(10px);
-  border-radius: 50%;
-  transition: left 1.75s cubic-bezier(0.1, 0.72, 0.22, 1) 0.04s;
-  box-shadow:
-    0 0 65px 32px rgba(255, 255, 255, 0.78),
-    0 0 150px 75px rgba(192, 232, 255, 0.48);
-}
-.de-overlay--tsunami.de-visible .de-tsunami-foam {
-  left: 39%;
-}
-
-/* Spray cloud billowing at the wave edge */
+/* Foam plume — explodes upward off the crest */
 .de-tsunami-spray {
   position: fixed;
-  top: -12%;
-  bottom: -12%;
-  left: -140%;
-  width: 220px;
+  left: -14%;
+  right: -14%;
+  height: 38%;
   background: radial-gradient(
-    ellipse at 50% 50%,
-    rgba(255, 255, 255, 0.72) 0%,
-    rgba(205, 238, 255, 0.52) 30%,
-    rgba(125, 192, 248, 0.22) 62%,
-    transparent 82%
+    ellipse 85% 65% at 50% 100%,
+    rgba(255, 255, 255, 0.96) 0%,
+    rgba(215, 242, 255, 0.8) 25%,
+    rgba(165, 220, 255, 0.52) 52%,
+    rgba(100, 185, 255, 0.2) 72%,
+    transparent 88%
   );
-  filter: blur(9px);
-  transition: left 1.75s cubic-bezier(0.1, 0.72, 0.22, 1) 0.02s;
+  filter: blur(7px);
+  animation:
+    de-wave-spray-rise 1.42s cubic-bezier(0.3, 0.05, 0.55, 1) 0.85s both,
+    de-spray-breathe 1.1s ease-in-out infinite alternate 2.3s;
+  will-change: transform;
+  z-index: 10;
 }
-.de-overlay--tsunami.de-visible .de-tsunami-spray {
-  left: 34%;
+@keyframes de-wave-spray-rise {
+  from {
+    transform: translateY(125%) scaleX(0.7);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(22%) scaleX(1);
+    opacity: 1;
+  }
+}
+@keyframes de-spray-breathe {
+  from {
+    transform: translateY(22%) scaleX(0.94) scaleY(1);
+    opacity: 0.88;
+  }
+  to {
+    transform: translateY(16%) scaleX(1.06) scaleY(1.14);
+    opacity: 1;
+  }
 }
 
-/* Secondary wave rolling behind */
+/* Secondary roller — second wave behind the main one */
 .de-tsunami-wave2 {
   position: fixed;
-  top: -20%;
-  bottom: -20%;
-  left: -165%;
-  width: 108%;
+  left: -10%;
+  right: -10%;
+  height: 100%;
   background: linear-gradient(
-    to right,
-    rgba(0, 18, 95, 0.72) 0%,
-    rgba(0, 55, 172, 0.45) 55%,
-    transparent
+    to top,
+    rgba(0, 8, 45, 0.95) 0%,
+    rgba(0, 24, 95, 0.85) 22%,
+    rgba(0, 50, 145, 0.68) 46%,
+    rgba(5, 82, 185, 0.38) 68%,
+    transparent 100%
   );
-  border-radius: 0 60% 40% 0;
-  transition: left 2.1s cubic-bezier(0.2, 0.7, 0.3, 1) 0.28s;
+  clip-path: polygon(
+    0% 42%,
+    5% 35%,
+    12% 40%,
+    18% 30%,
+    25% 36%,
+    33% 26%,
+    40% 32%,
+    47% 22%,
+    54% 29%,
+    61% 18%,
+    68% 26%,
+    76% 15%,
+    83% 23%,
+    90% 12%,
+    97% 20%,
+    100% 14%,
+    100% 100%,
+    0% 100%
+  );
+  animation:
+    de-wave2-rise 1.7s cubic-bezier(0.38, 0.05, 0.65, 1) 0.92s both,
+    de-wave-body-swell 2.4s ease-in-out 2.6s infinite reverse;
+  will-change: transform;
+  z-index: 6;
 }
-.de-overlay--tsunami.de-visible .de-tsunami-wave2 {
-  left: -32%;
+@keyframes de-wave2-rise {
+  from {
+    transform: translateY(125%);
+  }
+  to {
+    transform: translateY(2%);
+  }
 }
 
-/* Deep ocean aftermath — whole screen drowns in dark blue */
+/* ── PHASE 4: Submersion ────────────────────────────────────────────────── */
 .de-tsunami-flood {
   position: fixed;
   inset: 0;
-  background: rgba(0, 10, 65, 0.85);
+  background: rgba(0, 6, 48, 0.9);
   opacity: 0;
-  transition: opacity 0.7s 1.3s;
+  animation: de-flood-cover 1.1s ease-in 2.1s forwards;
+  z-index: 11;
 }
-.de-overlay--tsunami.de-visible .de-tsunami-flood {
-  opacity: 1;
+@keyframes de-flood-cover {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Underwater caustic light shimmer */
+.de-tsunami-caustic {
+  position: fixed;
+  inset: 0;
+  background:
+    repeating-radial-gradient(
+      ellipse 36px 22px at 18% 38%,
+      transparent 0px,
+      rgba(25, 110, 195, 0.09) 11px,
+      transparent 22px
+    ),
+    repeating-radial-gradient(
+      ellipse 28px 20px at 65% 65%,
+      transparent 0px,
+      rgba(18, 95, 178, 0.07) 9px,
+      transparent 20px
+    ),
+    repeating-radial-gradient(
+      ellipse 42px 26px at 82% 25%,
+      transparent 0px,
+      rgba(30, 125, 210, 0.06) 13px,
+      transparent 26px
+    );
+  opacity: 0;
+  animation:
+    de-caustic-fade-in 0.9s ease-in 2.9s forwards,
+    de-caustic-drift 3.5s ease-in-out 3.8s infinite;
+  z-index: 12;
+}
+@keyframes de-caustic-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes de-caustic-drift {
+  0%,
+  100% {
+    transform: scale(1) translateX(0) translateY(0);
+    opacity: 0.7;
+  }
+  33% {
+    transform: scale(1.07) translateX(9px) translateY(-5px);
+    opacity: 1;
+  }
+  66% {
+    transform: scale(0.96) translateX(-6px) translateY(4px);
+    opacity: 0.8;
+  }
+}
+
+/* Rising bubbles after submersion */
+.de-bubble {
+  position: fixed;
+  border-radius: 50%;
+  border: 1.5px solid rgba(105, 195, 255, 0.55);
+  background: rgba(60, 145, 230, 0.08);
+  opacity: 0;
+}
+.de-bubble--1 {
+  width: 13px;
+  height: 13px;
+  left: 7%;
+  bottom: 8%;
+  animation: de-bubble-rise 2.3s ease-in 3s infinite;
+}
+.de-bubble--2 {
+  width: 8px;
+  height: 8px;
+  left: 20%;
+  bottom: 4%;
+  animation: de-bubble-rise 2s ease-in 3.4s infinite;
+}
+.de-bubble--3 {
+  width: 17px;
+  height: 17px;
+  left: 34%;
+  bottom: 10%;
+  animation: de-bubble-rise 2.8s ease-in 2.9s infinite;
+}
+.de-bubble--4 {
+  width: 10px;
+  height: 10px;
+  left: 50%;
+  bottom: 3%;
+  animation: de-bubble-rise 2.1s ease-in 3.6s infinite;
+}
+.de-bubble--5 {
+  width: 15px;
+  height: 15px;
+  left: 66%;
+  bottom: 12%;
+  animation: de-bubble-rise 2.5s ease-in 3.1s infinite;
+}
+.de-bubble--6 {
+  width: 9px;
+  height: 9px;
+  left: 80%;
+  bottom: 6%;
+  animation: de-bubble-rise 2.2s ease-in 3.5s infinite;
+}
+.de-bubble--7 {
+  width: 12px;
+  height: 12px;
+  left: 92%;
+  bottom: 9%;
+  animation: de-bubble-rise 1.9s ease-in 3.2s infinite;
+}
+
+@keyframes de-bubble-rise {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  7% {
+    opacity: 0.85;
+  }
+  82% {
+    opacity: 0.45;
+  }
+  100% {
+    transform: translateY(-92vh) translateX(14px) scale(1.5);
+    opacity: 0;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

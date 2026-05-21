@@ -1,24 +1,17 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
-function TopHeader({ showBack = false, title = 'RouteRelief' }) {
+function TopHeader({ showBack = false, title = "RouteRelief" }) {
   const navigate = useNavigate();
 
   return (
     <header className="top-header">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div className="top-header-actions">
         {showBack && (
           <button
             onClick={() => navigate(-1)}
             aria-label="Go back"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--color-text-inverse)',
-              fontSize: '20px',
-              cursor: 'pointer',
-              padding: '4px 8px',
-            }}
+            className="top-header-back"
           >
             ←
           </button>

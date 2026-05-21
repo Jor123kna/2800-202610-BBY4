@@ -21,7 +21,12 @@ export default function DisasterEffects({ type }) {
 
   // Page-level effects (applied to app root)
   useEffect(() => {
-    const appRoot = document.getElementById("root") || document.body;
+    const rootElement = document.getElementById("root");
+    const appContainer = document.querySelector(".app-container");
+    const appRoot = rootElement || document.body;
+    const targets = [appRoot, document.body, rootElement, appContainer].filter(
+      Boolean,
+    );
     const classes = {
       disaster_earthquake: "de-page-earthquake",
       disaster_tsunami: "de-page-tsunami",
@@ -31,26 +36,28 @@ export default function DisasterEffects({ type }) {
       disaster_landslide: "de-page-landslide",
     };
 
-    // Remove all page classes first
-    Object.values(classes).forEach((c) => appRoot.classList.remove(c));
+    // Remove all page classes first from every relevant wrapper
+    Object.values(classes).forEach((c) => {
+      targets.forEach((node) => node.classList.remove(c));
+    });
 
     if (type && classes[type]) {
-      appRoot.classList.add(classes[type]);
+      targets.forEach((node) => node.classList.add(classes[type]));
       const durations = {
         disaster_earthquake: 2500,
         disaster_tsunami: 2000,
         "disaster_extreme-heat": 3200,
         disaster_windstorm: 2600,
         "disaster_wildfire-smoke": 3200,
-        disaster_landslide: 2200,
+        disaster_landslide: 2600,
       };
       const timer = setTimeout(
-        () => appRoot.classList.remove(classes[type]),
+        () => targets.forEach((node) => node.classList.remove(classes[type])),
         durations[type] || 2500,
       );
       return () => {
         clearTimeout(timer);
-        appRoot.classList.remove(classes[type]);
+        targets.forEach((node) => node.classList.remove(classes[type]));
       };
     }
   }, [type]);
@@ -68,7 +75,16 @@ export default function DisasterEffects({ type }) {
         <>
           <div className="de-rain" />
           <div className="de-flood-water" />
-          <div className="de-flood-wave" />
+          <div className="de-flood-wave-l1" />
+          <div className="de-flood-wave-l2" />
+          <div className="de-flood-wave-l3" />
+          <span className="de-splash de-splash--1" />
+          <span className="de-splash de-splash--2" />
+          <span className="de-splash de-splash--3" />
+          <span className="de-splash de-splash--4" />
+          <span className="de-splash de-splash--5" />
+          <span className="de-splash de-splash--6" />
+          <span className="de-splash de-splash--7" />
           <span className="de-float de-float--1">🌿</span>
           <span className="de-float de-float--2">🪵</span>
           <span className="de-float de-float--3">🛖</span>
@@ -80,11 +96,7 @@ export default function DisasterEffects({ type }) {
       {effectId === "earthquake" && (
         <>
           <div className="de-quake-dust" />
-          <div className="de-crack de-crack--h" />
-          <div className="de-crack de-crack--1" />
-          <div className="de-crack de-crack--2" />
-          <div className="de-crack de-crack--3" />
-          <div className="de-crack de-crack--4" />
+          <div className="de-quake-flash" />
         </>
       )}
 
@@ -104,28 +116,51 @@ export default function DisasterEffects({ type }) {
         </>
       )}
 
-      {/* ── TSUNAMI: wall of water from the side ── */}
+      {/* ── TSUNAMI ── */}
       {effectId === "tsunami" && (
         <>
-          <div className="de-tsunami-wall" />
-          <div className="de-tsunami-foam" />
+          {/* Phase 1 – ocean recedes, seafloor exposed */}
+          <div className="de-tsunami-recede" />
+
+          {/* Phase 2 – sky darkens, distant wave visible on horizon */}
+          <div className="de-tsunami-horizon" />
+
+          {/* Phase 3 – massive wave rises from the deep */}
+          <div className="de-tsunami-wave2" />
+          <div className="de-tsunami-body" />
+          <div className="de-tsunami-face" />
+          <div className="de-tsunami-crest" />
+          <div className="de-tsunami-spray" />
+
+          {/* Phase 4 – full submersion, caustics, bubbles */}
           <div className="de-tsunami-flood" />
+          <div className="de-tsunami-caustic" />
+          <span className="de-bubble de-bubble--1" />
+          <span className="de-bubble de-bubble--2" />
+          <span className="de-bubble de-bubble--3" />
+          <span className="de-bubble de-bubble--4" />
+          <span className="de-bubble de-bubble--5" />
+          <span className="de-bubble de-bubble--6" />
+          <span className="de-bubble de-bubble--7" />
         </>
       )}
 
       {/* ── EXTREME HEAT: sun glow + shimmer lines ── */}
       {effectId === "extreme-heat" && (
         <>
-          <div className="de-sun-glow" />
+          <div className="de-heat-vignette" />
+          <div className="de-sun" />
           <div className="de-heat-wave de-heat-wave--1" />
           <div className="de-heat-wave de-heat-wave--2" />
           <div className="de-heat-wave de-heat-wave--3" />
+          <div className="de-heat-wave de-heat-wave--4" />
         </>
       )}
 
       {/* ── LANDSLIDE: page slides down + rocks fall ── */}
       {effectId === "landslide" && (
         <>
+          <div className="de-mud-wall" />
           <span className="de-debris de-debris--1">🪨</span>
           <span className="de-debris de-debris--2">🪨</span>
           <span className="de-debris de-debris--3">🪨</span>
@@ -162,6 +197,8 @@ export default function DisasterEffects({ type }) {
           <div className="de-smoke-billow de-smoke-billow--2" />
           <div className="de-smoke-billow de-smoke-billow--3" />
           <div className="de-smoke-billow de-smoke-billow--4" />
+          <div className="de-smoke-billow de-smoke-billow--5" />
+          <div className="de-smoke-glow" />
           <div className="de-ash de-ash--1" />
           <div className="de-ash de-ash--2" />
           <div className="de-ash de-ash--3" />

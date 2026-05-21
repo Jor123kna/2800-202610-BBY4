@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { useNavigate } from 'react-router-dom';
 
 // funtion to be used to get the distance btw user and the community
 function getDistance(userLat, userLng, destinationLat, destinationLng) {
@@ -39,7 +40,7 @@ second east west move
 }
 
 // generate custom map icons based on location type
-function createLocationIcon(type) {
+  function createLocationIcon(type) {
   const isFood =
     type === "food bank" ||
     type === "community fridge" ||
@@ -52,14 +53,13 @@ function createLocationIcon(type) {
   const emoji = isFood ? "🍞" : isShelter ? "🏠" : "📍";
 
   return L.divIcon({
-    className: "custom-relief-marker", // Hooks into our CSS class rule
-    html: `<div>${emoji}</div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-    popupAnchor: [0, -16],
+    className: "custom-relief-marker", 
+    html: `<div style="font-size: 28px; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">${emoji}</div>`,
+    iconSize: [40, 40],       // Bumps up pin dimensions for Jo
+    iconAnchor: [20, 20],     // Centers the bottom anchor correctly
+    popupAnchor: [0, -20],    // Positions the popup cleanly right above the pin
   });
 }
-
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -74,6 +74,7 @@ const vancouverBounds = [
 ];
 
 function MapComponent({ onLocationError, onLocationFound, locations = [] }) {
+  const navigate = useNavigate();
   const mapContainerRef = useRef(null);
   const leafletMapRef = useRef(null);
   const userMarkerRef = useRef(null);
@@ -245,37 +246,49 @@ function MapComponent({ onLocationError, onLocationFound, locations = [] }) {
     }
 
     // 2. Draw custom markers for each location
-    validLocations.forEach((item) => {
+      
+      validLocations.forEach((item) => {
       const markerIcon = createLocationIcon(item.type);
-
-      // Initialize the marker using the new custom icon
       const marker = L.marker([item.lat, item.lng], { icon: markerIcon });
 
-      const navigationUrl =
-        "https://www.google.com/maps/dir/?api=1&destination=" +
-        item.lat +
-        "," +
-        item.lng;
-      marker.bindPopup(`
-        <div style="text-align: center; min-width: 150px; font-family: Arial, sans-serif;">
-          <strong style="font-size: 1.1em; display: block; margin-bottom: 4px;">${item.name}</strong>
-          <p style="margin: 0 0 10px 0; font-size: 0.9em; color: #555;">${item.address}</p>
-          
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <a href="/locations/${item._id}" 
-               style="background-color: #136aec; color: #ffffff; padding: 8px 12px; text-decoration: none; border-radius: 4px; font-weight: bold; display: block; font-size: 0.9em;">
-              View Details
-            </a>
-            <a href="${navigationUrl}" target="_blank" 
-               style="background-color: #f0f0f0; color: #333333; padding: 6px 12px; text-decoration: none; border-radius: 4px; border: 1px solid #cccccc; display: block; font-size: 0.85em;">
-              Get Directions
-            </a>
-          </div>
-        </div>
-      `);
+      const navigationUrl = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
 
+      // Create a native HTML element wrapper container
+      const popupContainer = L.DomUtil.create("div", "custom-popup-wrapper");
+      popupContainer.style.textAlign = "center";
+      popupContainer.style.minWidth = "160px";
+      popupContainer.style.fontFamily = "Arial, sans-serif";
+
+      popupContainer.innerHTML = `
+        <strong style="font-size: 1.1em; display: block; margin-bottom: 4px;">${item.name}</strong>
+        <p style="margin: 0 0 10px 0; font-size: 0.9em; color: #555;">${item.address}</p>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <button id="btn-details-${item._id}" 
+                  style="background-color: #136aec; color: #ffffff; padding: 8px 12px; border: none; border-radius: 4px; font-weight: bold; display: block; font-size: 0.9em; width: 100%; cursor: pointer;">
+            View Details
+          </button>
+          <a href="${navigationUrl}" target="_blank" rel="noopener noreferrer"
+             style="background-color: #f0f0f0; color: #333333; padding: 6px 12px; text-decoration: none; border-radius: 4px; border: 1px solid #cccccc; display: block; font-size: 0.85em; font-weight: normal; text-align: center;">
+            Get Directions
+          </a>
+        </div>
+      `;
+
+      // Safely map our React router 'navigate' hook directly when the popup opens
+      marker.on("popupopen", () => {
+        const targetBtn = document.getElementById(`btn-details-${item._id}`);
+        if (targetBtn) {
+          targetBtn.onclick = (e) => {
+            e.preventDefault();
+            navigate(`/locations/${item._id}`); // Instant routing wrapper update
+          };
+        }
+      });
+
+      marker.bindPopup(popupContainer);
       markersLayerRef.current.addLayer(marker);
     });
+     
 
     // 3. CAMERA LOGIC: Only trigger if there are pins to show
     //  preventing the map from jumping to the boundary edge on initial load
@@ -297,7 +310,7 @@ function MapComponent({ onLocationError, onLocationFound, locations = [] }) {
         leafletMapRef.current.setView(allPoints[0], 15);
       }
     }
-  }, [locations, userProximityCoords]);
+  }, [locations, userProximityCoords,navigate]);
 
   return <div ref={mapContainerRef} className="map-component-container" />;
 }

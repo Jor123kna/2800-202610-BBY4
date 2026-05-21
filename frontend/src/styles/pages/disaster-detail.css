@@ -76,6 +76,33 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.disaster-detail-icon-button:hover,
+.disaster-detail-icon-button:focus-visible {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 4px rgba(81, 147, 255, 0.16);
+}
+
+.disaster-detail-icon-button:active {
+  transform: scale(0.94);
+}
+
+.disaster-detail-icon-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(28, 114, 234, 0.22);
+}
+
+.disaster-detail-icon-button[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .disaster-detail-name {

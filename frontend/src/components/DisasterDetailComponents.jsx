@@ -1,6 +1,11 @@
 import React from "react";
 
-export function DisasterDetailHeader({ disaster, onBack, onTriggerEffect }) {
+export function DisasterDetailHeader({
+  disaster,
+  onBack,
+  onTriggerEffect,
+  disabled,
+}) {
   return (
     <>
       <div className="disaster-detail-header-actions">
@@ -18,7 +23,9 @@ export function DisasterDetailHeader({ disaster, onBack, onTriggerEffect }) {
           type="button"
           className={`disaster-detail-icon-button ${disaster.id}`}
           onClick={onTriggerEffect}
+          disabled={disabled}
           aria-label={`Trigger ${disaster.name} effect`}
+          aria-disabled={disabled}
         >
           <span className="disaster-detail-icon" aria-hidden="true">
             {disaster.icon}

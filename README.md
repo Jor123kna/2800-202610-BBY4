@@ -36,6 +36,7 @@ Users sign up as either someone **in need of help** or as a **helper** offering 
 ## Technologies Used
 
 ### Frontend
+
 - **React** 19 — UI library
 - **React Router** 7 — client-side routing
 - **Leaflet** + **React-Leaflet** — interactive maps
@@ -45,6 +46,7 @@ Users sign up as either someone **in need of help** or as a **helper** offering 
 - **CSS3** — custom design system (no Tailwind / no UI kit)
 
 ### Backend
+
 - **Node.js** + **Express** 5 — server
 - **Mongoose** — MongoDB ODM
 - **Express-session** — session-based authentication
@@ -53,13 +55,16 @@ Users sign up as either someone **in need of help** or as a **helper** offering 
 - **CORS** + **dotenv** — middleware
 
 ### Database
+
 - **MongoDB Atlas** — cloud-hosted NoSQL database
 
 ### Third-Party APIs
+
 - **Anthropic Claude API** (model: claude-haiku-4-5) — powers the AI chatbot
 - **OpenStreetMap** — map tile data via Leaflet
 
 ### Other Tools
+
 - **Git** + **GitHub** — version control
 - **Trello** — task tracking
 - **Discord** — team communication
@@ -154,14 +159,14 @@ Users sign up as either someone **in need of help** or as a **helper** offering 
 
 ### 1. What you need to install
 
-| What | Version | Why |
-|------|---------|-----|
-| **Node.js** | v18 or higher | Runs the backend and the frontend build tooling |
-| **npm** | v9 or higher (comes with Node) | Installs all JavaScript packages |
-| **Git** | any recent version | Cloning the repo |
-| **A code editor** | VS Code recommended | Editing the code |
-| **MongoDB Atlas account** | free tier is fine | Hosted database |
-| **Anthropic API key** | paid (starts at $5) | Powers the AI chatbot |
+| What                      | Version                        | Why                                             |
+| ------------------------- | ------------------------------ | ----------------------------------------------- |
+| **Node.js**               | v18 or higher                  | Runs the backend and the frontend build tooling |
+| **npm**                   | v9 or higher (comes with Node) | Installs all JavaScript packages                |
+| **Git**                   | any recent version             | Cloning the repo                                |
+| **A code editor**         | VS Code recommended            | Editing the code                                |
+| **MongoDB Atlas account** | free tier is fine              | Hosted database                                 |
+| **Anthropic API key**     | paid (starts at $5)            | Powers the AI chatbot                           |
 
 You do **not** need to install MongoDB locally — we use MongoDB Atlas (cloud-hosted).
 
@@ -249,16 +254,20 @@ This populates the map with sample relief locations in Vancouver.
 You need **two terminals** running at the same time.
 
 **Terminal 1 — Backend** (from project root):
+
 ```bash
 node server.js
 ```
+
 You should see:
+
 ```
 Connected to RouteRelief database
 Server running on port 5000
 ```
 
 **Terminal 2 — Frontend** (from project root):
+
 ```bash
 cd frontend
 npm start
@@ -279,6 +288,7 @@ Admin and test account credentials are provided in a separate `passwords.txt` fi
 ## How to Use the Product (Features)
 
 ### For Everyone (no login required)
+
 - **Browse the map** of nearby relief locations with filters (shelter, food, hubs, support, medical)
 - **View location details** — see status (open / limited / closed), capacity, services offered, and contact info
 - **Read disaster preparedness guides** for earthquakes, floods, wildfires, and more
@@ -286,6 +296,7 @@ Admin and test account credentials are provided in a separate `passwords.txt` fi
 - **Take the onboarding tour** for first-time users
 
 ### For Logged-in Users
+
 - **Browse the community feed** with posts marked "In Need" or "To Help"
 - **Create posts** (and edit or delete your own)
 - **Reply to posts** with inline editing and (edited) tags, similar to Discord
@@ -294,11 +305,13 @@ Admin and test account credentials are provided in a separate `passwords.txt` fi
 - **Manage your profile** — see your posts, saved posts, and toggle your role
 
 ### For Helpers (users registered as "I want to help")
+
 - **Edit location info** — update status, capacity, services, and contact details
 - **Flag locations needing supplies** to mobilize community donations
 - **Respond to "In Need" posts** in the community feed
 
 ### For Those In Need (users registered as "I need help")
+
 - **Get directions** to any location via Google Maps integration
 - **One-tap calling** for locations with contact info
 - **Post your needs** in the community feed for nearby helpers to see
@@ -308,6 +321,7 @@ Admin and test account credentials are provided in a separate `passwords.txt` fi
 ## Credits, References, and Licenses
 
 ### Code & Libraries
+
 - [React](https://react.dev/) — MIT License
 - [Express](https://expressjs.com/) — MIT License
 - [Mongoose](https://mongoosejs.com/) — MIT License
@@ -317,13 +331,16 @@ Admin and test account credentials are provided in a separate `passwords.txt` fi
 - [Lucide](https://lucide.dev/) — ISC License
 
 ### Map Data
+
 - **OpenStreetMap contributors** — map tiles via the [Open Database License (ODbL)](https://www.openstreetmap.org/copyright)
 
 ### Design Inspirations
+
 - General UX patterns inspired by Discord (reply threads), Pinterest (bookmarks), and Slack (edit indicators)
 - Color palette inspired by Canadian emergency response branding (calm green + warm orange + urgent red)
 
 ### References for Code & Tutorials
+
 - BCIT COMP 2800 course materials and labs
 - [React documentation](https://react.dev/learn) for hooks and patterns
 - [MongoDB Atlas docs](https://www.mongodb.com/docs/atlas/) for cluster setup
@@ -332,6 +349,7 @@ Admin and test account credentials are provided in a separate `passwords.txt` fi
 - [groovyPost: list directory contents](https://www.groovypost.com/howto/microsoft/list-directory-contents-to-a-printable-and-readable-txt-file/) — used for the `tree` command
 
 ### License
+
 This is a student project for educational purposes only (BCIT COMP 2800, 2026). It is not licensed for commercial use.
 
 ---
@@ -341,6 +359,7 @@ This is a student project for educational purposes only (BCIT COMP 2800, 2026). 
 We were transparent about our AI use throughout development. Here's exactly what we did:
 
 ### 1. Anthropic Claude API (as a product feature)
+
 - **What:** The in-app AI chatbot on the Disaster Info page uses the Anthropic Claude API.
 - **Model:** `claude-haiku-4-5` (chosen for low cost — about $1 per million input tokens).
 - **How:** The frontend sends user questions to our backend route (`/chat`), which calls the Anthropic API with a system prompt focused on emergency preparedness in the Lower Mainland. The reply is then returned to the user.
@@ -348,7 +367,9 @@ We were transparent about our AI use throughout development. Here's exactly what
 - **Files involved:** `routes/chatRoutes.js`, `frontend/src/pages/AiChat.jsx`
 
 ### 2. AI as a development assistant (Claude / ChatGPT)
+
 During development, our team used AI tools (Claude and ChatGPT) as a coding assistant for:
+
 - **Debugging help** — pasting error messages and asking for guidance
 - **CSS suggestions** — getting help with layout and design system decisions
 - **Code review** — checking syntax and React patterns
@@ -357,6 +378,7 @@ During development, our team used AI tools (Claude and ChatGPT) as a coding assi
 All AI-assisted code was reviewed, tested, and modified by our team before being committed. We did not blindly copy-paste AI-generated code into the project.
 
 ### 3. Other third-party APIs (no AI)
+
 - **OpenStreetMap** — for map tiles (free, no API key needed)
 - **Google Maps deep linking** — for "Get directions" feature (just constructs URLs, no API key needed)
 
@@ -366,13 +388,13 @@ All AI-assisted code was reviewed, tested, and modified by our team before being
 
 For questions, feedback, or contributions, please contact a team member:
 
-| Name | Role | Email |
-|------|------|-------|
-| Jorja Knaus | Backend | (BCIT email) |
-| Ahmad Khalil | Backend | (BCIT email) |
-| Hailey Kim | Frontend | skim682@my.bcit.ca |
-| Giant Mak | Map Features | (BCIT email) |
+| Name         | Role         | Email                |
+| ------------ | ------------ | -------------------- |
+| Jorja Knaus  | Backend      | jknaus@my.bcit.ca    |
+| Ahmad Khalil | Backend      | akhalil12@my.bcit.ca |
+| Hailey Kim   | Frontend     | skim682@my.bcit.ca   |
+| Giant Mak    | Map Features | tmak14@my.bcit.ca    |
 
-**Repository:** [github.com/Jor123kna/2800-202610-BBY4](https://github.com/Jor123kna/2800-202610-BBY4)
-**Course:** BCIT COMP 2800 — Full Stack Web Application Development (2026)
-**Team:** BBY4
+- **Repository:** [github.com/Jor123kna/2800-202610-BBY4](https://github.com/Jor123kna/2800-202610-BBY4)
+- **Course:** BCIT COMP 2800 — Full Stack Web Application Development (2026)
+- **Team:** BBY4

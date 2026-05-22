@@ -1,0 +1,99 @@
+/* 3. SHARED COMPONENTS */
+/* Top header */
+.top-header {
+  background: var(--color-brand);
+  color: var(--color-text-inverse);
+  padding: var(--space-4) var(--space-4);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+}
+
+.top-header-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.top-header-back {
+  background: transparent;
+  border: none;
+  color: var(--color-text-inverse);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Bottom navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-brand);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  z-index: 10;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--space-2) var(--space-1);
+  min-height: 60px;
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.bottom-nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Orange accent bar on top of active tab */
+.bottom-nav-item.active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: none;
+  width: auto;
+  height: 3px;
+  background: var(--color-accent);
+  border-radius: 0;
+}
+
+.bottom-nav-item.active {
+  color: var(--color-text-inverse);
+  background: rgba(255, 255, 255, 0.22);
+  font-weight: var(--font-weight-semibold);
+}
+
+.bottom-nav-item-icon {
+  width: 22px;
+  height: 22px;
+  filter: brightness(0) invert(1);
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+.bottom-nav-item.active .bottom-nav-item-icon {
+  opacity: 1;
+  transform: scale(1.1);
+}

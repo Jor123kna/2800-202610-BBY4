@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.96.0",
+    "anthropic-ai": "^0.0.10",
+    "bcrypt": "^6.0.0",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "framer-motion": "^12.38.0",
+    "joi": "^18.2.1",
+    "mongoose": "^9.6.1",
+    "react-markdown": "^10.1.0",
+    "react-scripts": "^5.0.1"
+  },
+  "scripts": {
+    "client": "cd frontend && npm start",
+    "server": "node server.js",
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm install && cd frontend && npm install && npm run build"
+  }
+}

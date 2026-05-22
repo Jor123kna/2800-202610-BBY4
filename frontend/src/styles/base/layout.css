@@ -1,0 +1,29 @@
+/* 2. LAYOUT */
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--color-surface-base);
+  position: relative;
+  padding-bottom: 72px;
+}
+
+/* Default page padding */
+.page-padding {
+  padding: var(--space-5) var(--space-4);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Narrow padding (auth pages: SignIn, SignUp, Home) */
+.page-padding-narrow {
+  padding: var(--space-5) var(--space-4);
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+/* Wide padding (Map page) */
+.page-padding-wide {
+  padding: var(--space-5) var(--space-4);
+  max-width: 1200px;
+  margin: 0 auto;
+}
